@@ -12,3 +12,6 @@ config.json
 
 # generate
 dest
+
+# work
+tmp
