@@ -8,8 +8,8 @@ var publicDir = __dirname + '/dest/public';
 
 var outputFiles = {
   index: path.join(publicDir, 'index.html'),
-  login: path.join(publicDir, 'login.html'),
-  master: path.join(publicDir, 'master.html')
+  login: path.join(publicDir, 'login'),
+  master: path.join(publicDir, 'master')
 };
 
 var templateDir = __dirname + '/src/template';

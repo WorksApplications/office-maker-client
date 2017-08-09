@@ -9,11 +9,10 @@
   "author": "WorksApplications CO.,LTD.",
   "license": "Apache 2.0",
   "devDependencies": {
+    "ejs": "^2.5.1",
     "minimatch": "^3.0.0",
+    "s3-diff": "^1.1.0",
     "watch": "^0.17.1",
-    "ejs": "^2.5.1"
-  },
-  "dependencies": {
     "aws-sdk": "^2.95.0",
     "s3": "^4.4.0"
   }
