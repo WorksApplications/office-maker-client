@@ -24,8 +24,8 @@ var client = s3.createClient({
 upload(config.s3Bucket, 'dest/public').then(_ => {
   console.log('done');
 }).then(_ => {
-  return fixContentTypeToHtml(config.s3Bucket, 'upload/test/login').then(_ => {
-    return fixContentTypeToHtml(config.s3Bucket, 'upload/test/master');
+  return fixContentTypeToHtml(config.s3Bucket, 'login').then(_ => {
+    return fixContentTypeToHtml(config.s3Bucket, 'master');
   });
 }).catch(e => {
   console.error(e);
@@ -56,8 +56,7 @@ function upload(bucket, dir) {
       localDir: dir,
       deleteRemoved: false,
       s3Params: {
-        Bucket: bucket,
-        Prefix: "upload/test/"
+        Bucket: bucket
       },
     });
     uploader.on('error', function(e) {

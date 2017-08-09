@@ -5,7 +5,6 @@ const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
 const s3 = require('s3');
 const s3diff = require('s3-diff');
 
-
 function doDiff(bucket) {
   return new Promise((resolve, reject) => {
     s3diff({
@@ -15,8 +14,7 @@ function doDiff(bucket) {
       },
       local: __dirname + '/dest/public',
       remote: {
-        bucket: bucket,
-        // prefix: 'upload/test'
+        bucket: bucket
       },
       recursive: false
     }, function(e, data) {
