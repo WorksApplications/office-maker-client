@@ -1,0 +1,12 @@
+{
+  "title": "Office Map",
+  "accountServiceRoot": "http://localhost/accounts/api",
+  "profileServiceRoot": "http://localhost/profiles/api",
+  "apiRoot": "http://localhost/api",
+  "multiTenency": false,
+  "log": {
+    "access": "INFO",
+    "system": "INFO",
+    "error": "INFO"
+  }
+}

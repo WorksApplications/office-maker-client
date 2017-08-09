@@ -1,0 +1,14 @@
+# nodejs
+node_modules
+npm-debug.log
+
+# elm
+elm-stuff
+elm.js
+repl-temp-*
+
+# config
+config.json
+
+# generate
+dest

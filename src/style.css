@@ -1,0 +1,67 @@
+@font-face {
+  font-family: Roboto;
+}
+
+@page {
+  size: A4 landscape;
+  margin: 0;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+body {
+  margin: 0;
+  overflow-y: hidden;
+  font-family: 'Roboto', sans-serif;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.elm-overlay {
+  z-index: 2147483647;
+}
+
+img.emoji {
+  height: 1.4em;
+  width: 1.4em;
+  margin: 0 .05em 0 .1em;
+  vertical-align: -0.1em;
+}
+
+
+/*https://gist.github.com/23maverick23/64b3b587c88697558fac*/
+
+svg text {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+svg text::selection {
+  background: none;
+}
+
+svg tspan {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+svg tspan::selection {
+  background: none;
+}

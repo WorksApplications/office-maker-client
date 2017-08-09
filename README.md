@@ -1,0 +1,56 @@
+Office Maker Client
+====
+
+Client implementation for Office Maker.
+
+## Routing
+
+|URL||
+|:--|:--|
+|/|top page|
+|/#floorId|specific floor page|
+|/?q=foo&edit=&object=#floorId|specific floor page with some conditions|
+|/login|login page|
+|/master|master page|
+
+
+## Development Requirement
+
+1. [Elm](http://elm-lang.org/) (>= 0.18)
+2. [Node.js](https://nodejs.org/) (>= 6.0)
+
+## Install
+
+```
+$ elm-package install
+$ npm install
+$ cp defaultConfig.json config.json
+```
+
+## Build
+
+```
+$ sh build.sh
+```
+
+## Watch
+
+```
+$ node watch
+```
+
+## Configuration
+
+Edit `config.json`. Bold properties are essential to work with various environment.
+
+|name||
+|:--|:--|
+|title|This name will be used by header.|
+|**accountServiceRoot**|URL of account service. http://xxx.xxx.xx.xx/accounts/api |
+|**profileServiceRoot**|URL of profile service. http://xxx.xxx.xx.xx/profiles/api |
+|**apiRoot**|URL of api server. http://xxx.xxx.xx.xx/api |
+
+
+## License
+
+[Apache License 2.0](LICENSE)
