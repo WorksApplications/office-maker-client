@@ -51,6 +51,11 @@ Edit `config.json`. Bold properties are essential to work with various environme
 |**apiRoot**|URL of api server. http://xxx.xxx.xx.xx/api |
 
 
+## Copyright
+
+© 2017-Present WorksApplications CO.,LTD.
+
+
 ## License
 
 [Apache License 2.0](LICENSE)

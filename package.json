@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha test/test.js"
   },
-  "author": "WorksApplications",
+  "author": "WorksApplications CO.,LTD.",
   "license": "Apache 2.0",
   "devDependencies": {
     "minimatch": "^3.0.0",
