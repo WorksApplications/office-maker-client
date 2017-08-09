@@ -39,6 +39,13 @@ $ sh build.sh
 $ node watch
 ```
 
+## Deploy
+
+```
+$ node deploy
+```
+
+
 ## Configuration
 
 Edit `config.json`. Bold properties are essential to work with various environment.
@@ -47,8 +54,10 @@ Edit `config.json`. Bold properties are essential to work with various environme
 |:--|:--|
 |title|This name will be used by header.|
 |**accountServiceRoot**|URL of account service. http://xxx.xxx.xx.xx/accounts/api |
-|**profileServiceRoot**|URL of profile service. http://xxx.xxx.xx.xx/profiles/api |
+|profileServiceRoot|Not used for now |
 |**apiRoot**|URL of api server. http://xxx.xxx.xx.xx/api |
+|**region**|S3 region you want to deploy static files to. |
+|**s3Bucket**|S3 bucket you want to deploy static files to. |
 
 
 ## Copyright
