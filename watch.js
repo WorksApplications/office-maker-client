@@ -49,7 +49,7 @@ function taskBuild(cb) {
 
 function runWatcher() {
   taskBuild(() => {
-    setTimeout(run, 300);
+    setTimeout(runWatcher, 300);
   });
 }
 
