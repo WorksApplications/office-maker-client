@@ -33,10 +33,16 @@ $ cp defaultConfig.json config.json
 $ sh build.sh
 ```
 
-## Watch
+## Debug
 
 ```
 $ node watch
+```
+
+**Note:** You might need to disable CORS if server returns specific `Access-Control-Allow-Origin`.
+e.g. Chrome 60 on Windows
+```
+$ start chrome http://localhost:3000 --disable-web-security --user-data-dir="%UserProfile%\AppData\Local\Google\Chrome\User Data"
 ```
 
 ## Deploy

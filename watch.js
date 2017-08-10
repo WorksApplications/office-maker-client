@@ -2,6 +2,25 @@ const cp = require('child_process');
 const watch = require('watch');
 const path = require('path');
 const minimatch = require('minimatch');
+var express = require('express');
+
+function runServer() {
+  var app = express();
+  app.use((req, res, next) => {
+    if (req.url.indexOf('/login') >= 0 || req.url.indexOf('/master') >= 0) {
+      res.set({
+        'Content-Type': 'text/html'
+      });
+    }
+    next();
+  });
+  app.use(express.static(__dirname + '/dest/public'));
+
+  app.listen(3000, function() {
+    console.log('Example app listening on port 3000!')
+  })
+}
+
 
 var debugMode = process.argv.filter(a => {
   return a == '--debug'
@@ -28,7 +47,7 @@ function taskBuild(cb) {
   }
 }
 
-function run() {
+function runWatcher() {
   taskBuild(() => {
     setTimeout(run, 300);
   });
@@ -45,4 +64,5 @@ watch.createMonitor('src', (monitor) => {
 
 
 schedule('build');
-run();
+runWatcher();
+runServer();
