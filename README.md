@@ -33,16 +33,29 @@ $ cp defaultConfig.json config.json
 $ sh build.sh
 ```
 
+- convert Elm code into JavaScript
+- copy CSS files
+- generate HTML
+
+
 ## Debug
 
 ```
 $ node watch
 ```
 
+This automatically runs `build.sh` if any file is changed. It also run static server on `http://localhost:3000`.
+
 **Note:** You might need to disable CORS if server returns specific `Access-Control-Allow-Origin`.
-e.g. Chrome 60 on Windows
+
+Chrome 60 on Windows
 ```
 $ start chrome http://localhost:3000 --disable-web-security --user-data-dir="%UserProfile%\AppData\Local\Google\Chrome\User Data"
+```
+
+Chrome 60 on Ubuntu
+```
+$ google-chrome http://localhost:3000 --disable-web-security --user-data-dir=/tmp/someDir
 ```
 
 ## Deploy
