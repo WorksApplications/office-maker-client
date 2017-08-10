@@ -151,11 +151,11 @@ realSize floor =
             ( pixelToReal floor.width, pixelToReal floor.height )
 
 
-src : Floor -> Maybe String
-src floor =
+src : String -> Floor -> Maybe String
+src imageRoot floor =
     case floor.image of
         Just src ->
-            Just ("./images/floors/" ++ src)
+            Just (imageRoot ++ "/floors/" ++ src)
 
         Nothing ->
             Nothing

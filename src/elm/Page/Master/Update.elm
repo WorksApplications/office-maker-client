@@ -33,6 +33,7 @@ init flags =
         apiConfig =
             { apiRoot = flags.apiRoot
             , accountServiceRoot = flags.accountServiceRoot
+            , imageRoot = ""
             , token = flags.authToken
             }
 

@@ -579,7 +579,7 @@ canvasImage model floor =
     in
         img
             [ style (canvasImageStyle floor.flipImage size)
-            , src (Maybe.withDefault "" (Floor.src floor))
+            , src (Maybe.withDefault "" (Floor.src model.apiConfig.imageRoot floor))
             ]
             []
 

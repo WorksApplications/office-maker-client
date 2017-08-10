@@ -68,6 +68,7 @@ port print : {} -> Cmd msg
 type alias Flags =
     { apiRoot : String
     , accountServiceRoot : String
+    , imageRoot : String
     , authToken : String
     , title : String
     , initialSize : Size
@@ -123,6 +124,7 @@ init flags location =
         apiConfig =
             { apiRoot = flags.apiRoot
             , accountServiceRoot = flags.accountServiceRoot
+            , imageRoot = flags.imageRoot
             , token = flags.authToken
             }
 

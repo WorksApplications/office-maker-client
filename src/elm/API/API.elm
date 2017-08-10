@@ -62,13 +62,14 @@ type alias Error =
 type alias Config =
     { apiRoot : String
     , accountServiceRoot : String
+    , imageRoot : String
     , token : String
     }
 
 
 authorization : String -> Http.Header
 authorization token =
-  HttpUtil.authorization ("Bearer " ++ token)
+    HttpUtil.authorization ("Bearer " ++ token)
 
 
 getObject : Config -> ObjectId -> Task Error (Maybe Object)
@@ -260,7 +261,7 @@ saveEditingImage config imageId file =
     HttpUtil.sendFile
         "PUT"
         (config.apiRoot ++ "/1/images/" ++ imageId)
-        [ authorizationTuple ("Bearer " ++ config.token)]
+        [ authorizationTuple ("Bearer " ++ config.token) ]
         file
 
 
