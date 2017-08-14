@@ -325,7 +325,7 @@ decodeFloor =
                 |> Floor.addObjects objects
         )
         |> required "id" D.string
-        |> required "version" D.int
+        |> optional "version" D.int 0
         |> required "name" D.string
         |> required "ord" D.int
         |> required "objects" (D.list decodeObject)
@@ -352,7 +352,7 @@ decodeFloorBase =
             }
         )
         |> required "id" D.string
-        |> required "version" D.int
+        |> optional "version" D.int 0 
         |> required "temporary" D.bool
         |> required "name" D.string
         |> required "ord" D.int
