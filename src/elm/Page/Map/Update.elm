@@ -999,7 +999,6 @@ update msg model =
                                 (API.getPeopleByFloorAndPost
                                     model.apiConfig
                                     floor.id
-                                    floor.version
                                     postName
                                 )
                     in
@@ -2104,7 +2103,6 @@ updateOnFinishStampWithoutEffects maybeObjectId prototypes model floor =
                     Object.initDesk
                         (Maybe.withDefault newId maybeObjectId)
                         (EditingFloor.present floor).id
-                        Nothing
                         pos
                         (Size prototype.width prototype.height)
                         prototype.backgroundColor
@@ -2133,7 +2131,6 @@ updateOnFinishPen from model =
                     Object.initDesk
                         newId
                         (EditingFloor.present floor).id
-                        Nothing
                         pos
                         size
                         color
@@ -2225,7 +2222,6 @@ updateOnPuttingLabel model =
                     Object.initLabel
                         newId
                         (EditingFloor.present floor).id
-                        Nothing
                         fitted
                         size
                         bgColor

@@ -16,6 +16,7 @@ import Model.SearchResult as SearchResult exposing (SearchResult)
 import Model.ColorPalette as ColorPalette exposing (ColorPalette)
 import Model.ObjectsChange as ObjectsChange exposing (..)
 import CoreType exposing (..)
+import API.Defaults as Defaults
 
 
 decodeAuthToken : Decoder String
@@ -60,27 +61,39 @@ encodeObject object =
         E.object
             [ ( "id", E.string (Object.idOf object) )
             , ( "floorId", E.string (Object.floorIdOf object) )
-            , ( "floorVersion", Object.floorVersionOf object |> Maybe.map E.int |> Maybe.withDefault E.null )
             , ( "updateAt", Object.updateAtOf object |> Maybe.map E.float |> Maybe.withDefault E.null )
             , ( "type"
-              , E.string
-                    (if Object.isDesk object then
-                        "desk"
-                     else
-                        "label"
-                    )
+              , if Object.isDesk object then
+                    E.string "desk"
+                else
+                    E.null
               )
             , ( "x", E.int x )
             , ( "y", E.int y )
             , ( "width", E.int width )
             , ( "height", E.int height )
             , ( "backgroundColor", E.string (Object.backgroundColorOf object) )
-            , ( "color", E.string (Object.colorOf object) )
-            , ( "bold", E.bool (Object.isBold object) )
+            , ( "color"
+              , if Object.colorOf object == Defaults.color then
+                    E.null
+                else
+                    E.string (Object.colorOf object)
+              )
+            , ( "bold"
+              , if Object.isBold object then
+                    E.bool True
+                else
+                    E.null
+              )
             , ( "url", E.string (Object.urlOf object) )
-            , ( "shape", E.string (encodeShape (Object.shapeOf object)) )
+            , ( "shape", encodeShape (Object.shapeOf object) )
             , ( "name", E.string (Object.nameOf object) )
-            , ( "fontSize", E.float (Object.fontSizeOf object) )
+            , ( "fontSize"
+              , if Object.fontSizeOf object == Defaults.fontSize then
+                    E.null
+                else
+                    E.float (Object.fontSizeOf object)
+              )
             , ( "personId"
               , case Object.relatedPerson object of
                     Just personId ->
@@ -92,14 +105,14 @@ encodeObject object =
             ]
 
 
-encodeShape : Shape -> String
+encodeShape : Shape -> Value
 encodeShape shape =
     case shape of
         Object.Rectangle ->
-            "rectangle"
+            E.null
 
         Object.Ellipse ->
-            "ellipse"
+            E.string "Ellipse"
 
 
 encodeObjectModification : ObjectModification -> Value
@@ -114,7 +127,6 @@ encodeFloor : Floor -> Value
 encodeFloor floor =
     E.object
         [ ( "id", E.string floor.id )
-        , ( "version", E.int floor.version )
         , ( "name", E.string floor.name )
         , ( "ord", E.int floor.ord )
         , ( "width", E.int floor.width )
@@ -209,8 +221,7 @@ decodeUsers =
 
 decodeColorEntity : Decoder ColorEntity
 decodeColorEntity =
-    decode
-        ColorEntity
+    decode ColorEntity
         |> required "ord" D.int
         |> required "type" D.string
         |> required "color" D.string
@@ -218,10 +229,7 @@ decodeColorEntity =
 
 decodePerson : Decoder Person
 decodePerson =
-    decode
-        (\id name post mail tel1 tel2 image ->
-            { id = id, name = name, post = post, mail = mail, tel1 = tel1, tel2 = tel2, image = image }
-        )
+    decode Person
         |> required "id" D.string
         |> required "name" D.string
         |> required "post" D.string
@@ -238,13 +246,12 @@ decodePerson =
 decodeObject : Decoder Object
 decodeObject =
     decode
-        (\id floorId floorVersion updateAt tipe x y width height backgroundColor name personId fontSize color bold url shape ->
+        (\id floorId updateAt tipe x y width height backgroundColor name personId fontSize color bold url shape ->
             if tipe == "desk" then
-                Object.initDesk id floorId floorVersion (Position x y) (Size width height) backgroundColor name fontSize (Just updateAt) personId
+                Object.initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize (Just updateAt) personId
             else
                 Object.initLabel id
                     floorId
-                    floorVersion
                     (Position x y)
                     (Size width height)
                     backgroundColor
@@ -254,7 +261,7 @@ decodeObject =
                     (Object.LabelFields color
                         bold
                         url
-                        (if shape == "rectangle" then
+                        (if shape == "Rectangle" then
                             Object.Rectangle
                          else
                             Object.Ellipse
@@ -263,9 +270,8 @@ decodeObject =
         )
         |> required "id" D.string
         |> required "floorId" D.string
-        |> optional_ "floorVersion" D.int
         |> required "updateAt" D.float
-        |> required "type" D.string
+        |> optional "type" D.string "desk"
         |> required "x" D.int
         |> required "y" D.int
         |> required "width" D.int
@@ -274,10 +280,10 @@ decodeObject =
         |> optional "name" D.string ""
         |> optional_ "personId" D.string
         |> optional "fontSize" D.float Object.defaultFontSize
-        |> required "color" D.string
-        |> required "bold" D.bool
+        |> optional "color" D.string Defaults.color
+        |> optional "bold" D.bool Defaults.bold
         |> optional "url" D.string ""
-        |> required "shape" D.string
+        |> optional "shape" D.string "Rectangle"
 
 
 decodeSearchResult : Decoder (Maybe SearchResult)
@@ -308,9 +314,8 @@ decodeSearchResults =
 decodeFloor : Decoder Floor
 decodeFloor =
     decode
-        (\id version name ord objects width height realWidth realHeight image flipImage temporary updateBy updateAt ->
+        (\id name ord objects width height realWidth realHeight image flipImage temporary updateBy updateAt ->
             { id = id
-            , version = version
             , name = name
             , ord = ord
             , objects = Dict.empty
@@ -325,7 +330,6 @@ decodeFloor =
                 |> Floor.addObjects objects
         )
         |> required "id" D.string
-        |> optional "version" D.int 0
         |> required "name" D.string
         |> required "ord" D.int
         |> required "objects" (D.list decodeObject)
@@ -343,16 +347,14 @@ decodeFloor =
 decodeFloorBase : Decoder FloorBase
 decodeFloorBase =
     decode
-        (\id version temporary name ord ->
+        (\id temporary name ord ->
             { id = id
-            , version = version
             , temporary = temporary
             , name = name
             , ord = ord
             }
         )
         |> required "id" D.string
-        |> optional "version" D.int 0 
         |> required "temporary" D.bool
         |> required "name" D.string
         |> required "ord" D.int
@@ -384,25 +386,35 @@ decodePrototype =
         )
         |> required "id" D.string
         |> required "backgroundColor" D.string
-        |> required "color" D.string
+        |> optional "color" D.string Defaults.color
         |> optional "name" D.string ""
         |> required "width" D.int
         |> required "height" D.int
-        |> required "fontSize" D.float
-        |> required "shape" D.string
+        |> optional "fontSize" D.float Defaults.fontSize
+        |> optional "shape" D.string "Rectangle"
 
 
 encodePrototype : Prototype -> Value
 encodePrototype { id, color, backgroundColor, name, width, height, fontSize, shape } =
     E.object
         [ ( "id", E.string id )
-        , ( "color", E.string color )
+        , ( "color"
+          , if color == Defaults.color then
+                E.null
+            else
+                E.string color
+          )
         , ( "backgroundColor", E.string backgroundColor )
         , ( "name", E.string name )
         , ( "width", E.int width )
         , ( "height", E.int height )
-        , ( "fontSize", E.float fontSize )
-        , ( "shape", E.string (encodeShape shape) )
+        , ( "fontSize"
+          , if fontSize == Defaults.fontSize then
+                E.null
+            else
+                E.float fontSize
+          )
+        , ( "shape", encodeShape shape )
         ]
 
 

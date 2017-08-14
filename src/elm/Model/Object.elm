@@ -4,10 +4,6 @@ import Time exposing (Time)
 import CoreType exposing (..)
 
 
-type alias FloorVersion =
-    Int
-
-
 type Shape
     = Rectangle
     | Ellipse
@@ -17,7 +13,6 @@ type Object
     = Object
         { id : ObjectId
         , floorId : FloorId
-        , floorVersion : Maybe FloorVersion
         , position : Position
         , size : Size
         , backgroundColor : String
@@ -124,12 +119,11 @@ isLabel (Object object) =
             False
 
 
-initDesk : ObjectId -> FloorId -> Maybe FloorVersion -> Position -> Size -> String -> String -> Float -> Maybe Time -> Maybe PersonId -> Object
-initDesk id floorId floorVersion position size backgroundColor name fontSize updateAt personId =
+initDesk : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe Time -> Maybe PersonId -> Object
+initDesk id floorId position size backgroundColor name fontSize updateAt personId =
     Object
         { id = id
         , floorId = floorId
-        , floorVersion = floorVersion
         , position = position
         , size = size
         , backgroundColor = backgroundColor
@@ -140,12 +134,11 @@ initDesk id floorId floorVersion position size backgroundColor name fontSize upd
         }
 
 
-initLabel : ObjectId -> FloorId -> Maybe FloorVersion -> Position -> Size -> String -> String -> Float -> Maybe Time -> LabelFields -> Object
-initLabel id floorId floorVersion position size backgroundColor name fontSize updateAt extension =
+initLabel : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe Time -> LabelFields -> Object
+initLabel id floorId position size backgroundColor name fontSize updateAt extension =
     Object
         { id = id
         , floorId = floorId
-        , floorVersion = floorVersion
         , position = position
         , size = size
         , backgroundColor = backgroundColor
@@ -254,11 +247,6 @@ idOf (Object object) =
 floorIdOf : Object -> FloorId
 floorIdOf (Object object) =
     object.floorId
-
-
-floorVersionOf : Object -> Maybe FloorVersion
-floorVersionOf (Object object) =
-    object.floorVersion
 
 
 updateAtOf : Object -> Maybe Time

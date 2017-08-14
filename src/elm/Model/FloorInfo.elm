@@ -60,10 +60,11 @@ mergeFloor editingFloor floorsInfo =
 
 mergeFloorHelp : FloorBase -> FloorInfo -> FloorInfo
 mergeFloorHelp floor (FloorInfo publicFloor editingFloor) =
-    if floor.version < 0 then
-        FloorInfo publicFloor floor
-    else
-        FloorInfo (Just floor) editingFloor
+    -- TODO now version is always 0...
+    -- if floor.version < 0 then
+    --     FloorInfo publicFloor floor
+    -- else
+    FloorInfo (Just floor) editingFloor
 
 
 toValues : Dict FloorId FloorInfo -> List FloorInfo

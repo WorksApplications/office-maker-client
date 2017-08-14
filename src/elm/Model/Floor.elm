@@ -11,7 +11,6 @@ import CoreType exposing (..)
 
 type alias FloorBase =
     { id : FloorId
-    , version : Int
     , temporary : Bool
     , name : String
     , ord : Int
@@ -37,7 +36,6 @@ type alias Floor =
 init : FloorId -> Floor
 init id =
     { id = id
-    , version = 0
     , name = "New Floor"
     , ord = 0
     , objects = Dict.empty
@@ -57,8 +55,8 @@ empty =
 
 
 baseOf : Floor -> FloorBase
-baseOf { id, version, temporary, name, ord } =
-    FloorBase id version temporary name ord
+baseOf { id, temporary, name, ord } =
+    FloorBase id temporary name ord
 
 
 initWithOrder : FloorId -> Int -> Floor
@@ -170,7 +168,6 @@ copy : FloorId -> Bool -> Floor -> Floor
 copy id temporary floor =
     { floor
         | id = id
-        , version = 0
         , name =
             if temporary then
                 "Temporary from " ++ floor.name

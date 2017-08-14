@@ -303,14 +303,13 @@ getPersonByUser config userId =
                 )
 
 
-getPeopleByFloorAndPost : Config -> FloorId -> Int -> String -> Task Error (List Person)
-getPeopleByFloorAndPost config floorId floorVersion post =
+getPeopleByFloorAndPost : Config -> FloorId -> String -> Task Error (List Person)
+getPeopleByFloorAndPost config floorId post =
     HttpUtil.get
         decodePeople
         (makeUrl
             (config.apiRoot ++ "/people")
             [ ( "floorId", floorId )
-            , ( "floorVersion", toString floorVersion )
             , ( "post", post )
             ]
         )
