@@ -29,7 +29,6 @@ view model =
         , messageBar model
         , card False "" Nothing Nothing <| colorMasterView model
         , card False "" Nothing Nothing <| prototypeMasterView model
-        , card False "" Nothing Nothing <| usersView model
         ]
 
 
@@ -157,15 +156,6 @@ messageBar model =
 
         Nothing ->
             MessageBar.none
-
-
-usersView : Model -> List (Html Msg)
-usersView model =
-    [ h1 [] [ text "Admins" ]
-    , model.allAdmins
-        |> List.map userView
-        |> div []
-    ]
 
 
 userView : User -> Html Msg
