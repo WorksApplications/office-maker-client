@@ -219,10 +219,13 @@ getDiffSource config id =
 
 getAuth : Config -> Task Error User
 getAuth config =
-    getWithoutCache
-        decodeUser
-        (config.apiRoot ++ "/self")
-        [ authorization config.token ]
+    if String.trim config.token == "" then
+        Task.succeed User.guest
+    else
+        getWithoutCache
+            decodeUser
+            (config.apiRoot ++ "/self")
+            [ authorization config.token ]
 
 
 search : Config -> Bool -> String -> Task Error ( List SearchResult, List Person )
