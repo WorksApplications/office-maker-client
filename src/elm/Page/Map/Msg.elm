@@ -50,6 +50,7 @@ type ObjectNameInputMsg
 type Msg
     = NoOp
     | UrlUpdate (Result String URL)
+    | UserLoaded User
     | Initialized (Maybe String) Bool UserState User
     | FloorsInfoLoaded Bool (List FloorInfo)
     | FloorLoaded (Maybe Floor)

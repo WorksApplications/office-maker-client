@@ -178,22 +178,26 @@ init flags location =
 
 initCmd : API.Config -> Bool -> UserState -> Maybe String -> Cmd Msg
 initCmd apiConfig needsEditMode defaultUserState selectedFloor =
-    Cache.getWithDefault Cache.cache defaultUserState
-        |> Task.andThen
-            (\userState ->
-                API.getAuth apiConfig
-                    |> Task.map (\user -> ( userState, user ))
-            )
-        |> performAPI (\( userState, user ) -> Initialized selectedFloor needsEditMode userState user)
+    if needsEditMode then
+        Cache.getWithDefault Cache.cache defaultUserState
+            |> Task.andThen
+                (\userState ->
+                    API.getAuth apiConfig
+                        |> Task.map (\user -> ( userState, user ))
+                )
+            |> performAPI (\( userState, user ) -> Initialized selectedFloor needsEditMode userState user)
+    else
+        Cmd.batch
+            [ API.getAuth apiConfig
+                |> performAPI UserLoaded
+            , Cache.getWithDefault Cache.cache defaultUserState
+                |> performAPI (\userState -> Initialized selectedFloor needsEditMode userState User.guest)
+            ]
 
 
 debug : Bool
 debug =
     False
-
-
-
--- || True
 
 
 debugMsg : Msg -> Msg
@@ -292,6 +296,12 @@ update msg model =
             in
                 newModel ! []
 
+        UserLoaded user ->
+            { model
+                | user = user
+            }
+                ! []
+
         Initialized selectedFloor needsEditMode userState user ->
             let
                 needSearch =
@@ -356,6 +366,10 @@ update msg model =
                             [ performAPI ColorsLoaded (API.getColors model.apiConfig)
                             , performAPI PrototypesLoaded (API.getPrototypes model.apiConfig)
                             ]
+
+                loadFloorInfoCmd =
+                    API.getFloorsInfo model.apiConfig
+                        |> performAPI (FloorsInfoLoaded (selectedFloor /= Nothing || model.selectedResult /= Nothing))
             in
                 { model
                     | user = user
@@ -366,7 +380,7 @@ update msg model =
                 }
                     ! [ focusObjectCmd
                       , searchCmd
-                      , performAPI (FloorsInfoLoaded (selectedFloor /= Nothing || model.selectedResult /= Nothing)) (API.getFloorsInfo model.apiConfig)
+                      , loadFloorInfoCmd
                       , loadFloorCmd
                       , loadSettingsCmd
                       ]
