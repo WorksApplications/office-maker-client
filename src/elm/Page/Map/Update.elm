@@ -297,10 +297,17 @@ update msg model =
                 newModel ! []
 
         UserLoaded user ->
-            { model
+            ( { model
                 | user = user
-            }
-                ! []
+              }
+            , if not (User.isGuest user) && not (Prototypes.isLoaded model.prototypes) then
+                Cmd.batch
+                    [ performAPI ColorsLoaded (API.getColors model.apiConfig)
+                    , performAPI PrototypesLoaded (API.getPrototypes model.apiConfig)
+                    ]
+              else
+                Cmd.none
+            )
 
         Initialized selectedFloor needsEditMode userState user ->
             let

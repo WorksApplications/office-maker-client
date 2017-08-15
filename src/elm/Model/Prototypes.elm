@@ -75,22 +75,27 @@ register prototype model =
 
 selectedPrototype : Prototypes -> Prototype
 selectedPrototype model =
-    findPrototypeByIndex model.selected model.data
-
-
-findPrototypeByIndex : Int -> List Prototype -> Prototype
-findPrototypeByIndex index list =
-    case getAt index list of
+    case findPrototypeByIndex model.selected model.data of
         Just prototype ->
             prototype
 
         Nothing ->
-            case List.head list of
-                Just prototype ->
-                    prototype
+            Debug.crash "no prototypes found"
 
-                Nothing ->
-                    Debug.crash "no prototypes found"
+
+isLoaded : Prototypes -> Bool
+isLoaded model =
+    findPrototypeByIndex model.selected model.data /= Nothing
+
+
+findPrototypeByIndex : Int -> List Prototype -> Maybe Prototype
+findPrototypeByIndex index list =
+    case getAt index list of
+        Just prototype ->
+            Just prototype
+
+        Nothing ->
+            List.head list
 
 
 prototypes : Prototypes -> List ( Prototype, Bool )
