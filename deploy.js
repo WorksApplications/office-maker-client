@@ -3,30 +3,48 @@ const path = require('path');
 const AWS = require('aws-sdk');
 const configJsonPath = path.resolve(__dirname, './config.json');
 const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
-const s3 = require('s3');
+const gzip = require('gzip-js');
 
-var s3Options = {
+var s3 = new AWS.S3({
   apiVersion: '2006-03-01',
   region: config.region
-};
-
-var originalS3 = new AWS.S3(s3Options);
-
-var client = s3.createClient({
-  maxAsyncS3: 20,
-  s3RetryCount: 3,
-  s3RetryDelay: 1000,
-  multipartUploadThreshold: 20971520,
-  multipartUploadSize: 15728640,
-  s3Options: s3Options
 });
 
-upload(config.s3Bucket, 'dest/public').then(_ => {
+fs.readdirSync('dest/public').map(file => {
+  var options = {
+    level: 3,
+    name: file,
+    timestamp: parseInt(Date.now() / 1000, 10)
+  };
+  var body = gzip.zip(fs.readFileSync(__dirname + '/dest/public/' + file), options);
+  return {
+    file: file,
+    body: new Buffer(body)
+  };
+}).map(result => {
+  var file = result.file;
+  var body = result.body;
+  var contentType;
+  if (file.endsWith('.html') || file === 'login' || file === 'master') {
+    contentType = 'text/html'
+  } else if (file.endsWith('.js')) {
+    contentType = 'application/javascript'
+  } else if (file.endsWith('.css')) {
+    contentType = 'text/css'
+  }
+  return {
+    Bucket: config.s3Bucket,
+    Key: file,
+    Body: body,
+    ContentType: contentType,
+    ContentEncoding: 'gzip'
+  };
+}).map(options => {
+  return upload(options);
+}).reduce((memo, p) => {
+  return memo.then(_ => p);
+}, Promise.resolve()).then(_ => {
   console.log('done');
-}).then(_ => {
-  return fixContentTypeToHtml(config.s3Bucket, 'login').then(_ => {
-    return fixContentTypeToHtml(config.s3Bucket, 'master');
-  });
 }).catch(e => {
   console.error(e);
   process.exit(1);
@@ -34,7 +52,7 @@ upload(config.s3Bucket, 'dest/public').then(_ => {
 
 function fixContentTypeToHtml(bucket, key) {
   return new Promise((resolve, reject) => {
-    originalS3.copyObject({
+    s3.copyObject({
       Bucket: bucket,
       CopySource: `${bucket}/${key}`,
       Key: key,
@@ -50,23 +68,14 @@ function fixContentTypeToHtml(bucket, key) {
   });
 }
 
-function upload(bucket, dir) {
+function upload(options) {
   return new Promise((resolve, reject) => {
-    var uploader = client.uploadDir({
-      localDir: dir,
-      deleteRemoved: false,
-      s3Params: {
-        Bucket: bucket
-      },
-    });
-    uploader.on('error', function(e) {
-      reject(e);
-    });
-    uploader.on('progress', function() {
-      console.log("progress", uploader.progressAmount, uploader.progressTotal);
-    });
-    uploader.on('end', function() {
-      resolve();
+    s3.upload(options, function(e) {
+      if (e) {
+        reject(e);
+      } else {
+        resolve();
+      }
     });
   });
 }
