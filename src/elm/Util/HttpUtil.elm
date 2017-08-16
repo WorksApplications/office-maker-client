@@ -30,12 +30,7 @@ makeUrl baseUrl args =
 
 queryPair : ( String, String ) -> String
 queryPair ( key, value ) =
-    queryEscape key ++ "=" ++ queryEscape value
-
-
-queryEscape : String -> String
-queryEscape string =
-    String.join "+" (String.split "%20" (Http.encodeUri string))
+    Http.encodeUri key ++ "=" ++ Http.encodeUri value
 
 
 authorization : String -> Header
