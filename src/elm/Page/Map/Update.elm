@@ -2327,8 +2327,15 @@ getAndCachePersonIfNotCached personId model =
         Cmd.none
     else
         performAPI
-            (\person -> CachePeople [ person ])
-            (API.getPersonByUser model.apiConfig personId)
+            (\maybePerson ->
+                case maybePerson of
+                    Just person ->
+                        CachePeople [ person ]
+
+                    Nothing ->
+                        NoOp
+            )
+            (API.getPersonMaybe model.apiConfig personId)
 
 
 focusCmd : Cmd Msg

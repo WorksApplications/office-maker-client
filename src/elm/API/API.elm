@@ -16,7 +16,7 @@ module API.API
         , personCandidate
         , getDiffSource
         , getPerson
-        , getPersonByUser
+        , getPersonMaybe
         , getPeopleByFloorAndPost
         , getColors
         , saveColors
@@ -265,36 +265,10 @@ getPerson config personId =
         [ authorization config.token ]
 
 
-getPersonByUser : Config -> UserId -> Task Error Person
-getPersonByUser config userId =
-    let
-        getUser =
-            HttpUtil.get
-                decodeUser
-                (config.apiRoot ++ "/users/" ++ userId)
-                [ authorization config.token ]
-    in
-        getUser
-            |> Task.map
-                (\user ->
-                    case user of
-                        User.Admin person ->
-                            person
-
-                        User.General person ->
-                            person
-
-                        User.Guest ->
-                            -- TODO how to deal with invalid person?
-                            { id = ""
-                            , name = ""
-                            , post = ""
-                            , mail = Nothing
-                            , tel1 = Nothing
-                            , tel2 = Nothing
-                            , image = Nothing
-                            }
-                )
+getPersonMaybe : Config -> PersonId -> Task Error (Maybe Person)
+getPersonMaybe config personId =
+    getPerson config personId
+        |> recover404
 
 
 getPeopleByFloorAndPost : Config -> FloorId -> String -> Task Error (List Person)
