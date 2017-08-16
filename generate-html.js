@@ -15,6 +15,7 @@ var outputFiles = {
 var templateDir = __dirname + '/src/template';
 var indexHtml = ejs.render(fs.readFileSync(templateDir + '/index.html', 'utf8'), {
   apiRoot: config.apiRoot,
+  cacheRoot: config.cacheRoot,
   accountServiceRoot: config.accountServiceRoot,
   imageRoot: config.imageRoot,
   title: config.title

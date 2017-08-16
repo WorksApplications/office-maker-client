@@ -32,6 +32,7 @@ init flags =
     let
         apiConfig =
             { apiRoot = flags.apiRoot
+            , cacheRoot = ""
             , accountServiceRoot = flags.accountServiceRoot
             , imageRoot = ""
             , token = flags.authToken

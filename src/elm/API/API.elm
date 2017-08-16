@@ -59,6 +59,7 @@ type alias Error =
 
 type alias Config =
     { apiRoot : String
+    , cacheRoot : String
     , accountServiceRoot : String
     , imageRoot : String
     , token : String
@@ -119,12 +120,20 @@ deleteEditingFloor config floorId =
 
 getEditingFloor : Config -> FloorId -> Task Error Floor
 getEditingFloor config floorId =
-    getFloorHelp config True floorId
+    let
+        url =
+            makeUrl (config.apiRoot ++ "/floors/" ++ floorId) [ ( "all", "true" ) ]
+    in
+        getWithoutCache decodeFloor url [ authorization config.token ]
 
 
 getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
-    getFloorHelp config False floorId
+    let
+        url =
+            config.cacheRoot ++ "/floors/" ++ floorId ++ ".json.gz"
+    in
+        getWithoutCache decodeFloor url [ authorization config.token ]
 
 
 getFloorOfVersion : Config -> FloorId -> Int -> Task Error Floor
@@ -136,21 +145,6 @@ getFloorOfVersion config floorId version =
                 []
     in
         get decodeFloor url [ authorization config.token ]
-
-
-getFloorHelp : Config -> Bool -> String -> Task Error Floor
-getFloorHelp config withPrivate id =
-    let
-        url =
-            makeUrl
-                (config.apiRoot ++ "/floors/" ++ id)
-                (if withPrivate then
-                    [ ( "all", "true" ) ]
-                 else
-                    []
-                )
-    in
-        getWithoutCache decodeFloor url [ authorization config.token ]
 
 
 getFloorMaybe : Config -> String -> Task Error (Maybe Floor)
