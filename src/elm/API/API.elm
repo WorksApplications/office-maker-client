@@ -73,14 +73,13 @@ authorization token =
 
 getObject : Config -> ObjectId -> Task Error (Maybe Object)
 getObject config objectId =
-    let
-        url =
-            makeUrl
-                (config.apiRoot ++ "/objects/" ++ objectId)
-                []
-    in
-        get decodeObject url [ authorization config.token ]
-            |> recover404
+    get decodeObject
+        (makeUrl
+            (config.apiRoot ++ "/objects/" ++ objectId)
+            []
+        )
+        [ authorization config.token ]
+        |> recover404
 
 
 saveObjects : Config -> ObjectsChange -> Task Error ObjectsChange
@@ -120,31 +119,29 @@ deleteEditingFloor config floorId =
 
 getEditingFloor : Config -> FloorId -> Task Error Floor
 getEditingFloor config floorId =
-    let
-        url =
-            makeUrl (config.apiRoot ++ "/floors/" ++ floorId) [ ( "all", "true" ) ]
-    in
-        getWithoutCache decodeFloor url [ authorization config.token ]
+    getWithoutCache
+        decodeFloor
+        (makeUrl (config.apiRoot ++ "/floors/" ++ floorId) [ ( "all", "true" ) ])
+        [ authorization config.token ]
 
 
 getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
-    let
-        url =
-            config.cacheRoot ++ "/floors/" ++ floorId ++ ".json.gz"
-    in
-        getWithoutCache decodeFloor url [ authorization config.token ]
+    getWithoutCache
+        decodeFloor
+        (config.cacheRoot ++ "/floors/" ++ floorId)
+        [ authorization config.token ]
 
 
 getFloorOfVersion : Config -> FloorId -> Int -> Task Error Floor
 getFloorOfVersion config floorId version =
-    let
-        url =
-            makeUrl
-                (config.apiRoot ++ "/floors/" ++ floorId ++ "/" ++ toString version)
-                []
-    in
-        get decodeFloor url [ authorization config.token ]
+    get
+        decodeFloor
+        (makeUrl
+            (config.apiRoot ++ "/floors/" ++ floorId ++ "/" ++ toString version)
+            []
+        )
+        [ authorization config.token ]
 
 
 getFloorMaybe : Config -> String -> Task Error (Maybe Floor)
