@@ -34,6 +34,7 @@ init flags =
             { apiRoot = flags.apiRoot
             , cacheRoot = ""
             , accountServiceRoot = flags.accountServiceRoot
+            , profileServiceRoot = ""
             , imageRoot = ""
             , token = flags.authToken
             }

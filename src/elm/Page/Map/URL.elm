@@ -3,6 +3,7 @@ module Page.Map.URL exposing (..)
 import Dict
 import Navigation exposing (Location)
 import Util.UrlParser as UrlParser
+import Http
 
 
 type alias URL =
@@ -90,7 +91,7 @@ stringifyParams params =
     else
         "?"
             ++ (String.join "&" <|
-                    List.map (\( k, v ) -> k ++ "=" ++ v) params
+                    List.map (\( k, v ) -> k ++ "=" ++ Http.encodeUri v) params
                )
 
 

@@ -239,8 +239,18 @@ decodePerson =
         |> optional_ "image" D.string
 
 
-
--- TODO andThen
+{-| this is needed for historical reason...
+-}
+decodePersonFromProfileService : Decoder Person
+decodePersonFromProfileService =
+    decode Person
+        |> required "userId" D.string
+        |> required "name" D.string
+        |> required "post" D.string
+        |> optional_ "mail" D.string
+        |> optional_ "extensionPhone" D.string
+        |> optional_ "cellPhone" D.string
+        |> optional_ "picture" D.string
 
 
 decodeObject : Decoder Object

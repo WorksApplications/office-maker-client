@@ -69,6 +69,7 @@ type alias Flags =
     { apiRoot : String
     , cacheRoot : String
     , accountServiceRoot : String
+    , profileServiceRoot : String
     , imageRoot : String
     , authToken : String
     , title : String
@@ -125,6 +126,7 @@ init flags location =
         apiConfig =
             { apiRoot = flags.apiRoot
             , accountServiceRoot = flags.accountServiceRoot
+            , profileServiceRoot = flags.profileServiceRoot
             , cacheRoot = flags.cacheRoot
             , imageRoot = flags.imageRoot
             , token = flags.authToken

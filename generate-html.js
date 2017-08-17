@@ -17,6 +17,7 @@ var indexHtml = ejs.render(fs.readFileSync(templateDir + '/index.html', 'utf8'),
   apiRoot: config.apiRoot,
   cacheRoot: config.cacheRoot,
   accountServiceRoot: config.accountServiceRoot,
+  profileServiceRoot: config.profileServiceRoot,
   imageRoot: config.imageRoot,
   title: config.title
 });

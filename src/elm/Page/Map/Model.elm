@@ -519,7 +519,7 @@ toUrl model =
         if String.length model.searchQuery == 0 then
             Nothing
         else
-            Just model.searchQuery
+            Just (Debug.log "searchQuery" model.searchQuery)
     , objectId =
         model.selectedResult
     , editMode =

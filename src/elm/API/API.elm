@@ -61,6 +61,7 @@ type alias Config =
     { apiRoot : String
     , cacheRoot : String
     , accountServiceRoot : String
+    , profileServiceRoot : String
     , imageRoot : String
     , token : String
     }
@@ -260,8 +261,8 @@ saveEditingImage config imageId file =
 getPerson : Config -> PersonId -> Task Error Person
 getPerson config personId =
     HttpUtil.get
-        decodePerson
-        (config.apiRoot ++ "/people/" ++ personId)
+        decodePersonFromProfileService
+        (config.profileServiceRoot ++ "/profiles/" ++ personId)
         [ authorization config.token ]
 
 
