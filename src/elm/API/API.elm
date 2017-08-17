@@ -243,9 +243,13 @@ personCandidate config name =
     if String.isEmpty name then
         Task.succeed []
     else
-        getWithoutCache
-            decodePeople
-            (config.apiRoot ++ "/people/search/" ++ Http.encodeUri (String.join "" <| String.split "/" name))
+        HttpUtil.get
+            decodePeopleFromProfileServiceSearch
+            (makeUrl
+                (config.profileServiceRoot ++ "/profiles")
+                [ ( "q", String.join "" <| String.split "/" name )
+                ]
+            )
             [ authorization config.token ]
 
 

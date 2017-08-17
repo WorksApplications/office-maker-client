@@ -253,6 +253,11 @@ decodePersonFromProfileService =
         |> optional_ "picture" D.string
 
 
+decodePeopleFromProfileServiceSearch : Decoder (List Person)
+decodePeopleFromProfileServiceSearch =
+    D.field "profiles" (D.list decodePersonFromProfileService)
+
+
 decodeObject : Decoder Object
 decodeObject =
     decode
