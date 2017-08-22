@@ -73,7 +73,7 @@ Edit `config.json`. Bold properties are essential to work with various environme
 |:--|:--|
 |title|This name will be used by header.|
 |**accountServiceRoot**|URL of account service. http://xxx.xxx.xx.xx/accounts/api |
-|profileServiceRoot|Not used for now |
+|**profileServiceRoot**|URL of profile service. http://xxx.xxx.xx.xx/profiles/api |
 |**apiRoot**|URL of api server. http://xxx.xxx.xx.xx/api |
 |**imageRoot**|Uploaded images are downloaded from this URL. http://xxx.xxx.xx.xx/images |
 |**region**|S3 region you want to deploy static files to. |
