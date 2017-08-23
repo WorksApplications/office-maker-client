@@ -326,6 +326,101 @@ decodeSearchResults =
         (D.field "people" decodePeople)
 
 
+decodeSearchedPeopleWithObjectsAsSearchResults : Decoder ( List SearchResult, List Person )
+decodeSearchedPeopleWithObjectsAsSearchResults =
+    decodeSearchedPeopleWithObjects
+        |> D.map
+            (\results ->
+                results
+                    |> List.foldl
+                        (\( person, objects ) ( results, people ) ->
+                            ( (case objects of
+                                [] ->
+                                    SearchResult.MissingPerson person.id :: results
+
+                                objects ->
+                                    (++) results
+                                        (objects
+                                            |> List.map
+                                                (\object ->
+                                                    SearchResult.Object object (Object.floorIdOf object)
+                                                )
+                                        )
+                              )
+                            , person :: people
+                            )
+                        )
+                        ( [], [] )
+            )
+
+
+decodeSearchedObjectsAsSearchResults : Decoder ( List SearchResult, List Person )
+decodeSearchedObjectsAsSearchResults =
+    decodeSearchedObjects
+        |> D.map
+            (\objects ->
+                objects
+                    |> List.map
+                        (\object ->
+                            SearchResult.Object object (Object.floorIdOf object)
+                        )
+                    |> (\results -> ( results, [] ))
+            )
+
+
+decodeSearchedObjects : Decoder (List Object)
+decodeSearchedObjects =
+    D.field "results" (D.list decodeObject)
+
+
+decodeSearchedPeopleWithObjects : Decoder (List ( Person, List Object ))
+decodeSearchedPeopleWithObjects =
+    D.field "results" (D.list decodePersonWithObjects)
+
+
+decodePersonWithObjects : Decoder ( Person, List Object )
+decodePersonWithObjects =
+    D.map2 (,)
+        decodePerson
+        (D.list decodeDesk)
+
+
+decodeDesk : Decoder Object
+decodeDesk =
+    decode
+        (\id floorId updateAt tipe x y width height backgroundColor name personId fontSize color bold url shape ->
+            if tipe == "desk" then
+                Object.initDesk
+                    id
+                    floorId
+                    (Position x y)
+                    (Size width height)
+                    backgroundColor
+                    name
+                    fontSize
+                    (Just updateAt)
+                    personId
+            else
+                Debug.crash "got non-desk object."
+        )
+        |> required "id" D.string
+        |> required "floorId" D.string
+        |> required "updateAt" D.float
+        |> optional "type" D.string "desk"
+        |> required "x" D.int
+        |> required "y" D.int
+        |> required "width" D.int
+        |> required "height" D.int
+        |> required "backgroundColor" D.string
+        |> optional "name" D.string ""
+        |> optional_ "personId" D.string
+        |> optional "fontSize" D.float Object.defaultFontSize
+        |> optional "color" D.string Defaults.color
+        |> optional "bold" D.bool Defaults.bold
+        |> optional "url" D.string ""
+        |> optional "shape" D.string "Rectangle"
+
+
 decodeFloor : Decoder Floor
 decodeFloor =
     decode

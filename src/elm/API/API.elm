@@ -2,6 +2,7 @@ module API.API
     exposing
         ( getAuth
         , search
+        , searchEx
         , saveFloor
         , getObject
         , saveObjects
@@ -234,6 +235,25 @@ search config withPrivate query =
     in
         HttpUtil.get
             decodeSearchResults
+            -- decodeSearchedPeopleWithObjectsAsSearchResults
+            url
+            [ authorization config.token ]
+
+
+searchEx : Config -> Bool -> String -> Task Error ( List SearchResult, List Person )
+searchEx config withPrivate query =
+    let
+        url =
+            makeUrl
+                (config.apiRoot ++ "/search-ex/" ++ Http.encodeUri query)
+                (if withPrivate then
+                    [ ( "all", "true" ) ]
+                 else
+                    []
+                )
+    in
+        HttpUtil.get
+            decodeSearchedObjectsAsSearchResults
             url
             [ authorization config.token ]
 
