@@ -1,6 +1,6 @@
 var _user$project$Native_LocalStorage = function() {
 
-  if (!localStorage || !localStorage.getItem || !localStorage.setItem) {
+  if (typeof localStorage === 'undefined' || !localStorage.getItem || !localStorage.setItem) {
     function disabled() {
       return _elm_lang$core$Native_Scheduler.fail({
         ctor: 'Disabled'
