@@ -234,7 +234,6 @@ search config withPrivate query =
                 )
     in
         HttpUtil.get
-            -- decodeSearchResults
             decodeSearchedPeopleWithObjectsAsSearchResults
             url
             [ authorization config.token ]

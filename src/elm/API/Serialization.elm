@@ -319,13 +319,6 @@ decodeSearchResult =
         |> optional_ "objectAndFloorId" (tuple2 (,) decodeObject D.string)
 
 
-decodeSearchResults : Decoder ( List SearchResult, List Person )
-decodeSearchResults =
-    D.map2 (,)
-        (D.field "result" (D.map (List.filterMap identity) (D.list decodeSearchResult)))
-        (D.field "people" decodePeople)
-
-
 decodeSearchedPeopleWithObjectsAsSearchResults : Decoder ( List SearchResult, List Person )
 decodeSearchedPeopleWithObjectsAsSearchResults =
     decodeSearchedPeopleWithObjects
