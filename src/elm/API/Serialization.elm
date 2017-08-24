@@ -381,8 +381,8 @@ decodeSearchedPeopleWithObjects =
 decodePersonWithObjects : Decoder ( Person, List Object )
 decodePersonWithObjects =
     D.map2 (,)
-        decodePerson
-        (D.list decodeDesk)
+        (D.field "person" decodePerson)
+        (D.field "objects" (D.list decodeDesk))
 
 
 decodeDesk : Decoder Object
