@@ -73,14 +73,9 @@ register prototype model =
         }
 
 
-selectedPrototype : Prototypes -> Prototype
+selectedPrototype : Prototypes -> Maybe Prototype
 selectedPrototype model =
-    case findPrototypeByIndex model.selected model.data of
-        Just prototype ->
-            prototype
-
-        Nothing ->
-            Debug.crash "no prototypes found"
+    findPrototypeByIndex model.selected model.data
 
 
 isLoaded : Prototypes -> Bool

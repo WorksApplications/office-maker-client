@@ -13,6 +13,7 @@ import Model.Mode as Mode exposing (Mode(..))
 import Model.SearchResult as SearchResult exposing (SearchResult)
 import Model.EditingFloor as EditingFloor
 import Model.I18n as I18n exposing (Language)
+import Model.Prototypes as Prototypes
 import View.Icons as I
 import View.Styles as S
 import CoreType exposing (..)
@@ -82,16 +83,20 @@ viewListForOnePost model ( maybePostName, results ) =
                 |> Maybe.map (\floor -> (EditingFloor.present floor).id)
 
         onStartDraggingMsg =
-            if Mode.isEditMode model.mode then
-                Just StartDraggingFromMissingPerson
-            else
-                Nothing
+            case ( Mode.isEditMode model.mode, Prototypes.selectedPrototype model.prototypes ) of
+                ( True, Just prototype ) ->
+                    Just (StartDraggingFromMissingPerson prototype)
+
+                _ ->
+                    Nothing
 
         onStartDraggingExistingObjectMsg =
-            if Mode.isEditMode model.mode then
-                Just StartDraggingFromExistingObject
-            else
-                Nothing
+            case ( Mode.isEditMode model.mode, Prototypes.selectedPrototype model.prototypes ) of
+                ( True, Just prototype ) ->
+                    Just (StartDraggingFromExistingObject prototype)
+
+                _ ->
+                    Nothing
 
         children =
             results

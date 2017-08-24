@@ -51,7 +51,7 @@ type Msg
     = NoOp
     | UrlUpdate (Result String URL)
     | UserLoaded User
-    | Initialized (Maybe String) Bool UserState User
+    | Initialized (Maybe String) Bool UserState
     | FloorsInfoLoaded Bool (List FloorInfo)
     | FloorLoaded (Maybe Floor)
     | ColorsLoaded ColorPalette
@@ -107,8 +107,8 @@ type Msg
     | GotSearchResult (List SearchResult) (List Person)
     | SelectSearchResult ObjectId FloorId (Maybe PersonId)
     | CloseSearchResult
-    | StartDraggingFromMissingPerson String String
-    | StartDraggingFromExistingObject Id String (Maybe String) String Time
+    | StartDraggingFromMissingPerson Prototype String String
+    | StartDraggingFromExistingObject Prototype Id String (Maybe String) String Time
     | CachePeople (List Person)
     | RequestCandidate Id String
     | SearchCandidateDebounceMsg Debounce.Msg

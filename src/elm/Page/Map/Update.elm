@@ -182,21 +182,12 @@ init flags location =
 
 initCmd : API.Config -> Bool -> UserState -> Maybe String -> Cmd Msg
 initCmd apiConfig needsEditMode defaultUserState selectedFloor =
-    if needsEditMode then
-        Cache.getWithDefault Cache.cache defaultUserState
-            |> Task.andThen
-                (\userState ->
-                    API.getAuth apiConfig
-                        |> Task.map (\user -> ( userState, user ))
-                )
-            |> performAPI (\( userState, user ) -> Initialized selectedFloor needsEditMode userState user)
-    else
-        Cmd.batch
-            [ API.getAuth apiConfig
-                |> performAPI UserLoaded
-            , Cache.getWithDefault Cache.cache defaultUserState
-                |> performAPI (\userState -> Initialized selectedFloor needsEditMode userState User.guest)
-            ]
+    Cmd.batch
+        [ API.getAuth apiConfig
+            |> performAPI UserLoaded
+        , Cache.getWithDefault Cache.cache defaultUserState
+            |> performAPI (\userState -> Initialized selectedFloor needsEditMode userState)
+        ]
 
 
 debug : Bool
@@ -304,7 +295,8 @@ update msg model =
             ( { model
                 | user = user
               }
-            , if not (User.isGuest user) && not (Prototypes.isLoaded model.prototypes) then
+            , if User.isAdmin user then
+                -- TODO only if edit mode
                 Cmd.batch
                     [ performAPI ColorsLoaded (API.getColors model.apiConfig)
                     , performAPI PrototypesLoaded (API.getPrototypes model.apiConfig)
@@ -313,17 +305,13 @@ update msg model =
                 Cmd.none
             )
 
-        Initialized selectedFloor needsEditMode userState user ->
+        Initialized selectedFloor needsEditMode userState ->
             let
                 needSearch =
                     String.trim model.searchQuery /= ""
 
                 mode =
-                    (if not (User.isGuest user) then
-                        Mode.init needsEditMode
-                     else
-                        model.mode
-                    )
+                    Mode.init needsEditMode
                         |> (if needSearch then
                                 Mode.showSearchResult
                             else
@@ -369,22 +357,12 @@ update msg model =
                         |> Maybe.map (performAPI FloorLoaded)
                         |> Maybe.withDefault Cmd.none
 
-                loadSettingsCmd =
-                    if User.isGuest user then
-                        Cmd.none
-                    else
-                        Cmd.batch
-                            [ performAPI ColorsLoaded (API.getColors model.apiConfig)
-                            , performAPI PrototypesLoaded (API.getPrototypes model.apiConfig)
-                            ]
-
                 loadFloorInfoCmd =
                     API.getFloorsInfo model.apiConfig
                         |> performAPI (FloorsInfoLoaded (selectedFloor /= Nothing || model.selectedResult /= Nothing))
             in
                 { model
-                    | user = user
-                    , scale = userState.scale
+                    | scale = userState.scale
                     , offset = userState.offset
                     , lang = userState.lang
                     , mode = mode
@@ -393,7 +371,6 @@ update msg model =
                       , searchCmd
                       , loadFloorInfoCmd
                       , loadFloorCmd
-                      , loadSettingsCmd
                       ]
 
         ColorsLoaded colorPalette ->
@@ -1390,39 +1367,31 @@ update msg model =
         CloseSearchResult ->
             searchBy "" model
 
-        StartDraggingFromMissingPerson personId personName ->
-            let
-                prototype =
-                    Prototypes.selectedPrototype model.prototypes
-            in
-                { model
-                    | draggingContext =
-                        MoveFromSearchResult
-                            { prototype
-                                | name = personName
-                                , personId = Just personId
-                            }
-                            personId
-                }
-                    ! []
+        StartDraggingFromMissingPerson prototype personId personName ->
+            { model
+                | draggingContext =
+                    MoveFromSearchResult
+                        { prototype
+                            | name = personName
+                            , personId = Just personId
+                        }
+                        personId
+            }
+                ! []
 
-        StartDraggingFromExistingObject objectId name personId floorId updateAt ->
-            let
-                prototype =
-                    Prototypes.selectedPrototype model.prototypes
-            in
-                { model
-                    | draggingContext =
-                        MoveExistingObjectFromSearchResult
-                            floorId
-                            updateAt
-                            { prototype
-                                | name = name
-                                , personId = personId
-                            }
-                            objectId
-                }
-                    ! []
+        StartDraggingFromExistingObject prototype objectId name personId floorId updateAt ->
+            { model
+                | draggingContext =
+                    MoveExistingObjectFromSearchResult
+                        floorId
+                        updateAt
+                        { prototype
+                            | name = name
+                            , personId = personId
+                        }
+                        objectId
+            }
+                ! []
 
         CachePeople people ->
             Model.cachePeople people model ! []
@@ -1699,7 +1668,12 @@ update msg model =
                     else
                         let
                             prototype =
-                                Prototypes.selectedPrototype model.prototypes
+                                case Prototypes.selectedPrototype model.prototypes of
+                                    Just p ->
+                                        p
+
+                                    _ ->
+                                        Debug.crash "unexpected empty prototypes"
 
                             candidates =
                                 ClipboardData.toObjectCandidates model.gridSize model.cellSizePerDesk prototype pos s

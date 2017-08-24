@@ -386,9 +386,6 @@ screenToImageWithOffset scale screenPosition offset =
 getPositionedPrototype : Model -> List PositionedPrototype
 getPositionedPrototype model =
     let
-        prototype =
-            Prototypes.selectedPrototype model.prototypes
-
         xy2 =
             screenToImageWithOffset model.scale (canvasPosition model) model.offset
     in
@@ -413,6 +410,14 @@ getPositionedPrototype model =
 
             ( True, StampFromScreenPos start ) ->
                 let
+                    prototype =
+                        case Prototypes.selectedPrototype model.prototypes of
+                            Just p ->
+                                p
+
+                            _ ->
+                                Debug.crash "unexpected empty prototypes"
+
                     xy1 =
                         screenToImageWithOffset model.scale start model.offset
                 in
@@ -420,6 +425,14 @@ getPositionedPrototype model =
 
             ( True, _ ) ->
                 let
+                    prototype =
+                        case Prototypes.selectedPrototype model.prototypes of
+                            Just p ->
+                                p
+
+                            _ ->
+                                Debug.crash "unexpected empty prototypes"
+
                     fitted =
                         ObjectsOperation.fitPositionToGrid
                             model.gridSize
