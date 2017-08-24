@@ -500,7 +500,7 @@ update msg model =
         FocusCanvas ->
             ( model, focusCanvas {} )
 
-        MouseDownOnObject ctrl shift lastTouchedId mousePosition ->
+        MouseDownOnObject dragEnabled ctrl shift lastTouchedId mousePosition ->
             let
                 model0 =
                     { model | mousePosition = mousePosition }
@@ -546,14 +546,17 @@ update msg model =
                                                 primary
                                                     :: ObjectsOperation.withinRange ( primary, object ) (objectsExcept primary)
 
-                                        --keep primary
                                         _ ->
                                             [ lastTouchedId ]
                             else if List.member lastTouchedId model.selectedObjects then
                                 model.selectedObjects
                             else
                                 [ lastTouchedId ]
-                        , draggingContext = MoveObject lastTouchedId model.mousePosition
+                        , draggingContext =
+                            if dragEnabled then
+                                MoveObject lastTouchedId model.mousePosition
+                            else
+                                NoDragging
                         , selectorRect = Nothing
                     }
             in

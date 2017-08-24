@@ -23,6 +23,8 @@ import Model.Object as Object exposing (..)
 import Model.Scale as Scale exposing (Scale)
 import Model.ObjectsOperation as ObjectsOperation
 import Model.Prototypes as Prototypes exposing (PositionedPrototype)
+import Model.ClipboardData as ClipboardData
+import Model.User as User
 import Page.Map.Model as Model exposing (Model, DraggingContext(..))
 import Page.Map.ContextMenuContext exposing (ContextMenuContext(ObjectContextMenu))
 import Page.Map.Msg exposing (..)
@@ -30,7 +32,6 @@ import Page.Map.ObjectNameInput as ObjectNameInput
 import Page.Map.ProfilePopup as ProfilePopup
 import Page.Map.GridLayer as GridLayer
 import Page.Map.KeyOperation as KeyOperation
-import Model.ClipboardData as ClipboardData
 import Native.ClipboardData
 import CoreType exposing (..)
 
@@ -51,29 +52,41 @@ viewModeEventOptions id =
         }
 
 
-editModeEventOptions : ObjectId -> ObjectView.EventOptions Msg
-editModeEventOptions id =
-    { onContextMenu =
-        Just
-            (ContextMenu.open ContextMenuMsg (ObjectContextMenu id)
-                |> Attributes.map (BeforeContextMenuOnObject id)
-            )
-    , onMouseDown =
-        Just <|
-            onWithOptions
-                "mousedown"
-                { stopPropagation = True, preventDefault = True }
-                (Decode.map4 MouseDownOnObject
-                    KeyOperation.decodeCtrlOrCommand
-                    KeyOperation.decodeShift
-                    (Decode.succeed id)
-                    Mouse.position
+editModeEventOptions : Bool -> ObjectId -> ObjectView.EventOptions Msg
+editModeEventOptions isAdmin id =
+    if isAdmin then
+        { onContextMenu =
+            Just
+                (ContextMenu.open ContextMenuMsg (ObjectContextMenu id)
+                    |> Attributes.map (BeforeContextMenuOnObject id)
                 )
-    , onMouseUp = Just (MouseUpOnObject id)
-    , onClick = Just NoOp
-    , onStartEditingName = Nothing -- Just (StartEditObject id)
-    , onStartResize = Just (MouseDownOnResizeGrip id)
-    }
+        , onMouseDown = Just (onMouseDownAttribute isAdmin id)
+        , onMouseUp = Just (MouseUpOnObject id)
+        , onClick = Just NoOp
+        , onStartEditingName = Nothing -- Just (StartEditObject id)
+        , onStartResize = Just (MouseDownOnResizeGrip id)
+        }
+    else
+        { onContextMenu = Nothing
+        , onMouseDown = Just (onMouseDownAttribute isAdmin id)
+        , onMouseUp = Just (MouseUpOnObject id)
+        , onClick = Just NoOp
+        , onStartEditingName = Nothing -- Just (StartEditObject id)
+        , onStartResize = Nothing
+        }
+
+
+onMouseDownAttribute : Bool -> ObjectId -> Attribute Msg
+onMouseDownAttribute isAdmin id =
+    onWithOptions
+        "mousedown"
+        { stopPropagation = True, preventDefault = True }
+        (Decode.map4 (MouseDownOnObject isAdmin)
+            KeyOperation.decodeCtrlOrCommand
+            KeyOperation.decodeShift
+            (Decode.succeed id)
+            Mouse.position
+        )
 
 
 printModeObjectView : Scale -> Object -> Html Msg
@@ -118,10 +131,10 @@ ghostObjectView scale object =
         object
 
 
-nonGhostOjectView : Scale -> Bool -> Object -> Html Msg
-nonGhostOjectView scale selected object =
+nonGhostOjectView : Bool -> Scale -> Bool -> Object -> Html Msg
+nonGhostOjectView isAdmin scale selected object =
     objectViewHelp
-        (editModeEventOptions (Object.idOf object))
+        (editModeEventOptions isAdmin (Object.idOf object))
         True
         -- isGhost
         False
@@ -430,7 +443,8 @@ objectsView model floor =
                     |> List.map
                         (\( object, selected ) ->
                             ( Object.idOf object
-                            , lazy3 nonGhostOjectView
+                            , nonGhostOjectView
+                                (User.isAdmin model.user)
                                 model.scale
                                 selected
                                 object
@@ -495,7 +509,8 @@ objectsViewWhileMoving model floor start =
                 |> List.map
                     (\( object, selected ) ->
                         ( Object.idOf object
-                        , lazy3 nonGhostOjectView
+                        , nonGhostOjectView
+                            (User.isAdmin model.user)
                             model.scale
                             selected
                             (adjustPosition object)
@@ -558,7 +573,8 @@ objectsViewWhileResizing model floor id from =
                 |> List.map
                     (\( object, selected ) ->
                         ( Object.idOf object
-                        , lazy3 nonGhostOjectView
+                        , nonGhostOjectView
+                            (User.isAdmin model.user)
                             model.scale
                             (isResizing object)
                             --TODO seems not selected?
