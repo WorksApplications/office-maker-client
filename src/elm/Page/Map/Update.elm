@@ -184,9 +184,9 @@ initCmd : API.Config -> Bool -> UserState -> Maybe String -> Cmd Msg
 initCmd apiConfig needsEditMode defaultUserState selectedFloor =
     Cmd.batch
         [ API.getAuth apiConfig
-            |> performAPI UserLoaded
+            |> performAPI (UserLoaded needsEditMode)
         , Cache.getWithDefault Cache.cache defaultUserState
-            |> performAPI (\userState -> Initialized selectedFloor needsEditMode userState)
+            |> performAPI (\userState -> Initialize needsEditMode selectedFloor userState)
         ]
 
 
@@ -291,12 +291,16 @@ update msg model =
             in
                 newModel ! []
 
-        UserLoaded user ->
+        UserLoaded turnToEditMode user ->
             ( { model
                 | user = user
+                , mode =
+                    if turnToEditMode && not (User.isGuest user) then
+                        Mode.toSelectMode model.mode
+                    else
+                        model.mode
               }
             , if User.isAdmin user then
-                -- TODO only if edit mode
                 Cmd.batch
                     [ performAPI ColorsLoaded (API.getColors model.apiConfig)
                     , performAPI PrototypesLoaded (API.getPrototypes model.apiConfig)
@@ -305,13 +309,13 @@ update msg model =
                 Cmd.none
             )
 
-        Initialized selectedFloor needsEditMode userState ->
+        Initialize tryToBehaveAsEditMode selectedFloor userState ->
             let
                 needSearch =
                     String.trim model.searchQuery /= ""
 
                 mode =
-                    Mode.init needsEditMode
+                    model.mode
                         |> (if needSearch then
                                 Mode.showSearchResult
                             else
@@ -319,7 +323,7 @@ update msg model =
                            )
 
                 requestPrivateFloors =
-                    Mode.isEditMode mode
+                    tryToBehaveAsEditMode
 
                 searchCmd =
                     if needSearch then
@@ -332,7 +336,7 @@ update msg model =
                         Cmd.none
 
                 focusObjectCmd =
-                    if Mode.isEditMode mode then
+                    if tryToBehaveAsEditMode then
                         Cmd.none
                     else
                         model.selectedResult
@@ -1603,7 +1607,7 @@ update msg model =
         TokenRemoved ->
             { model
                 | user = User.guest
-                , mode = Mode.init False
+                , mode = Mode.init
             }
                 ! []
 

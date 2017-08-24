@@ -129,7 +129,7 @@ init apiConfig title initialSize randomSeed visitDate isEditMode query objectId 
         , selectorRect = Nothing
         , ctrl = False
         , mapFocused = False
-        , mode = Mode.init False
+        , mode = Mode.init
         , colorPalette = ColorPalette.empty
         , contextMenu = contextMenu
         , floorsInfo = Dict.empty

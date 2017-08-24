@@ -17,12 +17,12 @@ type EditingMode
     | Label
 
 
-init : Bool -> Mode
-init isEditMode =
+init : Mode
+init =
     Mode
         { printMode = False
         , searchResult = False
-        , editing = isEditMode
+        , editing = False
         , editMode = Select
         }
 
