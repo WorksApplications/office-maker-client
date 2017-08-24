@@ -52,7 +52,14 @@ batchUpdate msgs model =
     msgs
         |> List.foldl
             (\msg model ->
-                Update.update msg model |> Tuple.first
+                Update.update msg model
+                    |> (\( m, c ) ->
+                            let
+                                _ =
+                                    Debug.log "cmd" c
+                            in
+                                m
+                       )
             )
             model
 
