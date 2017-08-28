@@ -18,7 +18,7 @@ type alias PropChanges =
     List ( String, String, String )
 
 
-diff : Floor -> Maybe Floor -> ( PropChanges, DetailedObjectsChange )
+diff : Floor -> Maybe Floor -> ( PropChanges, ObjectsChange )
 diff new old =
     ( diffPropertyChanges new old
     , diffObjects new.objects (Maybe.withDefault Dict.empty (Maybe.map .objects old))
@@ -95,7 +95,7 @@ propertyChangesHelp current prev =
         nameChange ++ ordChange ++ sizeChange ++ imageChange ++ flipImageChange
 
 
-diffObjects : Dict ObjectId Object -> Dict ObjectId Object -> DetailedObjectsChange
+diffObjects : Dict ObjectId Object -> Dict ObjectId Object -> ObjectsChange
 diffObjects newObjects oldObjects =
     Dict.merge
         (\id new dict -> Dict.insert id (ObjectsChange.Added new) dict)

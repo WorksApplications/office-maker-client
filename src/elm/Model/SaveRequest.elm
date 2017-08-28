@@ -2,20 +2,20 @@ module Model.SaveRequest exposing (..)
 
 import Model.Floor exposing (Floor)
 import Model.EditingFloor as EditingFloor exposing (EditingFloor)
-import Model.ObjectsChange as ObjectsChange exposing (DetailedObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
 import CoreType exposing (..)
 
 
 type SaveRequest
     = SaveFloor Floor
     | PublishFloor FloorId
-    | SaveObjects DetailedObjectsChange
+    | SaveObjects ObjectsChange
 
 
 type alias ReducedSaveRequest =
     { floor : Maybe Floor
     , publish : Maybe FloorId
-    , objects : DetailedObjectsChange
+    , objects : ObjectsChange
     }
 
 
@@ -23,7 +23,7 @@ emptyReducedSaveRequest : ReducedSaveRequest
 emptyReducedSaveRequest =
     { floor = Nothing
     , publish = Nothing
-    , objects = ObjectsChange.emptyDetailed
+    , objects = ObjectsChange.empty
     }
 
 

@@ -139,14 +139,14 @@ encodeFloor floor =
         ]
 
 
-encodeObjectsChange : List (ObjectChange ObjectModification) -> Value
+encodeObjectsChange : List ObjectChange -> Value
 encodeObjectsChange changes =
     changes
         |> List.map encodeObjectChange
         |> E.list
 
 
-encodeObjectChange : ObjectChange ObjectModification -> Value
+encodeObjectChange : ObjectChange -> Value
 encodeObjectChange change =
     case change of
         ObjectsChange.Added object ->

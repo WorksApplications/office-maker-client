@@ -9,45 +9,41 @@ type alias ObjectModification =
     { new : Object, old : Object, changes : List ObjectPropertyChange }
 
 
-type ObjectChange a
+type ObjectChange
     = Added Object
-    | Modified a
+    | Modified ObjectModification
     | Deleted Object
 
 
-type alias ObjectsChange_ a =
-    Dict ObjectId (ObjectChange a)
+type alias ObjectsChange =
+    Dict ObjectId ObjectChange
 
 
-type alias DetailedObjectsChange =
-    ObjectsChange_ ObjectModification
-
-
-added : List Object -> ObjectsChange_ a
+added : List Object -> ObjectsChange
 added objects =
     objects
         |> List.map (\object -> ( Object.idOf object, Added object ))
         |> Dict.fromList
 
 
-modified : List ( ObjectId, a ) -> ObjectsChange_ a
+modified : List ( ObjectId, ObjectModification ) -> ObjectsChange
 modified idRelatedList =
     idRelatedList
         |> List.map (\( id, a ) -> ( id, Modified a ))
         |> Dict.fromList
 
 
-emptyDetailed : DetailedObjectsChange
-emptyDetailed =
+empty : ObjectsChange
+empty =
     Dict.empty
 
 
-isEmpty : ObjectsChange_ a -> Bool
+isEmpty : ObjectsChange -> Bool
 isEmpty change =
     Dict.isEmpty change
 
 
-merge : Dict ObjectId Object -> DetailedObjectsChange -> DetailedObjectsChange -> DetailedObjectsChange
+merge : Dict ObjectId Object -> ObjectsChange -> ObjectsChange -> ObjectsChange
 merge currentObjects new old =
     Dict.merge
         (\id new dict -> insertToMergedDict currentObjects id new dict)
@@ -76,12 +72,12 @@ merge currentObjects new old =
                     insertToMergedDict currentObjects id new dict
         )
         (\id old dict -> insertToMergedDict currentObjects id old dict)
-        (Debug.log "new" new)
-        (Debug.log "old" old)
+        new
+        old
         Dict.empty
 
 
-insertToMergedDict : Dict ObjectId Object -> ObjectId -> ObjectChange ObjectModification -> DetailedObjectsChange -> DetailedObjectsChange
+insertToMergedDict : Dict ObjectId Object -> ObjectId -> ObjectChange -> ObjectsChange -> ObjectsChange
 insertToMergedDict currentObjects id value dict =
     currentObjects
         |> Dict.get id
@@ -94,7 +90,7 @@ insertToMergedDict currentObjects id value dict =
 
 {-| current object does not exist if deleted
 -}
-copyCurrentUpdateAtToObjects : Object -> ObjectChange ObjectModification -> ObjectChange ObjectModification
+copyCurrentUpdateAtToObjects : Object -> ObjectChange -> ObjectChange
 copyCurrentUpdateAtToObjects currentObject modification =
     case modification of
         Added object ->
@@ -107,17 +103,17 @@ copyCurrentUpdateAtToObjects currentObject modification =
             Deleted (Object.copyUpdateAt currentObject object)
 
 
-fromList : List ( ObjectId, ObjectChange a ) -> ObjectsChange_ a
+fromList : List ( ObjectId, ObjectChange ) -> ObjectsChange
 fromList list =
     Dict.fromList list
 
 
-toList : ObjectsChange_ a -> List (ObjectChange a)
+toList : ObjectsChange -> List ObjectChange
 toList change =
     List.map Tuple.second (Dict.toList change)
 
 
-separate : ObjectsChange_ a -> { added : List Object, modified : List a, deleted : List Object }
+separate : ObjectsChange -> { added : List Object, modified : List ObjectModification, deleted : List Object }
 separate change =
     let
         ( added, modified, deleted ) =

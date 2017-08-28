@@ -2,7 +2,7 @@ module Model.EditingFloor exposing (..)
 
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorDiff as FloorDiff
-import Model.ObjectsChange as ObjectsChange exposing (DetailedObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
 import Util.UndoList as UndoList exposing (UndoList)
 
 
@@ -17,7 +17,7 @@ init floor =
     }
 
 
-updateFloorAndObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, Floor, DetailedObjectsChange )
+updateFloorAndObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, Floor, ObjectsChange )
 updateFloorAndObjects f efloor =
     let
         floor =
@@ -73,7 +73,7 @@ updateFloor f efloor =
         )
 
 
-updateObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, DetailedObjectsChange )
+updateObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, ObjectsChange )
 updateObjects f efloor =
     let
         floor =
@@ -97,12 +97,12 @@ updateObjects f efloor =
         ( { efloor | undoList = newUndoList }, objectsChange )
 
 
-undo : EditingFloor -> ( EditingFloor, DetailedObjectsChange )
+undo : EditingFloor -> ( EditingFloor, ObjectsChange )
 undo efloor =
     let
         ( undoList, objectsChange ) =
             UndoList.undoReplace
-                ObjectsChange.emptyDetailed
+                ObjectsChange.empty
                 (\prev current ->
                     let
                         objectsChange =
@@ -117,12 +117,12 @@ undo efloor =
         ( { efloor | undoList = undoList }, objectsChange )
 
 
-redo : EditingFloor -> ( EditingFloor, DetailedObjectsChange )
+redo : EditingFloor -> ( EditingFloor, ObjectsChange )
 redo efloor =
     let
         ( undoList, objectsChange ) =
             UndoList.redoReplace
-                ObjectsChange.emptyDetailed
+                ObjectsChange.empty
                 (\next current ->
                     let
                         objectsChange =

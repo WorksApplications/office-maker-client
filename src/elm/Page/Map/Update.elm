@@ -25,7 +25,7 @@ import Model.Prototype exposing (Prototype)
 import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
-import Model.ObjectsChange as ObjectsChange exposing (DetailedObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
 import Model.Errors as Errors exposing (GlobalError(..))
 import Model.I18n as I18n exposing (Language(..))
 import Model.SaveRequest as SaveRequest exposing (SaveRequest(..), ReducedSaveRequest)
@@ -2103,7 +2103,7 @@ updateOnFinishStamp_ prototypes model floor =
 -- TODO Need a hard refactor around here
 
 
-updateOnFinishStampWithoutEffects : Maybe String -> List PositionedPrototype -> Model -> EditingFloor -> ( Seed, EditingFloor, List Object, DetailedObjectsChange )
+updateOnFinishStampWithoutEffects : Maybe String -> List PositionedPrototype -> Model -> EditingFloor -> ( Seed, EditingFloor, List Object, ObjectsChange )
 updateOnFinishStampWithoutEffects maybeObjectId prototypes model floor =
     let
         ( candidatesWithNewIds, newSeed ) =
@@ -2444,7 +2444,7 @@ updateOnFinishNameInput continueEditing objectId name model =
                                         (Floor.changeObjectName [ objectId ] name)
                                         efloor
                             )
-                        |> Maybe.withDefault ( efloor, ObjectsChange.emptyDetailed )
+                        |> Maybe.withDefault ( efloor, ObjectsChange.empty )
 
                 saveCmd =
                     requestSaveObjectsCmd objectsChange
@@ -2496,7 +2496,7 @@ savePrototypesCmd apiConfig prototypes =
         |> performAPI (always NoOp)
 
 
-requestSaveObjectsCmd : DetailedObjectsChange -> Cmd Msg
+requestSaveObjectsCmd : ObjectsChange -> Cmd Msg
 requestSaveObjectsCmd objectsChange =
     requestCmd (SaveObjects objectsChange)
 
