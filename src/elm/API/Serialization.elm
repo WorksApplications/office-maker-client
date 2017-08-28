@@ -151,21 +151,36 @@ encodeObjectChange change =
     case change of
         ObjectsChange.Added object ->
             E.object
-                [ ( "flag", E.string "added" )
+                [ addedFlag
                 , ( "object", encodeObject object )
                 ]
 
         ObjectsChange.Modified { new, changes } ->
             E.object
-                [ ( "flag", E.string "modified" )
+                [ modifiedFlag
                 , ( "object", encodeObjectPropertyChange (Object.idOf new) (Object.floorIdOf new) changes )
                 ]
 
         ObjectsChange.Deleted object ->
             E.object
-                [ ( "flag", E.string "deleted" )
+                [ deletedFlag
                 , ( "object", encodeObject object )
                 ]
+
+
+addedFlag : ( String, Value )
+addedFlag =
+    ( "flag", E.string "added" )
+
+
+modifiedFlag : ( String, Value )
+modifiedFlag =
+    ( "flag", E.string "modified" )
+
+
+deletedFlag : ( String, Value )
+deletedFlag =
+    ( "flag", E.string "deleted" )
 
 
 encodeObjectPropertyChange : ObjectId -> FloorId -> List ObjectPropertyChange -> Value
