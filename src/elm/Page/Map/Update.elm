@@ -44,6 +44,7 @@ import Page.Map.Msg exposing (Msg(..))
 import Page.Map.URL as URL exposing (URL)
 import Page.Map.ObjectNameInput as ObjectNameInput
 import Page.Map.KeyOperation as KeyOperation
+import Http
 import CoreType exposing (..)
 
 
@@ -1867,6 +1868,12 @@ update msg model =
                                   ]
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
+
+        Error ((APIError (Http.BadStatus { status })) as e) ->
+            if status.code == 401 then
+                model ! [ Navigation.load "./login" ]
+            else
+                { model | error = e } ! []
 
         Error e ->
             { model | error = e } ! []
