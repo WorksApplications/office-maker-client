@@ -2446,7 +2446,7 @@ updateOnFinishNameInput continueEditing objectId name model =
                                         (Floor.changeObjectName [ objectId ] name)
                                         efloor
                             )
-                        |> Maybe.withDefault ( efloor, ObjectsChange.empty )
+                        |> Maybe.withDefault ( efloor, ObjectsChange.emptyDetailed )
 
                 saveCmd =
                     requestSaveObjectsCmd objectsChange

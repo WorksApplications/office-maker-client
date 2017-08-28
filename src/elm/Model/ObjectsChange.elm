@@ -138,20 +138,3 @@ separate change =
         , modified = modified
         , deleted = deleted
         }
-
-
-simplify : DetailedObjectsChange -> ObjectsChange
-simplify change =
-    change
-        |> Dict.map
-            (\id value ->
-                case value of
-                    Added object ->
-                        Added object
-
-                    Modified mod ->
-                        Modified mod.new
-
-                    Deleted object ->
-                        Deleted object
-            )

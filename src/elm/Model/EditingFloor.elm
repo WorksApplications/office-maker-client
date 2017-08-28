@@ -17,7 +17,7 @@ init floor =
     }
 
 
-updateFloorAndObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, Floor, ObjectsChange )
+updateFloorAndObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, Floor, DetailedObjectsChange )
 updateFloorAndObjects f efloor =
     let
         floor =
@@ -31,7 +31,6 @@ updateFloorAndObjects f efloor =
 
         objectsChange =
             FloorDiff.diffObjects newFloor.objects floor.objects
-                |> ObjectsChange.simplify
 
         changed =
             propChanged /= [] || (not <| ObjectsChange.isEmpty objectsChange)
@@ -116,19 +115,19 @@ syncObjects change efloor =
         { efloor | undoList = newUndoList }
 
 
-undo : EditingFloor -> ( EditingFloor, ObjectsChange )
+undo : EditingFloor -> ( EditingFloor, DetailedObjectsChange )
 undo efloor =
     let
         ( undoList, objectsChange ) =
             UndoList.undoReplace
-                ObjectsChange.empty
+                ObjectsChange.emptyDetailed
                 (\prev current ->
                     let
                         objectsChange =
                             FloorDiff.diffObjects prev.objects current.objects
                     in
                         ( Floor.changeObjectsByChanges objectsChange current
-                        , objectsChange |> ObjectsChange.simplify
+                        , objectsChange
                         )
                 )
                 efloor.undoList
@@ -136,19 +135,19 @@ undo efloor =
         ( { efloor | undoList = undoList }, objectsChange )
 
 
-redo : EditingFloor -> ( EditingFloor, ObjectsChange )
+redo : EditingFloor -> ( EditingFloor, DetailedObjectsChange )
 redo efloor =
     let
         ( undoList, objectsChange ) =
             UndoList.redoReplace
-                ObjectsChange.empty
+                ObjectsChange.emptyDetailed
                 (\next current ->
                     let
                         objectsChange =
                             FloorDiff.diffObjects next.objects current.objects
                     in
                         ( Floor.changeObjectsByChanges objectsChange current
-                        , objectsChange |> ObjectsChange.simplify
+                        , objectsChange
                         )
                 )
                 efloor.undoList
