@@ -87,7 +87,7 @@ getObject config objectId =
 saveObjects : Config -> List (ObjectChange ObjectModification) -> Task Error ()
 saveObjects config changes =
     patchJsonNoResponse
-        (config.apiRoot ++ "/objects")
+        (config.apiRoot ++ "/objects2")
         [ authorization config.token ]
         (Http.jsonBody <| encodeObjectsChange changes)
 

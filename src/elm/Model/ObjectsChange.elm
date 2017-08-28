@@ -59,12 +59,25 @@ merge currentObjects new old =
                 ( Modified { new }, Added _ ) ->
                     insertToMergedDict currentObjects id (Added new) dict
 
+                ( Modified n, Modified o ) ->
+                    insertToMergedDict currentObjects
+                        id
+                        (Modified
+                            { new = n.new
+                            , old = n.old
+
+                            -- TODO dedupe
+                            , changes = n.changes ++ o.changes
+                            }
+                        )
+                        dict
+
                 _ ->
                     insertToMergedDict currentObjects id new dict
         )
         (\id old dict -> insertToMergedDict currentObjects id old dict)
-        new
-        old
+        (Debug.log "new" new)
+        (Debug.log "old" old)
         Dict.empty
 
 

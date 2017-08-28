@@ -155,10 +155,10 @@ encodeObjectChange change =
                 , ( "object", encodeObject object )
                 ]
 
-        ObjectsChange.Modified { changes } ->
+        ObjectsChange.Modified { new, changes } ->
             E.object
                 [ ( "flag", E.string "modified" )
-                , ( "object", encodeObjectPropertyChange changes )
+                , ( "object", encodeObjectPropertyChange (Object.idOf new) (Object.floorIdOf new) changes )
                 ]
 
         ObjectsChange.Deleted object ->
@@ -168,37 +168,41 @@ encodeObjectChange change =
                 ]
 
 
-encodeObjectPropertyChange : List ObjectPropertyChange -> Value
-encodeObjectPropertyChange changes =
-    E.object (List.concatMap encodeObjectPropertyChangeProperty changes)
+encodeObjectPropertyChange : ObjectId -> FloorId -> List ObjectPropertyChange -> Value
+encodeObjectPropertyChange objectId floorId changes =
+    E.object
+        (( "id", E.string objectId )
+            -- :: ( "floorId", E.string floorId )
+            :: List.concatMap encodeObjectPropertyChangeProperty (Debug.log "changes" changes)
+        )
 
 
 encodeObjectPropertyChangeProperty : ObjectPropertyChange -> List ( String, Value )
 encodeObjectPropertyChangeProperty change =
     case change of
-        Object.ChangeName _ new ->
+        Object.ChangeName new _ ->
             [ ( "name", E.string new ) ]
 
-        Object.ChangeSize _ new ->
+        Object.ChangeSize new _ ->
             [ ( "width", E.int new.width )
             , ( "height", E.int new.height )
             ]
 
-        Object.ChangePosition _ new ->
+        Object.ChangePosition new _ ->
             [ ( "x", E.int new.x )
             , ( "y", E.int new.y )
             ]
 
-        Object.ChangeBackgroundColor _ new ->
+        Object.ChangeBackgroundColor new _ ->
             [ ( "backgroundColor", E.string new ) ]
 
-        Object.ChangeColor _ new ->
+        Object.ChangeColor new _ ->
             [ ( "color", E.string new ) ]
 
-        Object.ChangeFontSize _ new ->
+        Object.ChangeFontSize new _ ->
             [ ( "fontSize", E.float new ) ]
 
-        Object.ChangeBold _ new ->
+        Object.ChangeBold new _ ->
             [ ( "bold"
               , if new then
                     E.bool True
@@ -207,7 +211,7 @@ encodeObjectPropertyChangeProperty change =
               )
             ]
 
-        Object.ChangeUrl _ new ->
+        Object.ChangeUrl new _ ->
             [ ( "url"
               , if new == "" then
                     E.null
@@ -216,7 +220,7 @@ encodeObjectPropertyChangeProperty change =
               )
             ]
 
-        Object.ChangeShape _ new ->
+        Object.ChangeShape new _ ->
             [ ( "shape"
               , if new == Ellipse then
                     E.string "ellipse"
@@ -225,7 +229,7 @@ encodeObjectPropertyChangeProperty change =
               )
             ]
 
-        Object.ChangePerson _ new ->
+        Object.ChangePerson new _ ->
             [ ( "personId"
               , case new of
                     Just id ->
