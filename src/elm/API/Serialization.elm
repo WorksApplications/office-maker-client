@@ -112,7 +112,7 @@ encodeShape shape =
             E.null
 
         Object.Ellipse ->
-            E.string "Ellipse"
+            E.string "ellipse"
 
 
 encodeObjectModification : ObjectModification -> Value
@@ -276,7 +276,7 @@ decodeObject =
                     (Object.LabelFields color
                         bold
                         url
-                        (if shape == "Rectangle" then
+                        (if shape == "rectangle" then
                             Object.Rectangle
                          else
                             Object.Ellipse
@@ -298,7 +298,7 @@ decodeObject =
         |> optional "color" D.string Defaults.color
         |> optional "bold" D.bool Defaults.bold
         |> optional "url" D.string ""
-        |> optional "shape" D.string "Rectangle"
+        |> optional "shape" D.string "rectangle"
 
 
 decodeSearchResult : Decoder (Maybe SearchResult)
@@ -411,7 +411,7 @@ decodeDesk =
         |> optional "color" D.string Defaults.color
         |> optional "bold" D.bool Defaults.bold
         |> optional "url" D.string ""
-        |> optional "shape" D.string "Rectangle"
+        |> optional "shape" D.string "rectangle"
 
 
 decodeFloor : Decoder Floor
@@ -473,7 +473,7 @@ decodePrototype =
             , height = height
             , fontSize = fontSize
             , shape =
-                if shape == "Ellipse" then
+                if shape == "ellipse" then
                     Ellipse
                 else
                     Rectangle
@@ -487,7 +487,7 @@ decodePrototype =
         |> required "width" D.int
         |> required "height" D.int
         |> optional "fontSize" D.float Defaults.fontSize
-        |> optional "shape" D.string "Rectangle"
+        |> optional "shape" D.string "rectangle"
 
 
 encodePrototype : Prototype -> Value
