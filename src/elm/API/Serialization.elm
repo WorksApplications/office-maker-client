@@ -172,8 +172,8 @@ encodeObjectPropertyChange : ObjectId -> FloorId -> List ObjectPropertyChange ->
 encodeObjectPropertyChange objectId floorId changes =
     E.object
         (( "id", E.string objectId )
-            -- :: ( "floorId", E.string floorId )
-            :: List.concatMap encodeObjectPropertyChangeProperty (Debug.log "changes" changes)
+            :: ( "floorId", E.string floorId )
+            :: List.concatMap encodeObjectPropertyChangeProperty changes
         )
 
 
