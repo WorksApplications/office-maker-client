@@ -2,7 +2,7 @@ module Model.EditingFloor exposing (..)
 
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorDiff as FloorDiff
-import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange, DetailedObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (DetailedObjectsChange)
 import Util.UndoList as UndoList exposing (UndoList)
 
 
@@ -95,24 +95,6 @@ updateObjects f efloor =
                 efloor.undoList
     in
         ( { efloor | undoList = newUndoList }, objectsChange )
-
-
-syncObjects : ObjectsChange -> EditingFloor -> EditingFloor
-syncObjects change efloor =
-    let
-        undoList =
-            efloor.undoList
-
-        separated =
-            ObjectsChange.separate change
-
-        -- Unsafe operation!
-        newUndoList =
-            { undoList
-                | present = Floor.addObjects (separated.added ++ separated.modified) undoList.present
-            }
-    in
-        { efloor | undoList = newUndoList }
 
 
 undo : EditingFloor -> ( EditingFloor, DetailedObjectsChange )

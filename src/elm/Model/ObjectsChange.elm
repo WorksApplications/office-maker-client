@@ -19,10 +19,6 @@ type alias ObjectsChange_ a =
     Dict ObjectId (ObjectChange a)
 
 
-type alias ObjectsChange =
-    ObjectsChange_ Object
-
-
 type alias DetailedObjectsChange =
     ObjectsChange_ ObjectModification
 
@@ -39,11 +35,6 @@ modified idRelatedList =
     idRelatedList
         |> List.map (\( id, a ) -> ( id, Modified a ))
         |> Dict.fromList
-
-
-empty : ObjectsChange
-empty =
-    Dict.empty
 
 
 emptyDetailed : DetailedObjectsChange
@@ -88,10 +79,8 @@ insertToMergedDict currentObjects id value dict =
         |> Maybe.withDefault (Dict.insert id value dict)
 
 
-
--- current object does not exist if deleted
-
-
+{-| current object does not exist if deleted
+-}
 copyCurrentUpdateAtToObjects : Object -> ObjectChange ObjectModification -> ObjectChange ObjectModification
 copyCurrentUpdateAtToObjects currentObject modification =
     case modification of

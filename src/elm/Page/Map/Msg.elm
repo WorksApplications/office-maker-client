@@ -7,7 +7,6 @@ import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
 import Model.User as User exposing (User)
 import Model.Person as Person exposing (Person)
 import Model.Object as Object exposing (..)
-import Model.ObjectsChange exposing (ObjectsChange)
 import Model.Prototype exposing (Prototype)
 import Model.Prototypes as Prototypes exposing (Prototypes)
 import Model.Floor as Floor exposing (Floor, FloorBase)
@@ -33,10 +32,8 @@ type alias Id =
     String
 
 
-
-{- TODO temporary here for sefe refactoring -}
-
-
+{-| TODO temporary here for sefe refactoring
+-}
 type ObjectNameInputMsg
     = NoOperation
     | CaretPosition Int
@@ -59,7 +56,7 @@ type Msg
     | ImageSaved String Int Int
     | RequestSave SaveRequest
     | SaveFloorDebounceMsg Debounce.Msg
-    | ObjectsSaved ObjectsChange
+    | ObjectsSaved
     | UnlockSaveFloor
     | FloorSaved FloorBase
     | FloorPublished Floor

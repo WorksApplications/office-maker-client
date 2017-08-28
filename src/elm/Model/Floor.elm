@@ -367,6 +367,8 @@ setObjects objects floor =
     }
 
 
+{-| bad name!!
+-}
 addObjects : List Object -> Floor -> Floor
 addObjects objects floor =
     { floor

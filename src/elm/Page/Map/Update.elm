@@ -25,7 +25,7 @@ import Model.Prototype exposing (Prototype)
 import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
-import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange, DetailedObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (DetailedObjectsChange)
 import Model.Errors as Errors exposing (GlobalError(..))
 import Model.I18n as I18n exposing (Language(..))
 import Model.SaveRequest as SaveRequest exposing (SaveRequest(..), ReducedSaveRequest)
@@ -475,11 +475,9 @@ update msg model =
                 }
                     ! [ cmd ]
 
-        ObjectsSaved change ->
-            { model
-                | floor = Maybe.map (EditingFloor.syncObjects change) model.floor
-            }
-                ! []
+        ObjectsSaved ->
+            -- TODO don't sync for now
+            model ! []
 
         -- [ Process.sleep 1000 |> Task.perform (always UnlockSaveFloor) ]
         -- TODO: add "unlockAfter" to elm-debounce
@@ -2536,7 +2534,7 @@ batchSave apiConfig request =
 
         saveObjectsCmd =
             API.saveObjects apiConfig (Dict.values request.objects)
-                |> performAPI ObjectsSaved
+                |> performAPI (always ObjectsSaved)
     in
         Cmd.batch [ publishFloorCmd, saveFloorCmd, saveObjectsCmd ]
 

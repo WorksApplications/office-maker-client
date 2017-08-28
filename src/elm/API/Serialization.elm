@@ -237,27 +237,6 @@ encodeObjectPropertyChangeProperty change =
             ]
 
 
-decodeObjectsChange : Decoder ObjectsChange
-decodeObjectsChange =
-    D.list decodeObjectChange
-        |> D.map ObjectsChange.fromList
-
-
-decodeObjectChange : Decoder ( ObjectId, ObjectChange Object )
-decodeObjectChange =
-    D.map2
-        (\flag object ->
-            if flag == "added" then
-                ( Object.idOf object, ObjectsChange.Added object )
-            else if flag == "modified" then
-                ( Object.idOf object, ObjectsChange.Modified object )
-            else
-                ( Object.idOf object, ObjectsChange.Deleted object )
-        )
-        (D.field "flag" D.string)
-        (D.field "object" decodeObject)
-
-
 encodeLogin : String -> String -> Value
 encodeLogin userId pass =
     E.object
