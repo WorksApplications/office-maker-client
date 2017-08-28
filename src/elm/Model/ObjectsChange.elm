@@ -46,12 +46,17 @@ empty =
     Dict.empty
 
 
+emptyDetailed : DetailedObjectsChange
+emptyDetailed =
+    Dict.empty
+
+
 isEmpty : ObjectsChange_ a -> Bool
 isEmpty change =
     Dict.isEmpty change
 
 
-merge : Dict ObjectId Object -> ObjectsChange -> ObjectsChange -> ObjectsChange
+merge : Dict ObjectId Object -> DetailedObjectsChange -> DetailedObjectsChange -> DetailedObjectsChange
 merge currentObjects new old =
     Dict.merge
         (\id new dict -> insertToMergedDict currentObjects id new dict)
@@ -60,8 +65,8 @@ merge currentObjects new old =
                 ( Deleted _, Added _ ) ->
                     dict
 
-                ( Modified object, Added _ ) ->
-                    insertToMergedDict currentObjects id (Added object) dict
+                ( Modified { new }, Added _ ) ->
+                    insertToMergedDict currentObjects id (Added new) dict
 
                 _ ->
                     insertToMergedDict currentObjects id new dict
@@ -72,7 +77,7 @@ merge currentObjects new old =
         Dict.empty
 
 
-insertToMergedDict : Dict ObjectId Object -> ObjectId -> ObjectChange Object -> ObjectsChange -> ObjectsChange
+insertToMergedDict : Dict ObjectId Object -> ObjectId -> ObjectChange ObjectModification -> DetailedObjectsChange -> DetailedObjectsChange
 insertToMergedDict currentObjects id value dict =
     currentObjects
         |> Dict.get id
@@ -87,14 +92,14 @@ insertToMergedDict currentObjects id value dict =
 -- current object does not exist if deleted
 
 
-copyCurrentUpdateAtToObjects : Object -> ObjectChange Object -> ObjectChange Object
+copyCurrentUpdateAtToObjects : Object -> ObjectChange ObjectModification -> ObjectChange ObjectModification
 copyCurrentUpdateAtToObjects currentObject modification =
     case modification of
         Added object ->
             Added (Object.copyUpdateAt currentObject object)
 
-        Modified object ->
-            Modified (Object.copyUpdateAt currentObject object)
+        Modified { old, new, changes } ->
+            Modified { old = old, new = Object.copyUpdateAt currentObject new, changes = changes }
 
         Deleted object ->
             Deleted (Object.copyUpdateAt currentObject object)

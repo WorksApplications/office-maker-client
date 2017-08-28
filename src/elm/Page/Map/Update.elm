@@ -25,7 +25,7 @@ import Model.Prototype exposing (Prototype)
 import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
-import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange, DetailedObjectsChange)
 import Model.Errors as Errors exposing (GlobalError(..))
 import Model.I18n as I18n exposing (Language(..))
 import Model.SaveRequest as SaveRequest exposing (SaveRequest(..), ReducedSaveRequest)
@@ -1556,7 +1556,7 @@ update msg model =
 
                             saveAndLoadNewFloorCmd =
                                 API.saveFloor model.apiConfig newFloor
-                                    |> Task.andThen (\_ -> API.saveObjects model.apiConfig objectsChange)
+                                    |> Task.andThen (\_ -> API.saveObjects model.apiConfig (Dict.values objectsChange))
                                     |> Task.andThen (\_ -> API.getFloorsInfo model.apiConfig)
                                     |> performAPI (FloorsInfoLoaded True)
 
@@ -1984,7 +1984,8 @@ updateOnMouseUp pos model =
 
                                 objectsChange =
                                     ObjectsChange.modified
-                                        (List.map (\object -> ( Object.idOf object, object )) newObjects)
+                                        -- FIXME this is not working now!
+                                        (List.map (\object -> ( Object.idOf object, { new = object, old = object, changes = [] } )) newObjects)
 
                                 saveCmd =
                                     requestSaveObjectsCmd objectsChange
@@ -2104,7 +2105,7 @@ updateOnFinishStamp_ prototypes model floor =
 -- TODO Need a hard refactor around here
 
 
-updateOnFinishStampWithoutEffects : Maybe String -> List PositionedPrototype -> Model -> EditingFloor -> ( Seed, EditingFloor, List Object, ObjectsChange )
+updateOnFinishStampWithoutEffects : Maybe String -> List PositionedPrototype -> Model -> EditingFloor -> ( Seed, EditingFloor, List Object, DetailedObjectsChange )
 updateOnFinishStampWithoutEffects maybeObjectId prototypes model floor =
     let
         ( candidatesWithNewIds, newSeed ) =
@@ -2497,7 +2498,7 @@ savePrototypesCmd apiConfig prototypes =
         |> performAPI (always NoOp)
 
 
-requestSaveObjectsCmd : ObjectsChange -> Cmd Msg
+requestSaveObjectsCmd : DetailedObjectsChange -> Cmd Msg
 requestSaveObjectsCmd objectsChange =
     requestCmd (SaveObjects objectsChange)
 
@@ -2534,7 +2535,7 @@ batchSave apiConfig request =
                 |> Maybe.withDefault Cmd.none
 
         saveObjectsCmd =
-            API.saveObjects apiConfig request.objects
+            API.saveObjects apiConfig (Dict.values request.objects)
                 |> performAPI ObjectsSaved
     in
         Cmd.batch [ publishFloorCmd, saveFloorCmd, saveObjectsCmd ]

@@ -2,7 +2,7 @@ module Model.EditingFloor exposing (..)
 
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorDiff as FloorDiff
-import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange, DetailedObjectsChange)
 import Util.UndoList as UndoList exposing (UndoList)
 
 
@@ -74,7 +74,7 @@ updateFloor f efloor =
         )
 
 
-updateObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, ObjectsChange )
+updateObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, DetailedObjectsChange )
 updateObjects f efloor =
     let
         floor =
@@ -85,7 +85,6 @@ updateObjects f efloor =
 
         objectsChange =
             FloorDiff.diffObjects newFloor.objects floor.objects
-                |> ObjectsChange.simplify
 
         changed =
             not <| ObjectsChange.isEmpty objectsChange

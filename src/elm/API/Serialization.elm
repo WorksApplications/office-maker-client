@@ -10,7 +10,7 @@ import Model.Floor as Floor exposing (Floor, FloorBase)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
 import Model.User as User exposing (User)
 import Model.Person exposing (Person)
-import Model.Object as Object exposing (Object, Shape(..))
+import Model.Object as Object exposing (Object, Shape(..), ObjectPropertyChange)
 import Model.Prototype exposing (Prototype)
 import Model.SearchResult as SearchResult exposing (SearchResult)
 import Model.ColorPalette as ColorPalette exposing (ColorPalette)
@@ -139,15 +139,14 @@ encodeFloor floor =
         ]
 
 
-encodeObjectsChange : ObjectsChange -> Value
-encodeObjectsChange change =
-    change
-        |> ObjectsChange.toList
+encodeObjectsChange : List (ObjectChange ObjectModification) -> Value
+encodeObjectsChange changes =
+    changes
         |> List.map encodeObjectChange
         |> E.list
 
 
-encodeObjectChange : ObjectChange Object -> Value
+encodeObjectChange : ObjectChange ObjectModification -> Value
 encodeObjectChange change =
     case change of
         ObjectsChange.Added object ->
@@ -156,10 +155,10 @@ encodeObjectChange change =
                 , ( "object", encodeObject object )
                 ]
 
-        ObjectsChange.Modified object ->
+        ObjectsChange.Modified { changes } ->
             E.object
                 [ ( "flag", E.string "modified" )
-                , ( "object", encodeObject object )
+                , ( "object", encodeObjectPropertyChange changes )
                 ]
 
         ObjectsChange.Deleted object ->
@@ -167,6 +166,75 @@ encodeObjectChange change =
                 [ ( "flag", E.string "deleted" )
                 , ( "object", encodeObject object )
                 ]
+
+
+encodeObjectPropertyChange : List ObjectPropertyChange -> Value
+encodeObjectPropertyChange changes =
+    E.object (List.concatMap encodeObjectPropertyChangeProperty changes)
+
+
+encodeObjectPropertyChangeProperty : ObjectPropertyChange -> List ( String, Value )
+encodeObjectPropertyChangeProperty change =
+    case change of
+        Object.ChangeName _ new ->
+            [ ( "name", E.string new ) ]
+
+        Object.ChangeSize _ new ->
+            [ ( "width", E.int new.width )
+            , ( "height", E.int new.height )
+            ]
+
+        Object.ChangePosition _ new ->
+            [ ( "x", E.int new.x )
+            , ( "y", E.int new.y )
+            ]
+
+        Object.ChangeBackgroundColor _ new ->
+            [ ( "backgroundColor", E.string new ) ]
+
+        Object.ChangeColor _ new ->
+            [ ( "color", E.string new ) ]
+
+        Object.ChangeFontSize _ new ->
+            [ ( "fontSize", E.float new ) ]
+
+        Object.ChangeBold _ new ->
+            [ ( "bold"
+              , if new then
+                    E.bool True
+                else
+                    E.null
+              )
+            ]
+
+        Object.ChangeUrl _ new ->
+            [ ( "url"
+              , if new == "" then
+                    E.null
+                else
+                    E.string new
+              )
+            ]
+
+        Object.ChangeShape _ new ->
+            [ ( "shape"
+              , if new == Ellipse then
+                    E.string "ellipse"
+                else
+                    E.null
+              )
+            ]
+
+        Object.ChangePerson _ new ->
+            [ ( "personId"
+              , case new of
+                    Just id ->
+                        E.string id
+
+                    _ ->
+                        E.null
+              )
+            ]
 
 
 decodeObjectsChange : Decoder ObjectsChange
