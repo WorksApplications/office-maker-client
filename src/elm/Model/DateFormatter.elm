@@ -46,12 +46,9 @@ monthToInt month =
 
 sameDay : Date -> Date -> Bool
 sameDay d1 d2 =
-    year d1
-        == year d2
-        && month d1
-        == month d2
-        && day d1
-        == day d2
+    (year d1 == year d2)
+        && (month d1 == month d2)
+        && (day d1 == day d2)
 
 
 am : Date -> Bool
