@@ -5,6 +5,9 @@ import Test exposing (..)
 import Page.Map.Model as Model exposing (Model)
 import Page.Map.Update as Update exposing (Flags)
 import API.Cache as Cache exposing (Cache, UserState)
+import Model.EditingFloor as EditingFloor
+import Model.Floor as Floor exposing (Floor)
+import Model.Object as Object exposing (Object)
 import Model.User as User exposing (User)
 import Page.Map.Msg exposing (Msg(..))
 import Model.I18n as I18n exposing (Language(..))
@@ -77,8 +80,33 @@ suite =
                 \_ ->
                     initialModel
                         |> batchUpdate
-                            [ Initialized Nothing False userState User.guest ]
+                            [ Initialize False Nothing userState ]
                         -- |> Debug.log "model"
                         |> Expect.all [ (\model -> Expect.pass) ]
+            ]
+        , describe "EditingFloor"
+            [ test "works" <|
+                \_ ->
+                    EditingFloor.init
+                        (Floor.init "floor1"
+                            |> Floor.addObjects
+                                [ Object.initDesk
+                                    "object1"
+                                    "floor1"
+                                    (Position 0 0)
+                                    (Size 100 100)
+                                    "#000"
+                                    "name"
+                                    10.5
+                                    Nothing
+                                    Nothing
+                                ]
+                        )
+                        |> EditingFloor.updateObjects (Floor.move [ "object1" ] 10 ( 20, 30 ))
+                        |> Tuple.first
+                        |> EditingFloor.undo
+                        |> Tuple.second
+                        |> Debug.log "changes"
+                        |> (always Expect.pass)
             ]
         ]

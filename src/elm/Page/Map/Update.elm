@@ -475,11 +475,9 @@ update msg model =
                 }
                     ! [ cmd ]
 
-        ObjectsSaved change ->
-            { model
-                | floor = Maybe.map (EditingFloor.syncObjects change) model.floor
-            }
-                ! []
+        ObjectsSaved ->
+            -- TODO don't sync for now
+            model ! []
 
         -- [ Process.sleep 1000 |> Task.perform (always UnlockSaveFloor) ]
         -- TODO: add "unlockAfter" to elm-debounce
@@ -1556,7 +1554,7 @@ update msg model =
 
                             saveAndLoadNewFloorCmd =
                                 API.saveFloor model.apiConfig newFloor
-                                    |> Task.andThen (\_ -> API.saveObjects model.apiConfig objectsChange)
+                                    |> Task.andThen (\_ -> API.saveObjects model.apiConfig (Dict.values objectsChange))
                                     |> Task.andThen (\_ -> API.getFloorsInfo model.apiConfig)
                                     |> performAPI (FloorsInfoLoaded True)
 
@@ -1984,7 +1982,8 @@ updateOnMouseUp pos model =
 
                                 objectsChange =
                                     ObjectsChange.modified
-                                        (List.map (\object -> ( Object.idOf object, object )) newObjects)
+                                        -- FIXME this is not working now!
+                                        (List.map (\object -> ( Object.idOf object, { new = object, old = object, changes = [] } )) newObjects)
 
                                 saveCmd =
                                     requestSaveObjectsCmd objectsChange
@@ -2534,8 +2533,8 @@ batchSave apiConfig request =
                 |> Maybe.withDefault Cmd.none
 
         saveObjectsCmd =
-            API.saveObjects apiConfig request.objects
-                |> performAPI ObjectsSaved
+            API.saveObjects apiConfig (Dict.values request.objects)
+                |> performAPI (always ObjectsSaved)
     in
         Cmd.batch [ publishFloorCmd, saveFloorCmd, saveObjectsCmd ]
 

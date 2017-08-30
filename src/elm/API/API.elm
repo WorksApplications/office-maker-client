@@ -42,7 +42,7 @@ import Model.Floor as Floor exposing (Floor)
 import Model.Prototype exposing (Prototype)
 import Model.SearchResult exposing (SearchResult)
 import Model.ColorPalette exposing (ColorPalette)
-import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectChange)
 import API.Serialization exposing (..)
 
 
@@ -84,13 +84,12 @@ getObject config objectId =
         |> recover404
 
 
-saveObjects : Config -> ObjectsChange -> Task Error ObjectsChange
-saveObjects config change =
-    patchJson
-        decodeObjectsChange
+saveObjects : Config -> List ObjectChange -> Task Error ()
+saveObjects config changes =
+    patchJsonNoResponse
         (config.apiRoot ++ "/objects")
         [ authorization config.token ]
-        (Http.jsonBody <| encodeObjectsChange change)
+        (Http.jsonBody <| encodeObjectsChange changes)
 
 
 saveFloor : Config -> Floor -> Task Error FloorBase

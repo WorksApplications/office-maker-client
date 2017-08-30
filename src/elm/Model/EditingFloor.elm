@@ -31,7 +31,6 @@ updateFloorAndObjects f efloor =
 
         objectsChange =
             FloorDiff.diffObjects newFloor.objects floor.objects
-                |> ObjectsChange.simplify
 
         changed =
             propChanged /= [] || (not <| ObjectsChange.isEmpty objectsChange)
@@ -85,7 +84,6 @@ updateObjects f efloor =
 
         objectsChange =
             FloorDiff.diffObjects newFloor.objects floor.objects
-                |> ObjectsChange.simplify
 
         changed =
             not <| ObjectsChange.isEmpty objectsChange
@@ -97,24 +95,6 @@ updateObjects f efloor =
                 efloor.undoList
     in
         ( { efloor | undoList = newUndoList }, objectsChange )
-
-
-syncObjects : ObjectsChange -> EditingFloor -> EditingFloor
-syncObjects change efloor =
-    let
-        undoList =
-            efloor.undoList
-
-        separated =
-            ObjectsChange.separate change
-
-        -- Unsafe operation!
-        newUndoList =
-            { undoList
-                | present = Floor.addObjects (separated.added ++ separated.modified) undoList.present
-            }
-    in
-        { efloor | undoList = newUndoList }
 
 
 undo : EditingFloor -> ( EditingFloor, ObjectsChange )
@@ -129,7 +109,7 @@ undo efloor =
                             FloorDiff.diffObjects prev.objects current.objects
                     in
                         ( Floor.changeObjectsByChanges objectsChange current
-                        , objectsChange |> ObjectsChange.simplify
+                        , objectsChange
                         )
                 )
                 efloor.undoList
@@ -149,7 +129,7 @@ redo efloor =
                             FloorDiff.diffObjects next.objects current.objects
                     in
                         ( Floor.changeObjectsByChanges objectsChange current
-                        , objectsChange |> ObjectsChange.simplify
+                        , objectsChange
                         )
                 )
                 efloor.undoList

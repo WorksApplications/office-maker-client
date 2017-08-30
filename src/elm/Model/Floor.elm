@@ -5,7 +5,7 @@ import Regex
 import Date exposing (Date)
 import Model.Object as Object exposing (Object)
 import Model.ObjectsOperation as ObjectsOperation
-import Model.ObjectsChange as ObjectsChange exposing (DetailedObjectsChange, ObjectModification)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange, ObjectModification)
 import CoreType exposing (..)
 
 
@@ -255,7 +255,7 @@ changeObjectUrl ids url floor =
     partiallyChangeObjects (Object.changeUrl url) ids floor
 
 
-changeObjectsByChanges : DetailedObjectsChange -> Floor -> Floor
+changeObjectsByChanges : ObjectsChange -> Floor -> Floor
 changeObjectsByChanges change floor =
     let
         separated =
@@ -367,6 +367,8 @@ setObjects objects floor =
     }
 
 
+{-| bad name!!
+-}
 addObjects : List Object -> Floor -> Floor
 addObjects objects floor =
     { floor

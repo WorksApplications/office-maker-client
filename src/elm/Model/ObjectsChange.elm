@@ -9,32 +9,24 @@ type alias ObjectModification =
     { new : Object, old : Object, changes : List ObjectPropertyChange }
 
 
-type ObjectChange a
+type ObjectChange
     = Added Object
-    | Modified a
+    | Modified ObjectModification
     | Deleted Object
 
 
-type alias ObjectsChange_ a =
-    Dict ObjectId (ObjectChange a)
-
-
 type alias ObjectsChange =
-    ObjectsChange_ Object
+    Dict ObjectId ObjectChange
 
 
-type alias DetailedObjectsChange =
-    ObjectsChange_ ObjectModification
-
-
-added : List Object -> ObjectsChange_ a
+added : List Object -> ObjectsChange
 added objects =
     objects
         |> List.map (\object -> ( Object.idOf object, Added object ))
         |> Dict.fromList
 
 
-modified : List ( ObjectId, a ) -> ObjectsChange_ a
+modified : List ( ObjectId, ObjectModification ) -> ObjectsChange
 modified idRelatedList =
     idRelatedList
         |> List.map (\( id, a ) -> ( id, Modified a ))
@@ -46,7 +38,7 @@ empty =
     Dict.empty
 
 
-isEmpty : ObjectsChange_ a -> Bool
+isEmpty : ObjectsChange -> Bool
 isEmpty change =
     Dict.isEmpty change
 
@@ -60,8 +52,21 @@ merge currentObjects new old =
                 ( Deleted _, Added _ ) ->
                     dict
 
-                ( Modified object, Added _ ) ->
-                    insertToMergedDict currentObjects id (Added object) dict
+                ( Modified { new }, Added _ ) ->
+                    insertToMergedDict currentObjects id (Added new) dict
+
+                ( Modified n, Modified o ) ->
+                    insertToMergedDict currentObjects
+                        id
+                        (Modified
+                            { new = n.new
+                            , old = n.old
+
+                            -- TODO dedupe
+                            , changes = o.changes ++ n.changes
+                            }
+                        )
+                        dict
 
                 _ ->
                     insertToMergedDict currentObjects id new dict
@@ -72,7 +77,7 @@ merge currentObjects new old =
         Dict.empty
 
 
-insertToMergedDict : Dict ObjectId Object -> ObjectId -> ObjectChange Object -> ObjectsChange -> ObjectsChange
+insertToMergedDict : Dict ObjectId Object -> ObjectId -> ObjectChange -> ObjectsChange -> ObjectsChange
 insertToMergedDict currentObjects id value dict =
     currentObjects
         |> Dict.get id
@@ -83,34 +88,32 @@ insertToMergedDict currentObjects id value dict =
         |> Maybe.withDefault (Dict.insert id value dict)
 
 
-
--- current object does not exist if deleted
-
-
-copyCurrentUpdateAtToObjects : Object -> ObjectChange Object -> ObjectChange Object
+{-| current object does not exist if deleted
+-}
+copyCurrentUpdateAtToObjects : Object -> ObjectChange -> ObjectChange
 copyCurrentUpdateAtToObjects currentObject modification =
     case modification of
         Added object ->
             Added (Object.copyUpdateAt currentObject object)
 
-        Modified object ->
-            Modified (Object.copyUpdateAt currentObject object)
+        Modified { old, new, changes } ->
+            Modified { old = old, new = Object.copyUpdateAt currentObject new, changes = changes }
 
         Deleted object ->
             Deleted (Object.copyUpdateAt currentObject object)
 
 
-fromList : List ( ObjectId, ObjectChange a ) -> ObjectsChange_ a
+fromList : List ( ObjectId, ObjectChange ) -> ObjectsChange
 fromList list =
     Dict.fromList list
 
 
-toList : ObjectsChange_ a -> List (ObjectChange a)
+toList : ObjectsChange -> List ObjectChange
 toList change =
     List.map Tuple.second (Dict.toList change)
 
 
-separate : ObjectsChange_ a -> { added : List Object, modified : List a, deleted : List Object }
+separate : ObjectsChange -> { added : List Object, modified : List ObjectModification, deleted : List Object }
 separate change =
     let
         ( added, modified, deleted ) =
@@ -133,20 +136,3 @@ separate change =
         , modified = modified
         , deleted = deleted
         }
-
-
-simplify : DetailedObjectsChange -> ObjectsChange
-simplify change =
-    change
-        |> Dict.map
-            (\id value ->
-                case value of
-                    Added object ->
-                        Added object
-
-                    Modified mod ->
-                        Modified mod.new
-
-                    Deleted object ->
-                        Deleted object
-            )

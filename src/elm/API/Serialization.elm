@@ -10,7 +10,7 @@ import Model.Floor as Floor exposing (Floor, FloorBase)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
 import Model.User as User exposing (User)
 import Model.Person exposing (Person)
-import Model.Object as Object exposing (Object, Shape(..))
+import Model.Object as Object exposing (Object, Shape(..), ObjectPropertyChange)
 import Model.Prototype exposing (Prototype)
 import Model.SearchResult as SearchResult exposing (SearchResult)
 import Model.ColorPalette as ColorPalette exposing (ColorPalette)
@@ -139,55 +139,121 @@ encodeFloor floor =
         ]
 
 
-encodeObjectsChange : ObjectsChange -> Value
-encodeObjectsChange change =
-    change
-        |> ObjectsChange.toList
+encodeObjectsChange : List ObjectChange -> Value
+encodeObjectsChange changes =
+    changes
         |> List.map encodeObjectChange
         |> E.list
 
 
-encodeObjectChange : ObjectChange Object -> Value
+encodeObjectChange : ObjectChange -> Value
 encodeObjectChange change =
     case change of
         ObjectsChange.Added object ->
             E.object
-                [ ( "flag", E.string "added" )
+                [ addedFlag
                 , ( "object", encodeObject object )
                 ]
 
-        ObjectsChange.Modified object ->
+        ObjectsChange.Modified { new, changes } ->
             E.object
-                [ ( "flag", E.string "modified" )
-                , ( "object", encodeObject object )
+                [ modifiedFlag
+                , ( "object", encodeObjectPropertyChange (Object.idOf new) (Object.floorIdOf new) changes )
                 ]
 
         ObjectsChange.Deleted object ->
             E.object
-                [ ( "flag", E.string "deleted" )
+                [ deletedFlag
                 , ( "object", encodeObject object )
                 ]
 
 
-decodeObjectsChange : Decoder ObjectsChange
-decodeObjectsChange =
-    D.list decodeObjectChange
-        |> D.map ObjectsChange.fromList
+addedFlag : ( String, Value )
+addedFlag =
+    ( "flag", E.string "added" )
 
 
-decodeObjectChange : Decoder ( ObjectId, ObjectChange Object )
-decodeObjectChange =
-    D.map2
-        (\flag object ->
-            if flag == "added" then
-                ( Object.idOf object, ObjectsChange.Added object )
-            else if flag == "modified" then
-                ( Object.idOf object, ObjectsChange.Modified object )
-            else
-                ( Object.idOf object, ObjectsChange.Deleted object )
+modifiedFlag : ( String, Value )
+modifiedFlag =
+    ( "flag", E.string "modified" )
+
+
+deletedFlag : ( String, Value )
+deletedFlag =
+    ( "flag", E.string "deleted" )
+
+
+encodeObjectPropertyChange : ObjectId -> FloorId -> List ObjectPropertyChange -> Value
+encodeObjectPropertyChange objectId floorId changes =
+    E.object
+        (( "id", E.string objectId )
+            :: ( "floorId", E.string floorId )
+            :: List.concatMap encodeObjectPropertyChangeProperty changes
         )
-        (D.field "flag" D.string)
-        (D.field "object" decodeObject)
+
+
+encodeObjectPropertyChangeProperty : ObjectPropertyChange -> List ( String, Value )
+encodeObjectPropertyChangeProperty change =
+    case change of
+        Object.ChangeName new _ ->
+            [ ( "name", E.string new ) ]
+
+        Object.ChangeSize new _ ->
+            [ ( "width", E.int new.width )
+            , ( "height", E.int new.height )
+            ]
+
+        Object.ChangePosition new _ ->
+            [ ( "x", E.int new.x )
+            , ( "y", E.int new.y )
+            ]
+
+        Object.ChangeBackgroundColor new _ ->
+            [ ( "backgroundColor", E.string new ) ]
+
+        Object.ChangeColor new _ ->
+            [ ( "color", E.string new ) ]
+
+        Object.ChangeFontSize new _ ->
+            [ ( "fontSize", E.float new ) ]
+
+        Object.ChangeBold new _ ->
+            [ ( "bold"
+              , if new then
+                    E.bool True
+                else
+                    E.null
+              )
+            ]
+
+        Object.ChangeUrl new _ ->
+            [ ( "url"
+              , if new == "" then
+                    E.null
+                else
+                    E.string new
+              )
+            ]
+
+        Object.ChangeShape new _ ->
+            [ ( "shape"
+              , if new == Ellipse then
+                    E.string "ellipse"
+                else
+                    E.null
+              )
+            ]
+
+        Object.ChangePerson new _ ->
+            [ ( "personId"
+              , case new of
+                    Just id ->
+                        E.string id
+
+                    _ ->
+                        E.null
+              )
+            ]
 
 
 encodeLogin : String -> String -> Value
@@ -289,9 +355,12 @@ decodeObject =
         |> optional "type" D.string "desk"
         |> required "x" D.int
         |> required "y" D.int
-        |> required "width" D.int
-        |> required "height" D.int
-        |> required "backgroundColor" D.string
+        -- TODO server should retrun
+        |> optional "width" D.int 100
+        -- TODO server should retrun
+        |> optional "height" D.int 100
+        -- TODO server should retrun
+        |> optional "backgroundColor" D.string "#fff"
         |> optional "name" D.string ""
         |> optional_ "personId" D.string
         |> optional "fontSize" D.float Object.defaultFontSize
