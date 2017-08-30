@@ -100,41 +100,37 @@ updateObjects f efloor =
 undo : EditingFloor -> ( EditingFloor, ObjectsChange )
 undo efloor =
     let
-        ( undoList, objectsChange ) =
-            UndoList.undoReplace
-                ObjectsChange.empty
+        ( undoList, maybeObjectsChange ) =
+            UndoList.undoWithDiff
                 (\prev current ->
-                    let
-                        objectsChange =
-                            FloorDiff.diffObjects prev.objects current.objects
-                    in
-                        ( Floor.changeObjectsByChanges objectsChange current
-                        , objectsChange
-                        )
+                    FloorDiff.diffObjects prev.objects current.objects
                 )
                 efloor.undoList
     in
-        ( { efloor | undoList = undoList }, objectsChange )
+        case maybeObjectsChange of
+            Just objectsChange ->
+                ( { efloor | undoList = undoList }, objectsChange )
+
+            Nothing ->
+                ( efloor, ObjectsChange.empty )
 
 
 redo : EditingFloor -> ( EditingFloor, ObjectsChange )
 redo efloor =
     let
-        ( undoList, objectsChange ) =
-            UndoList.redoReplace
-                ObjectsChange.empty
+        ( undoList, maybeObjectsChange ) =
+            UndoList.redoWithDiff
                 (\next current ->
-                    let
-                        objectsChange =
-                            FloorDiff.diffObjects next.objects current.objects
-                    in
-                        ( Floor.changeObjectsByChanges objectsChange current
-                        , objectsChange
-                        )
+                    FloorDiff.diffObjects next.objects current.objects
                 )
                 efloor.undoList
     in
-        ( { efloor | undoList = undoList }, objectsChange )
+        case maybeObjectsChange of
+            Just objectsChange ->
+                ( { efloor | undoList = undoList }, objectsChange )
+
+            Nothing ->
+                ( efloor, ObjectsChange.empty )
 
 
 present : EditingFloor -> Floor

@@ -89,7 +89,7 @@ type DraggingContext
     | StampFromScreenPos Position
     | ResizeFromScreenPos Id Position
     | MoveFromSearchResult Prototype String
-    | MoveExistingObjectFromSearchResult FloorId Time Prototype ObjectId
+    | MoveExistingObjectFromSearchResult FloorId Prototype ObjectId
 
 
 init :
@@ -399,7 +399,7 @@ getPositionedPrototype model =
                 in
                     [ ( prototype, fitted ) ]
 
-            ( _, MoveExistingObjectFromSearchResult floorId _ prototype _ ) ->
+            ( _, MoveExistingObjectFromSearchResult floorId prototype _ ) ->
                 let
                     fitted =
                         ObjectsOperation.fitPositionToGrid

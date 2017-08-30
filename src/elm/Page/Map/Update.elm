@@ -1385,12 +1385,11 @@ update msg model =
             }
                 ! []
 
-        StartDraggingFromExistingObject prototype objectId name personId floorId updateAt ->
+        StartDraggingFromExistingObject prototype objectId name personId floorId ->
             { model
                 | draggingContext =
                     MoveExistingObjectFromSearchResult
                         floorId
-                        updateAt
                         { prototype
                             | name = name
                             , personId = personId
@@ -1965,20 +1964,16 @@ updateOnMouseUp pos model =
                 MoveFromSearchResult prototype personId ->
                     updateOnFinishStamp model
 
-                MoveExistingObjectFromSearchResult oldFloorId updateAt _ objectId ->
+                MoveExistingObjectFromSearchResult oldFloorId _ objectId ->
                     case model.floor of
                         Just editingFloor ->
                             let
-                                ( newSeed, newFloor, newObjects_, _ ) =
+                                ( newSeed, newFloor, newObjects, _ ) =
                                     updateOnFinishStampWithoutEffects
                                         (Just objectId)
                                         (Model.getPositionedPrototype model)
                                         model
                                         editingFloor
-
-                                -- currently, only one desk is made
-                                newObjects =
-                                    List.map (Object.setUpdateAt updateAt) newObjects_
 
                                 objectsChange =
                                     ObjectsChange.modified
@@ -2120,7 +2115,6 @@ updateOnFinishStampWithoutEffects maybeObjectId prototypes model floor =
                         prototype.backgroundColor
                         prototype.name
                         prototype.fontSize
-                        Nothing
                         prototype.personId
                 )
                 candidatesWithNewIds
@@ -2148,7 +2142,6 @@ updateOnFinishPen from model =
                         color
                         name
                         Object.defaultFontSize
-                        Nothing
                         Nothing
 
                 ( newFloor, objectsChange ) =
@@ -2239,7 +2232,6 @@ updateOnPuttingLabel model =
                         bgColor
                         name
                         fontSize
-                        Nothing
                         (Object.LabelFields color False "" Object.Rectangle)
 
                 ( newFloor, objectsChange ) =

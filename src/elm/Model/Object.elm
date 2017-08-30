@@ -18,7 +18,6 @@ type Object
         , backgroundColor : String
         , name : String
         , fontSize : Float
-        , updateAt : Maybe Time
         , extension : ObjectExtension
         }
 
@@ -89,16 +88,6 @@ modify change object =
             setPerson new object
 
 
-copyUpdateAt : Object -> Object -> Object
-copyUpdateAt (Object src) (Object dest) =
-    Object { dest | updateAt = src.updateAt }
-
-
-setUpdateAt : Time -> Object -> Object
-setUpdateAt updateAt (Object object) =
-    Object { object | updateAt = Just updateAt }
-
-
 isDesk : Object -> Bool
 isDesk (Object object) =
     case object.extension of
@@ -119,8 +108,8 @@ isLabel (Object object) =
             False
 
 
-initDesk : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe Time -> Maybe PersonId -> Object
-initDesk id floorId position size backgroundColor name fontSize updateAt personId =
+initDesk : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe PersonId -> Object
+initDesk id floorId position size backgroundColor name fontSize personId =
     Object
         { id = id
         , floorId = floorId
@@ -129,13 +118,12 @@ initDesk id floorId position size backgroundColor name fontSize updateAt personI
         , backgroundColor = backgroundColor
         , name = name
         , fontSize = fontSize
-        , updateAt = updateAt
         , extension = Desk personId
         }
 
 
-initLabel : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe Time -> LabelFields -> Object
-initLabel id floorId position size backgroundColor name fontSize updateAt extension =
+initLabel : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> LabelFields -> Object
+initLabel id floorId position size backgroundColor name fontSize extension =
     Object
         { id = id
         , floorId = floorId
@@ -144,7 +132,6 @@ initLabel id floorId position size backgroundColor name fontSize updateAt extens
         , backgroundColor = backgroundColor
         , name = name
         , fontSize = fontSize
-        , updateAt = updateAt
         , extension = Label extension
         }
 
@@ -247,11 +234,6 @@ idOf (Object object) =
 floorIdOf : Object -> FloorId
 floorIdOf (Object object) =
     object.floorId
-
-
-updateAtOf : Object -> Maybe Time
-updateAtOf (Object object) =
-    object.updateAt
 
 
 nameOf : Object -> String

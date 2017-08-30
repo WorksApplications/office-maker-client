@@ -105,7 +105,7 @@ diffObjects newObjects oldObjects =
                     dict
 
                 list ->
-                    Dict.insert id (ObjectsChange.Modified { new = Object.copyUpdateAt old new, old = old, changes = list }) dict
+                    Dict.insert id (ObjectsChange.Modified { new = new, old = old, changes = list }) dict
         )
         (\id old dict -> Dict.insert id (ObjectsChange.Deleted old) dict)
         newObjects

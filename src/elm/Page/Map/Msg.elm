@@ -105,7 +105,7 @@ type Msg
     | SelectSearchResult ObjectId FloorId (Maybe PersonId)
     | CloseSearchResult
     | StartDraggingFromMissingPerson Prototype String String
-    | StartDraggingFromExistingObject Prototype Id String (Maybe String) String Time
+    | StartDraggingFromExistingObject Prototype Id String (Maybe String) String
     | CachePeople (List Person)
     | RequestCandidate Id String
     | SearchCandidateDebounceMsg Debounce.Msg

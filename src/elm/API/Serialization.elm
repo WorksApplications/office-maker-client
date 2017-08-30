@@ -61,7 +61,6 @@ encodeObject object =
         E.object
             [ ( "id", E.string (Object.idOf object) )
             , ( "floorId", E.string (Object.floorIdOf object) )
-            , ( "updateAt", Object.updateAtOf object |> Maybe.map E.float |> Maybe.withDefault E.null )
             , ( "type"
               , if Object.isDesk object then
                     E.string "desk"
@@ -327,9 +326,9 @@ decodePeopleFromProfileServiceSearch =
 decodeObject : Decoder Object
 decodeObject =
     decode
-        (\id floorId updateAt tipe x y width height backgroundColor name personId fontSize color bold url shape ->
+        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape ->
             if tipe == "desk" then
-                Object.initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize (Just updateAt) personId
+                Object.initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize personId
             else
                 Object.initLabel id
                     floorId
@@ -338,7 +337,6 @@ decodeObject =
                     backgroundColor
                     name
                     fontSize
-                    (Just updateAt)
                     (Object.LabelFields color
                         bold
                         url
@@ -351,7 +349,6 @@ decodeObject =
         )
         |> required "id" D.string
         |> required "floorId" D.string
-        |> required "updateAt" D.float
         |> optional "type" D.string "desk"
         |> required "x" D.int
         |> required "y" D.int
@@ -450,7 +447,7 @@ decodePersonWithObjects =
 decodeDesk : Decoder Object
 decodeDesk =
     decode
-        (\id floorId updateAt tipe x y width height backgroundColor name personId fontSize color bold url shape ->
+        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape ->
             if tipe == "desk" then
                 Object.initDesk
                     id
@@ -460,14 +457,12 @@ decodeDesk =
                     backgroundColor
                     name
                     fontSize
-                    (Just updateAt)
                     personId
             else
                 Debug.crash "got non-desk object."
         )
         |> required "id" D.string
         |> required "floorId" D.string
-        |> required "updateAt" D.float
         |> optional "type" D.string "desk"
         |> required "x" D.int
         |> required "y" D.int

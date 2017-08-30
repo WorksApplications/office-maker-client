@@ -1,4 +1,13 @@
-module Util.UndoList exposing (UndoList, init, undo, undoReplace, redo, redoReplace, new)
+module Util.UndoList
+    exposing
+        ( UndoList
+        , init
+        , undo
+        , undoWithDiff
+        , redo
+        , redoWithDiff
+        , new
+        )
 
 
 type alias UndoList a =
@@ -30,24 +39,20 @@ undo undoList =
             undoList
 
 
-undoReplace : b -> (a -> a -> ( a, b )) -> UndoList a -> ( UndoList a, b )
-undoReplace default f undoList =
+undoWithDiff : (a -> a -> diff) -> UndoList a -> ( UndoList a, Maybe diff )
+undoWithDiff f undoList =
     case undoList.past of
         x :: xs ->
-            let
-                ( newPresent, b ) =
-                    f x undoList.present
-            in
-                ( { undoList
-                    | past = xs
-                    , present = newPresent
-                    , future = undoList.present :: undoList.future
-                  }
-                , b
-                )
+            ( { undoList
+                | past = xs
+                , present = x
+                , future = undoList.present :: undoList.future
+              }
+            , Just (f x undoList.present)
+            )
 
         _ ->
-            ( undoList, default )
+            ( undoList, Nothing )
 
 
 redo : UndoList a -> UndoList a
@@ -64,24 +69,20 @@ redo undoList =
             undoList
 
 
-redoReplace : b -> (a -> a -> ( a, b )) -> UndoList a -> ( UndoList a, b )
-redoReplace default f undoList =
+redoWithDiff : (a -> a -> diff) -> UndoList a -> ( UndoList a, Maybe diff )
+redoWithDiff f undoList =
     case undoList.future of
         x :: xs ->
-            let
-                ( newPresent, b ) =
-                    f x undoList.present
-            in
-                ( { undoList
-                    | past = undoList.present :: undoList.past
-                    , present = newPresent
-                    , future = xs
-                  }
-                , b
-                )
+            ( { undoList
+                | past = undoList.present :: undoList.past
+                , present = x
+                , future = xs
+              }
+            , Just (f x undoList.present)
+            )
 
         _ ->
-            ( undoList, default )
+            ( undoList, Nothing )
 
 
 new : a -> UndoList a -> UndoList a

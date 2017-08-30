@@ -30,15 +30,15 @@ emptyReducedSaveRequest =
 reduceRequest : Maybe EditingFloor -> List SaveRequest -> ReducedSaveRequest
 reduceRequest maybeEditingFloor list =
     case maybeEditingFloor of
-        Just efloor ->
-            List.foldr (reduceRequestHelp efloor) emptyReducedSaveRequest list
+        Just _ ->
+            List.foldr reduceRequestHelp emptyReducedSaveRequest list
 
         Nothing ->
             emptyReducedSaveRequest
 
 
-reduceRequestHelp : EditingFloor -> SaveRequest -> ReducedSaveRequest -> ReducedSaveRequest
-reduceRequestHelp efloor req reducedSaveRequest =
+reduceRequestHelp : SaveRequest -> ReducedSaveRequest -> ReducedSaveRequest
+reduceRequestHelp req reducedSaveRequest =
     case req of
         SaveFloor floor ->
             { reducedSaveRequest
@@ -54,7 +54,6 @@ reduceRequestHelp efloor req reducedSaveRequest =
             { reducedSaveRequest
                 | objects =
                     ObjectsChange.merge
-                        (EditingFloor.present efloor).objects
                         objectsChange
                         reducedSaveRequest.objects
             }

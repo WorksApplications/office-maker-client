@@ -388,7 +388,7 @@ modifyObjects list floor =
                     (\mod dict ->
                         Dict.update
                             (Object.idOf mod.new)
-                            (Maybe.map (Object.copyUpdateAt mod.old << Object.modifyAll mod.changes))
+                            (Maybe.map (Object.modifyAll mod.changes))
                             dict
                     )
                     floor.objects
