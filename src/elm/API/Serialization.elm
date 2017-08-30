@@ -466,9 +466,12 @@ decodeDesk =
         |> optional "type" D.string "desk"
         |> required "x" D.int
         |> required "y" D.int
-        |> required "width" D.int
-        |> required "height" D.int
-        |> required "backgroundColor" D.string
+        -- TODO server should retrun
+        |> optional "width" D.int 100
+        -- TODO server should retrun
+        |> optional "height" D.int 100
+        -- TODO server should retrun
+        |> optional "backgroundColor" D.string "#fff"
         |> optional "name" D.string ""
         |> optional_ "personId" D.string
         |> optional "fontSize" D.float Object.defaultFontSize
