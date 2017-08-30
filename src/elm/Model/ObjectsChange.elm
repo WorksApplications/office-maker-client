@@ -63,7 +63,7 @@ merge currentObjects new old =
                             , old = n.old
 
                             -- TODO dedupe
-                            , changes = n.changes ++ o.changes
+                            , changes = o.changes ++ n.changes
                             }
                         )
                         dict
