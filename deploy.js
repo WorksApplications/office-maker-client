@@ -25,7 +25,7 @@ fs.readdirSync('dest/public').map(file => {
   var file = result.file;
   var body = result.body;
   var contentType;
-  if (file.endsWith('.html') || file === 'login' || file === 'master') {
+  if (file.endsWith('.html') || file === 'login' || file === 'master' || file === 'doc') {
     contentType = 'text/html'
   } else if (file.endsWith('.js')) {
     contentType = 'application/javascript'

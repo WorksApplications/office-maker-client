@@ -17,3 +17,6 @@ dest
 # work
 tmp
 test.sh
+
+# doc
+doc
