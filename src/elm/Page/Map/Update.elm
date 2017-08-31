@@ -1937,8 +1937,13 @@ submitSearch model =
 
 search : API.Config -> Bool -> Dict PersonId Person -> String -> Cmd Msg
 search apiConfig withPrivate personInfo query =
-    API.search apiConfig withPrivate query
-        |> performAPI (\( results, people ) -> GotSearchResult results people)
+    Cmd.batch
+        [ API.search apiConfig withPrivate query
+            |> performAPI (\( results, people ) -> GotSearchResult results people)
+
+        -- , API.searchObjects apiConfig withPrivate query
+        --     |> performAPI (\( results, people ) -> GotSearchResult results people)
+        ]
 
 
 updateOnMouseUp : Position -> Model -> ( Model, Cmd Msg )
