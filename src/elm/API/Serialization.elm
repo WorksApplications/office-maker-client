@@ -58,50 +58,41 @@ encodeObject object =
         { width, height } =
             Object.sizeOf object
     in
-        E.object
-            [ ( "id", E.string (Object.idOf object) )
-            , ( "floorId", E.string (Object.floorIdOf object) )
-            , ( "type"
-              , if Object.isDesk object then
-                    E.string "desk"
-                else
-                    E.null
-              )
-            , ( "x", E.int x )
-            , ( "y", E.int y )
-            , ( "width", E.int width )
-            , ( "height", E.int height )
-            , ( "backgroundColor", E.string (Object.backgroundColorOf object) )
-            , ( "color"
-              , if Object.colorOf object == Defaults.color then
-                    E.null
-                else
-                    E.string (Object.colorOf object)
-              )
-            , ( "bold"
-              , if Object.isBold object then
-                    E.bool True
-                else
-                    E.null
-              )
-            , ( "url", E.string (Object.urlOf object) )
-            , ( "shape", encodeShape (Object.shapeOf object) )
-            , ( "name", E.string (Object.nameOf object) )
-            , ( "fontSize"
-              , if Object.fontSizeOf object == Defaults.fontSize then
-                    E.null
-                else
-                    E.float (Object.fontSizeOf object)
-              )
-            , ( "personId"
-              , case Object.relatedPerson object of
+        E.object <|
+            List.concat
+                [ [ ( "id", E.string (Object.idOf object) ) ]
+                , [ ( "floorId", E.string (Object.floorIdOf object) ) ]
+                , if Object.isDesk object then
+                    [ ( "type", E.string "desk" ) ]
+                  else
+                    []
+                , [ ( "x", E.int x ) ]
+                , [ ( "y", E.int y ) ]
+                , [ ( "width", E.int width ) ]
+                , [ ( "height", E.int height ) ]
+                , [ ( "backgroundColor", E.string (Object.backgroundColorOf object) ) ]
+                , if Object.colorOf object == Defaults.color then
+                    []
+                  else
+                    [ ( "color", E.string (Object.colorOf object) ) ]
+                , if Object.isBold object then
+                    [ ( "bold", E.bool True ) ]
+                  else
+                    []
+                , [ ( "url", E.string (Object.urlOf object) ) ]
+                , [ ( "shape", encodeShape (Object.shapeOf object) ) ]
+                , [ ( "name", E.string (Object.nameOf object) ) ]
+                , if Object.fontSizeOf object == Defaults.fontSize then
+                    []
+                  else
+                    [ ( "fontSize", E.float (Object.fontSizeOf object) ) ]
+                , case Object.relatedPerson object of
                     Just personId ->
-                        E.string personId
+                        [ ( "personId", E.string personId ) ]
 
                     Nothing ->
-                        E.null
-              )
-            ]
+                        []
+                ]
 
 
 encodeShape : Shape -> Value
@@ -217,42 +208,30 @@ encodeObjectPropertyChangeProperty change =
             [ ( "fontSize", E.float new ) ]
 
         Object.ChangeBold new _ ->
-            [ ( "bold"
-              , if new then
-                    E.bool True
-                else
-                    E.null
-              )
-            ]
+            if new then
+                [ ( "bold", E.bool True ) ]
+            else
+                []
 
         Object.ChangeUrl new _ ->
-            [ ( "url"
-              , if new == "" then
-                    E.null
-                else
-                    E.string new
-              )
-            ]
+            if new == "" then
+                []
+            else
+                [ ( "url", E.string new ) ]
 
         Object.ChangeShape new _ ->
-            [ ( "shape"
-              , if new == Ellipse then
-                    E.string "ellipse"
-                else
-                    E.null
-              )
-            ]
+            if new == Ellipse then
+                [ ( "shape", E.string "ellipse" ) ]
+            else
+                []
 
         Object.ChangePerson new _ ->
-            [ ( "personId"
-              , case new of
-                    Just id ->
-                        E.string id
+            case new of
+                Just id ->
+                    [ ( "personId", E.string id ) ]
 
-                    _ ->
-                        E.null
-              )
-            ]
+                _ ->
+                    []
 
 
 encodeLogin : String -> String -> Value
