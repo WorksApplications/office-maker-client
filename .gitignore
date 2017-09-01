@@ -9,7 +9,7 @@ elm.js
 repl-temp-*
 
 # config
-config.json
+config.*json
 
 # generate
 dest
