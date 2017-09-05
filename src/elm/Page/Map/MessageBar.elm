@@ -1,21 +1,24 @@
-module View.MessageBarForMainView exposing (view)
+module Page.Map.MessageBar exposing (view)
 
 import Http
 import Html exposing (..)
 import View.MessageBar as MessageBar
 import Model.I18n as I18n exposing (Language)
-import Model.Errors exposing (GlobalError(..))
+import Model.Information exposing (Information(..))
 import API.API as API
 
 
-view : Language -> GlobalError -> Html msg
+view : Language -> Information -> Html msg
 view lang e =
     case e of
-        NoError ->
+        NoInformation ->
             MessageBar.none
 
         Success message ->
             MessageBar.success message
+
+        InProgress message ->
+            MessageBar.default message
 
         APIError e ->
             MessageBar.error (describeAPIError lang e)

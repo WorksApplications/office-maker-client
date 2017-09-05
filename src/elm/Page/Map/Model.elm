@@ -16,7 +16,7 @@ import Model.Prototype as Prototype exposing (Prototype)
 import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
-import Model.Errors as Errors exposing (GlobalError(..))
+import Model.Information as Information exposing (Information(..))
 import Model.I18n as I18n exposing (Language)
 import Model.SearchResult as SearchResult exposing (SearchResult, SearchResultsForOnePost)
 import Model.ProfilePopupLogic as ProfilePopupLogic
@@ -61,7 +61,7 @@ type alias Model =
     , prototypes : Prototypes
     , clipboardOptionsForm : ClipboardOptionsView.Form
     , cellSizePerDesk : Size
-    , error : GlobalError
+    , information : Information
     , floorProperty : FloorProperty
     , searchQuery : String
     , searchResult : Maybe (List SearchResult)
@@ -140,7 +140,7 @@ init apiConfig title initialSize randomSeed visitDate isEditMode query objectId 
         , prototypes = Prototypes.init []
         , clipboardOptionsForm = ClipboardOptionsView.init
         , cellSizePerDesk = Size 1 1
-        , error = NoError
+        , information = NoInformation
         , floorProperty = FloorProperty.init initialFloor.name 0 0 0
         , selectedResult = objectId
         , personInfo = Dict.empty

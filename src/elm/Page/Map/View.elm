@@ -6,7 +6,6 @@ import Html.Attributes exposing (..)
 import Html.Lazy as Lazy exposing (..)
 import View.Styles as S
 import View.Icons as Icons
-import View.MessageBarForMainView as MessageBar
 import View.DiffView as DiffView
 import View.Common exposing (..)
 import View.SearchInputView as SearchInputView
@@ -35,13 +34,14 @@ import Page.Map.ObjectNameInput as ObjectNameInput
 import Page.Map.ProfilePopup as ProfilePopup
 import Page.Map.PrintGuide as PrintGuide
 import Page.Map.ClipboardOptionsView as ClipboardOptionsView
+import Page.Map.MessageBar as MessageBar
 
 
 mainView : Model -> Html Msg
 mainView model =
     main_ [ style (S.mainView model.windowSize.height) ]
         [ floorInfoView model
-        , Lazy.lazy2 MessageBar.view model.lang model.error
+        , Lazy.lazy2 MessageBar.view model.lang model.information
         , CanvasView.view model
         , if Mode.isPrintMode model.mode then
             text ""

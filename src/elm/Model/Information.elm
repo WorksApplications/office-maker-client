@@ -1,14 +1,15 @@
-module Model.Errors exposing (..)
+module Model.Information exposing (..)
 
 import Dom
 import Util.File as File
 import API.API as API exposing (..)
 
 
-type GlobalError
+type Information
     = APIError API.Error
     | FileError File.Error
     | HtmlError Dom.Error
     | PasteError String
     | Success String
-    | NoError
+    | InProgress String
+    | NoInformation

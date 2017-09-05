@@ -26,7 +26,7 @@ import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
-import Model.Errors as Errors exposing (GlobalError(..))
+import Model.Information as Information exposing (Information(..))
 import Model.I18n as I18n exposing (Language(..))
 import Model.SaveRequest as SaveRequest exposing (SaveRequest(..), ReducedSaveRequest)
 import Model.EditingFloor as EditingFloor exposing (EditingFloor)
@@ -213,7 +213,7 @@ performAPI : (a -> Msg) -> Task.Task API.Error a -> Cmd Msg
 performAPI tagger task =
     task
         |> Task.map tagger
-        |> Task.onError (\e -> Task.succeed (Error (APIError e)))
+        |> Task.onError (\e -> Task.succeed (ShowInformation (APIError e)))
         |> Task.perform identity
 
 
@@ -493,11 +493,11 @@ update msg model =
         FloorPublished floor ->
             { model
                 | floor = Maybe.map (\_ -> EditingFloor.init floor) model.floor
-                , error = Success ("Successfully published " ++ floor.name)
+                , information = Success ("Successfully published " ++ floor.name)
             }
                 ! [ performAPI (FloorsInfoLoaded True) (API.getFloorsInfo model.apiConfig)
                   , Process.sleep 3000.0
-                        |> Task.perform (\_ -> Error NoError)
+                        |> Task.perform (\_ -> ShowInformation NoInformation)
                   ]
 
         FocusCanvas ->
@@ -1740,7 +1740,7 @@ update msg model =
             model
                 ! [ ImageLoader.update
                         { onFileWithDataURL = GotFileWithDataURL
-                        , onFileLoadFailed = Error << FileError
+                        , onFileLoadFailed = ShowInformation << FileError
                         }
                         msg
                   ]
@@ -1783,14 +1783,14 @@ update msg model =
                 newModel =
                     { model
                         | floor = Nothing
-                        , error = Success ("Successfully deleted " ++ floor.name)
+                        , information = Success ("Successfully deleted " ++ floor.name)
                     }
             in
                 newModel
                     ! [ API.getFloorsInfo model.apiConfig
                             |> performAPI (FloorsInfoLoaded False)
                       , Process.sleep 3000.0
-                            |> Task.perform (\_ -> Error NoError)
+                            |> Task.perform (\_ -> ShowInformation NoInformation)
                       , Navigation.modifyUrl (Model.encodeToUrl newModel)
                       ]
 
@@ -1866,14 +1866,14 @@ update msg model =
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
-        Error ((APIError (Http.BadStatus { status })) as e) ->
+        ShowInformation ((APIError (Http.BadStatus { status })) as information) ->
             if status.code == 401 then
                 model ! [ Navigation.load "./login" ]
             else
-                { model | error = e } ! []
+                { model | information = information } ! []
 
-        Error e ->
-            { model | error = e } ! []
+        ShowInformation information ->
+            { model | information = information } ! []
 
 
 andThen : (Model -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -2525,7 +2525,7 @@ batchSave apiConfig request =
                         (Cmd.batch
                             [ performAPI FloorPublished task
                             , Task.perform identity <|
-                                Task.succeed (Error (Success ("Requested publishing...")))
+                                Task.succeed (ShowInformation (InProgress ("Requested publishing...")))
                             ]
                         )
                     )

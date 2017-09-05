@@ -11,7 +11,7 @@ import Model.Prototype exposing (Prototype)
 import Model.Prototypes as Prototypes exposing (Prototypes)
 import Model.Floor as Floor exposing (Floor, FloorBase)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
-import Model.Errors as Errors exposing (GlobalError(..))
+import Model.Information as Information exposing (Information(..))
 import Model.I18n as I18n exposing (Language(..))
 import Model.SearchResult as SearchResult exposing (SearchResult)
 import Model.SaveRequest as SaveRequest exposing (SaveRequest(..))
@@ -144,4 +144,4 @@ type Msg
     | ExpandOrShrinkToward Direction
     | Print
     | FlipFloor
-    | Error GlobalError
+    | ShowInformation Information

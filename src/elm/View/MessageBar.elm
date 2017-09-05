@@ -10,6 +10,11 @@ none =
     div [ style Styles.noneBar ] []
 
 
+default : String -> Html msg
+default msg =
+    div [ style Styles.successBar ] [ text msg ]
+
+
 success : String -> Html msg
 success msg =
     div [ style Styles.successBar ] [ text msg ]
