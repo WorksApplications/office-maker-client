@@ -2520,7 +2520,15 @@ batchSave apiConfig request =
         publishFloorCmd =
             request.publish
                 |> Maybe.map (API.publishFloor apiConfig)
-                |> Maybe.map (performAPI FloorPublished)
+                |> Maybe.map
+                    (\task ->
+                        (Cmd.batch
+                            [ performAPI FloorPublished task
+                            , Task.perform identity <|
+                                Task.succeed (Error (Success ("Requested publishing...")))
+                            ]
+                        )
+                    )
                 |> Maybe.withDefault Cmd.none
 
         saveFloorCmd =
