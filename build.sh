@@ -11,6 +11,7 @@ elm-make src/elm/Page/Master/Main.elm --output=dest/public/master.js --warn $1 &
 cp -f src/style.css dest/public
 cp -f doc/index.html doc/doc
 mv doc/doc dest/public
+cp -f doc/manual.pdf dest/public
 
 # generate html
 node generate-html
