@@ -16,7 +16,10 @@ fs.readdirSync('dest/public').map(file => {
     name: file,
     timestamp: parseInt(Date.now() / 1000, 10)
   };
-  var body = gzip.zip(fs.readFileSync(__dirname + '/dest/public/' + file), options);
+  var body = fs.readFileSync(__dirname + '/dest/public/' + file);
+  if (!file.endsWith('.pdf')) {
+    body = gzip.zip(body, options);
+  }
   return {
     file: file,
     body: new Buffer(body)
@@ -26,18 +29,27 @@ fs.readdirSync('dest/public').map(file => {
   var body = result.body;
   var contentType;
   if (file.endsWith('.html') || file === 'login' || file === 'master' || file === 'doc') {
-    contentType = 'text/html'
+    contentType = 'text/html';
   } else if (file.endsWith('.js')) {
-    contentType = 'application/javascript'
+    contentType = 'application/javascript';
   } else if (file.endsWith('.css')) {
-    contentType = 'text/css'
+    contentType = 'text/css';
+  } else if (file.endsWith('.pdf')) {
+    contentType = 'application/pdf';
+  }
+
+  var contentEncoding;
+  if (!file.endsWith('.pdf')) {
+    contentEncoding = 'gzip';
+  } else {
+    contentEncoding = undefined;
   }
   return {
     Bucket: config.s3Bucket,
     Key: file,
     Body: body,
     ContentType: contentType,
-    ContentEncoding: 'gzip'
+    ContentEncoding: contentEncoding
   };
 }).map(options => {
   return upload(options);
