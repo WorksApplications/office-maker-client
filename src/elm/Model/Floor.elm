@@ -14,6 +14,7 @@ type alias FloorBase =
     , temporary : Bool
     , name : String
     , ord : Int
+    , update : Maybe { by : PersonId, at : Date }
     }
 
 
@@ -24,7 +25,6 @@ type alias Detailed a =
         , realSize : Maybe ( Int, Int )
         , image : Maybe String
         , flipImage : Bool
-        , update : Maybe { by : PersonId, at : Date }
         , objects : Dict ObjectId Object
     }
 
@@ -55,8 +55,8 @@ empty =
 
 
 baseOf : Floor -> FloorBase
-baseOf { id, temporary, name, ord } =
-    FloorBase id temporary name ord
+baseOf { id, temporary, name, ord, update } =
+    FloorBase id temporary name ord update
 
 
 initWithOrder : FloorId -> Int -> Floor

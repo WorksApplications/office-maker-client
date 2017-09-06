@@ -1,4 +1,21 @@
-module Model.FloorInfo exposing (..)
+module Model.FloorInfo
+    exposing
+        ( FloorInfo
+        , init
+        , isNeverPublished
+        , idOf
+        , publicFloor
+        , editingFloor
+        , findPublicFloor
+        , findFloor
+        , mergeEditingFloor
+        , mergePublicFloor
+        , toValues
+        , toPublicList
+        , toEditingList
+        , intToOrd
+        , sortByPublicOrder
+        )
 
 import Dict exposing (Dict)
 import CoreType exposing (..)
@@ -52,18 +69,25 @@ findFloor floorId floorsInfo =
         |> Dict.get floorId
 
 
-mergeFloor : FloorBase -> Dict FloorId FloorInfo -> Dict FloorId FloorInfo
-mergeFloor editingFloor floorsInfo =
+mergeEditingFloor : FloorBase -> Dict FloorId FloorInfo -> Dict FloorId FloorInfo
+mergeEditingFloor editingFloor floorsInfo =
     floorsInfo
-        |> Dict.update editingFloor.id (Maybe.map (mergeFloorHelp editingFloor))
+        |> Dict.update editingFloor.id (Maybe.map (setEditingFloor editingFloor))
 
 
-mergeFloorHelp : FloorBase -> FloorInfo -> FloorInfo
-mergeFloorHelp floor (FloorInfo publicFloor editingFloor) =
-    -- TODO now version is always 0...
-    -- if floor.version < 0 then
-    --     FloorInfo publicFloor floor
-    -- else
+mergePublicFloor : FloorBase -> Dict FloorId FloorInfo -> Dict FloorId FloorInfo
+mergePublicFloor publicFloor floorsInfo =
+    floorsInfo
+        |> Dict.update publicFloor.id (Maybe.map (setPublicFloor publicFloor))
+
+
+setEditingFloor : FloorBase -> FloorInfo -> FloorInfo
+setEditingFloor floor (FloorInfo publicFloor editingFloor) =
+    FloorInfo publicFloor floor
+
+
+setPublicFloor : FloorBase -> FloorInfo -> FloorInfo
+setPublicFloor floor (FloorInfo publicFloor editingFloor) =
     FloorInfo (Just floor) editingFloor
 
 

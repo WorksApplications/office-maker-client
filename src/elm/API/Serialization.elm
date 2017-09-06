@@ -495,11 +495,17 @@ decodeFloor =
 
 decodeFloorBase : Decoder FloorBase
 decodeFloorBase =
-    decode FloorBase
+    decode
+        (\id temporary name ord updateBy updateAt ->
+            FloorBase id temporary name ord <|
+                Maybe.map2 (\by at -> { by = by, at = Date.fromTime at }) updateBy updateAt
+        )
         |> required "id" D.string
         |> required "temporary" D.bool
         |> required "name" D.string
         |> required "ord" D.int
+        |> optional_ "updateBy" D.string
+        |> optional_ "updateAt" D.float
 
 
 decodeFloorInfo : Decoder FloorInfo

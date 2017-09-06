@@ -486,7 +486,7 @@ update msg model =
 
         FloorSaved floorBase ->
             { model
-                | floorsInfo = FloorInfo.mergeFloor floorBase model.floorsInfo
+                | floorsInfo = FloorInfo.mergePublicFloor floorBase model.floorsInfo
             }
                 ! []
 
@@ -2290,7 +2290,7 @@ updateOnFloorLoaded maybeFloor model =
                                 |> Maybe.withDefault Cmd.none
                 in
                     { model
-                        | floorsInfo = FloorInfo.mergeFloor (Floor.baseOf floor) model.floorsInfo
+                        | floorsInfo = FloorInfo.mergeEditingFloor (Floor.baseOf floor) model.floorsInfo
                         , floor = Just (EditingFloor.init floor)
                         , floorProperty = FloorProperty.init floor.name realWidth realHeight floor.ord
                     }
