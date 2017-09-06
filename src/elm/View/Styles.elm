@@ -946,6 +946,14 @@ successBar =
            ]
 
 
+defaultBar : S
+defaultBar =
+    messageBar
+        ++ [ ( "background-color", "#bbb" )
+           , ( "opacity", "1" )
+           ]
+
+
 errorBar : S
 errorBar =
     messageBar

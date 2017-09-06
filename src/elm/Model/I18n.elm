@@ -158,6 +158,26 @@ missing lang =
 ----
 
 
+publishingInProgressPreaseWaitForSeconds : Language -> String -> String
+publishingInProgressPreaseWaitForSeconds lang floorName =
+    case lang of
+        JA ->
+            "フロアの公開中。しばらくお待ちください "
+
+        EN ->
+            "Publishing in progress. Please wait for seconds "
+
+
+successfullyPublished : Language -> String -> String
+successfullyPublished lang floorName =
+    case lang of
+        JA ->
+            "フロアを公開が完了しました: " ++ floorName
+
+        EN ->
+            "Successfully published: " ++ floorName
+
+
 unexpectedFileError : Language -> String
 unexpectedFileError lang =
     case lang of

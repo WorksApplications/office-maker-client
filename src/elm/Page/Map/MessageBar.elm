@@ -17,8 +17,11 @@ view lang e =
         Success message ->
             MessageBar.success message
 
-        InProgress message ->
-            MessageBar.default message
+        PublishInProgress floorName ->
+            MessageBar.default (I18n.publishingInProgressPreaseWaitForSeconds lang floorName)
+
+        PublishedFloor floorName ->
+            MessageBar.success (I18n.successfullyPublished lang floorName)
 
         APIError e ->
             MessageBar.error (describeAPIError lang e)

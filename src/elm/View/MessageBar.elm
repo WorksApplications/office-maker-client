@@ -12,7 +12,7 @@ none =
 
 default : String -> Html msg
 default msg =
-    div [ style Styles.successBar ] [ text msg ]
+    div [ style Styles.defaultBar ] [ text msg ]
 
 
 success : String -> Html msg

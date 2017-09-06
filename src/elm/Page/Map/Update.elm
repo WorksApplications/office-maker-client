@@ -493,10 +493,10 @@ update msg model =
         FloorPublished floor ->
             { model
                 | floor = Maybe.map (\_ -> EditingFloor.init floor) model.floor
-                , information = Success ("Successfully published " ++ floor.name)
+                , information = PublishedFloor floor.name
             }
                 ! [ performAPI (FloorsInfoLoaded True) (API.getFloorsInfo model.apiConfig)
-                  , Process.sleep 3000.0
+                  , Process.sleep 4000.0
                         |> Task.perform (\_ -> ShowInformation NoInformation)
                   ]
 
@@ -2525,7 +2525,7 @@ batchSave apiConfig request =
                         (Cmd.batch
                             [ performAPI FloorPublished task
                             , Task.perform identity <|
-                                Task.succeed (ShowInformation (InProgress ("Requested publishing...")))
+                                Task.succeed (ShowInformation (PublishInProgress ""))
                             ]
                         )
                     )
