@@ -61,7 +61,7 @@ $ google-chrome http://localhost:3000 --disable-web-security --user-data-dir=/tm
 ## Deploy
 
 ```
-$ node deploy
+$ sh deploy.sh
 ```
 
 
@@ -75,6 +75,7 @@ Edit `config.json`. Bold properties are essential to work with various environme
 |**accountServiceRoot**|URL of account service. http://xxx.xxx.xx.xx/accounts/api |
 |**profileServiceRoot**|URL of profile service. http://xxx.xxx.xx.xx/profiles/api |
 |**apiRoot**|URL of api server. http://xxx.xxx.xx.xx/api |
+|**cacheRoot**|URL of api cache server. http://xxx.xxx.xx.xx/cache |
 |**imageRoot**|Uploaded images are downloaded from this URL. http://xxx.xxx.xx.xx/images |
 |**region**|S3 region you want to deploy static files to. |
 |**s3Bucket**|S3 bucket you want to deploy static files to. |
