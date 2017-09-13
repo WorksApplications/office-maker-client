@@ -10,7 +10,6 @@ module API.API
         , deleteEditingFloor
         , getEditingFloor
         , getFloor
-        , getFloorOfVersion
         , getFloorsInfo
         , saveEditingImage
         , login
@@ -122,26 +121,16 @@ getEditingFloor : Config -> FloorId -> Task Error Floor
 getEditingFloor config floorId =
     getWithoutCache
         decodeFloor
-        (makeUrl (config.apiRoot ++ "/floors/" ++ floorId) [ ( "all", "true" ) ])
+        (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/edit") [])
         [ authorization config.token ]
 
 
 getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
-    getWithoutCache
-        decodeFloor
-        (config.cacheRoot ++ "/floors/" ++ floorId)
-        [ authorization config.token ]
-
-
-getFloorOfVersion : Config -> FloorId -> Int -> Task Error Floor
-getFloorOfVersion config floorId version =
     get
         decodeFloor
-        (makeUrl
-            (config.apiRoot ++ "/floors/" ++ floorId ++ "/" ++ toString version)
-            []
-        )
+        (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/public") [])
+        -- (config.cacheRoot ++ "/floors/" ++ floorId)
         [ authorization config.token ]
 
 
