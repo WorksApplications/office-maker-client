@@ -3,7 +3,7 @@ module API.API
         ( getAuth
         , search
         , searchObjects
-        , saveFloor
+        , saveEditingFloor
         , getObject
         , saveObjects
         , publishFloor
@@ -91,11 +91,11 @@ saveObjects config changes =
         (Http.jsonBody <| encodeObjectsChange changes)
 
 
-saveFloor : Config -> Floor -> Task Error FloorBase
-saveFloor config floor =
+saveEditingFloor : Config -> Floor -> Task Error FloorBase
+saveEditingFloor config floor =
     putJson
         decodeFloorBase
-        (config.apiRoot ++ "/floors/" ++ floor.id)
+        (config.apiRoot ++ "/floors/" ++ floor.id ++ "/edit")
         [ authorization config.token ]
         (Http.jsonBody <| encodeFloor floor)
 
@@ -112,7 +112,7 @@ publishFloor config floorId =
 deleteEditingFloor : Config -> FloorId -> Task Error ()
 deleteEditingFloor config floorId =
     deleteJsonNoResponse
-        (config.apiRoot ++ "/floors/" ++ floorId)
+        (config.apiRoot ++ "/floors/" ++ floorId ++ "/edit")
         [ authorization config.token ]
         Http.emptyBody
 

@@ -1503,7 +1503,7 @@ update msg model =
                     Floor.initWithOrder newFloorId lastFloorOrder
 
                 cmd =
-                    API.saveFloor model.apiConfig newFloor
+                    API.saveEditingFloor model.apiConfig newFloor
                         |> Task.andThen (\_ -> API.getFloorsInfo model.apiConfig)
                         |> performAPI (FloorsInfoLoaded True)
 
@@ -1552,7 +1552,7 @@ update msg model =
                                     |> EditingFloor.updateObjects (Floor.addObjects newObjects)
 
                             saveAndLoadNewFloorCmd =
-                                API.saveFloor model.apiConfig newFloor
+                                API.saveEditingFloor model.apiConfig newFloor
                                     |> Task.andThen (\_ -> API.saveObjects model.apiConfig (Dict.values objectsChange))
                                     |> Task.andThen (\_ -> API.getFloorsInfo model.apiConfig)
                                     |> performAPI (FloorsInfoLoaded True)
@@ -2533,7 +2533,7 @@ batchSave apiConfig request =
 
         saveFloorCmd =
             request.floor
-                |> Maybe.map (API.saveFloor apiConfig)
+                |> Maybe.map (API.saveEditingFloor apiConfig)
                 |> Maybe.map (performAPI FloorSaved)
                 |> Maybe.withDefault Cmd.none
 
