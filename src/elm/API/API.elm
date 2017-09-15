@@ -129,9 +129,10 @@ getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
     get
         decodeFloor
-        (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/public") [])
-        -- (config.cacheRoot ++ "/floors/" ++ floorId)
-        [ authorization config.token ]
+        -- (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/public") [])
+        (config.cacheRoot ++ "/floors/" ++ floorId)
+        -- [ authorization config.token ]
+        []
 
 
 getFloorMaybe : Config -> String -> Task Error (Maybe Floor)
