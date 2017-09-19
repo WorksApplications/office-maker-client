@@ -145,3 +145,4 @@ type Msg
     | Print
     | FlipFloor
     | ShowInformation Information
+    | GotNewToken (Maybe String)

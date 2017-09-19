@@ -188,6 +188,8 @@ initCmd apiConfig needsEditMode defaultUserState selectedFloor =
             |> performAPI (UserLoaded needsEditMode)
         , Cache.getWithDefault Cache.cache defaultUserState
             |> performAPI (\userState -> Initialize needsEditMode selectedFloor userState)
+        , API.sustainToken apiConfig
+            |> performAPI GotNewToken
         ]
 
 
@@ -236,6 +238,14 @@ update msg model =
     case debugMsg msg of
         NoOp ->
             model ! []
+
+        GotNewToken maybeToken ->
+            case maybeToken of
+                Just token ->
+                    model ! []
+
+                Nothing ->
+                    model ! []
 
         UrlUpdate result ->
             case result of

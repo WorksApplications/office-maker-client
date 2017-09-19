@@ -1,6 +1,7 @@
 module API.API
     exposing
-        ( getAuth
+        ( sustainToken
+        , getAuth
         , search
         , searchObjects
         , saveEditingFloor
@@ -70,6 +71,25 @@ type alias Config =
 authorization : String -> Http.Header
 authorization token =
     HttpUtil.authorization ("Bearer " ++ token)
+
+
+sustainToken : Config -> Task Error (Maybe String)
+sustainToken config =
+    get decodeNewToken
+        (makeUrl
+            (config.profileServiceRoot ++ "/sustain")
+            []
+        )
+        [ authorization config.token ]
+        |> Task.map Just
+        |> Task.onError
+            (\e ->
+                let
+                    _ =
+                        Debug.log "sustainTokenError" e
+                in
+                    Task.succeed Nothing
+            )
 
 
 getObject : Config -> ObjectId -> Task Error (Maybe Object)

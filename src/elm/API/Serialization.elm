@@ -24,6 +24,11 @@ decodeAuthToken =
     D.field "accessToken" D.string
 
 
+decodeNewToken : Decoder String
+decodeNewToken =
+    D.field "token" D.string
+
+
 decodeColors : Decoder ColorPalette
 decodeColors =
     D.map makeColorPalette (D.list decodeColorEntity)
