@@ -92,6 +92,7 @@ subViewForEdit model editingMode =
                 Just editingFloor ->
                     FloorProperty.view
                         FloorPropertyMsg
+                        model.apiConfig.imageRoot
                         model.lang
                         model.user
                         (EditingFloor.present editingFloor)

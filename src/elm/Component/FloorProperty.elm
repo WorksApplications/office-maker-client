@@ -235,9 +235,9 @@ widthOrHeightValueView toMsg forEdit value =
         div [ style Styles.floorPropertyText ] [ text value ]
 
 
-view : (Msg -> msg) -> Language -> User -> Floor -> FloorProperty -> msg -> Html msg -> Html msg -> Html msg -> Html msg -> List (Html msg)
-view transform lang user floor model flipMsg floorLoadButton publishButton deleteButton deleteDialog =
-    [ Lazy.lazy3 imageView lang floor floorLoadButton
+view : (Msg -> msg) -> String -> Language -> User -> Floor -> FloorProperty -> msg -> Html msg -> Html msg -> Html msg -> Html msg -> List (Html msg)
+view transform imageRoot lang user floor model flipMsg floorLoadButton publishButton deleteButton deleteDialog =
+    [ imageView imageRoot lang floor floorLoadButton
     , Lazy.lazy3 floorNameInputView lang user model |> Html.map transform
     , if floor.temporary then
         text ""
@@ -265,8 +265,8 @@ flipButton lang msg =
     div [ onClick msg, style Styles.flipButton ] [ text (I18n.flipFloor lang) ]
 
 
-imageView : Language -> Floor -> Html msg -> Html msg
-imageView lang floor floorLoadButton =
+imageView : String -> Language -> Floor -> Html msg -> Html msg
+imageView imageRoot lang floor floorLoadButton =
     div
         [ style [ ( "display", "flex" ) ] ]
         [ floorLoadButton
@@ -274,7 +274,7 @@ imageView lang floor floorLoadButton =
             |> Maybe.map
                 (\path ->
                     a
-                        [ href ("./images/floors/" ++ path)
+                        [ href (imageRoot ++ "/floors/" ++ path)
                         , attribute "download" (floor.name ++ ".png")
                         , style Styles.imageDownloadButton
                         ]
