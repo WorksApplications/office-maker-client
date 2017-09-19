@@ -100,7 +100,7 @@ personView : Maybe Msg -> String -> Person -> List (Html Msg)
 personView maybeCloseMsg objectId person =
     let
         url =
-            Maybe.withDefault "./images/users/default.png" person.image
+            Maybe.withDefault "./default-user.png" person.image
 
         closeButton =
             case maybeCloseMsg of

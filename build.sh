@@ -12,6 +12,7 @@ cp -f src/style.css dest/public
 cp -f doc/index.html doc/doc
 mv doc/doc dest/public
 cp -f doc/manual.pdf dest/public
+cp -f images/default-user.png dest/public
 
 # generate html
 node generate-html

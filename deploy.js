@@ -36,6 +36,8 @@ fs.readdirSync('dest/public').map(file => {
     contentType = 'text/css';
   } else if (file.endsWith('.pdf')) {
     contentType = 'application/pdf';
+  } else if (file.endsWith('.png')) {
+    contentType = 'image/png';
   }
 
   var contentEncoding;
