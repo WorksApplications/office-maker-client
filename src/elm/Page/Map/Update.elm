@@ -35,6 +35,7 @@ import Model.SearchResult as SearchResult
 import API.API as API
 import API.Page as Page
 import API.Cache as Cache exposing (Cache, UserState)
+import API.Cache2 as Cache2
 import Component.FloorProperty as FloorProperty
 import Component.Header as Header
 import Component.ImageLoader as ImageLoader
@@ -242,7 +243,15 @@ update msg model =
         GotNewToken maybeToken ->
             case maybeToken of
                 Just token ->
-                    model ! []
+                    let
+                        apiConfig =
+                            model.apiConfig
+                    in
+                        { model
+                            | apiConfig =
+                                { apiConfig | token = token }
+                        }
+                            ! [ Cache2.saveToken token ]
 
                 Nothing ->
                     model ! []

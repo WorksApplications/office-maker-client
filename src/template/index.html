@@ -65,6 +65,9 @@
 			localStorage.removeItem('authToken', token);
 			main.ports.tokenRemoved.send();
 		});
+		main.ports.saveToken.subscribe(function(token) {
+			localStorage.setItem('authToken', token);
+		});
 		main.ports.setSelectionStart.subscribe(function() {
 			var input = document.getElementById('name-input');
 			if (input) {
