@@ -65,9 +65,6 @@
 			localStorage.removeItem('authToken', token);
 			main.ports.tokenRemoved.send();
 		});
-		main.ports.saveToken.subscribe(function(token) {
-			localStorage.setItem('authToken', token);
-		});
 		main.ports.setSelectionStart.subscribe(function() {
 			var input = document.getElementById('name-input');
 			if (input) {
@@ -88,6 +85,10 @@
 		main.ports.print.subscribe(function(s) {
 			window.print();
 		});
+		main.ports.saveToken.subscribe(function(token) {
+			localStorage.setItem('authToken', token);
+		});
+		
 		setTimeout(function() {
 			document.getElementById('blink-style').innerHTML = '';
 		}, 1400);
