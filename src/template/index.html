@@ -13,8 +13,12 @@
 </head>
 
 <body>
+	<style id="debug-style"></style>
 	<input id="paste" hidden>
 	<script>
+	  if(location.host.indexOf('-dev') > 0) {
+			document.getElementById('debug-style').innerHTML = 'header { background-color: #8a6 !important; }';
+		}
 		var lang =
 			window.navigator.language ||
 			window.navigator.userLanguage ||
@@ -88,7 +92,7 @@
 		main.ports.saveToken.subscribe(function(token) {
 			localStorage.setItem('authToken', token);
 		});
-		
+
 		setTimeout(function() {
 			document.getElementById('blink-style').innerHTML = '';
 		}, 1400);
