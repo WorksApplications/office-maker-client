@@ -3,7 +3,7 @@
   "accountServiceRoot": "http://localhost/accounts/api",
   "profileServiceRoot": "http://localhost/profiles/api",
   "apiRoot": "http://localhost/api",
-  "cacheRoot": "not used for now",
+  "cacheRoot": "http://localhost/cache",
   "imageRoot": "http://localhost/images",
   "region": "",
   "s3Bucket": ""
