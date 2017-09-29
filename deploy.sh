@@ -1,3 +1,5 @@
+set -eu
+
 cat config.json
 echo "okay? [yes/no]"
 
@@ -7,4 +9,5 @@ if test "$answer" != "yes" ; then
     exit 1
 fi
 
-sh build.sh && node deploy
+sh build.sh $env
+node deploy
