@@ -9,5 +9,5 @@ if test "$answer" != "yes" ; then
     exit 1
 fi
 
-sh build.sh $env
+sh build.sh
 node deploy
