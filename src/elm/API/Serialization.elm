@@ -189,7 +189,7 @@ encodeObjectPropertyChange objectId floorId changes =
 
 encodeObjectPropertyChangeProperty : ObjectPropertyChange -> List ( String, Value )
 encodeObjectPropertyChangeProperty change =
-    case change of
+    case Debug.log "change" change of
         Object.ChangeName new _ ->
             [ ( "name", E.string new ) ]
 
@@ -230,13 +230,19 @@ encodeObjectPropertyChangeProperty change =
             else
                 []
 
-        Object.ChangePerson new _ ->
-            case new of
-                Just id ->
-                    [ ( "personId", E.string id ) ]
+        Object.ChangePerson new old ->
+            if new == old then
+                []
+            else
+                [ ( "personId"
+                  , case new of
+                        Just id ->
+                            E.string id
 
-                _ ->
-                    []
+                        Nothing ->
+                            E.null
+                  )
+                ]
 
 
 encodeLogin : String -> String -> Value
