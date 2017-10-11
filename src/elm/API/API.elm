@@ -147,7 +147,7 @@ getEditingFloor config floorId =
 
 getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
-    get
+    getWithoutCache
         decodeFloor
         -- (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/public") [])
         (config.cacheRoot ++ "/floors/" ++ floorId)
