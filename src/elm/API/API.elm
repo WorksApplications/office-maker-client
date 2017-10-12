@@ -44,7 +44,7 @@ import Model.SearchResult exposing (SearchResult)
 import Model.ColorPalette exposing (ColorPalette)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectChange)
 import API.Serialization exposing (..)
-import Json.Decode
+import Json.Decode exposing (Decoder)
 import Dict
 
 
@@ -86,11 +86,7 @@ sustainToken config =
         |> Task.map Just
         |> Task.onError
             (\e ->
-                let
-                    _ =
-                        Debug.log "sustainTokenError" e
-                in
-                    Task.succeed Nothing
+                Task.succeed Nothing
             )
 
 
@@ -149,9 +145,14 @@ getEditingFloor config floorId =
 
 getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
+    handle304 decodeFloor (config.cacheRoot ++ "/floors/" ++ floorId)
+
+
+handle304 : Decoder a -> String -> Task Http.Error a
+handle304 decoder url =
     { method = "GET"
     , headers = []
-    , url = config.cacheRoot ++ "/floors/" ++ floorId
+    , url = url
     , body = Http.emptyBody
     , expect =
         Http.expectStringResponse
@@ -171,21 +172,26 @@ getFloor config floorId =
                 let
                     lastModified =
                         Dict.get "Last-Modified" headers
-                            |> Maybe.withDefault "Thu, 01 Jun 1970 00:00:00 GMT"
+                            |> Maybe.withDefault
+                                (Dict.get
+                                    "last-modified"
+                                    headers
+                                    |> Maybe.withDefault "Thu, 01 Jun 1970 00:00:00 GMT"
+                                )
                 in
                     getWithIfModifiedSince
                         lastModified
-                        decodeFloor
-                        (config.cacheRoot ++ "/floors/" ++ floorId)
+                        decoder
+                        url
                         []
                         |> Task.onError
                             (\e ->
                                 case e of
                                     Http.BadStatus res ->
                                         if res.status.code == 304 then
-                                            case Json.Decode.decodeString decodeFloor stringBody of
-                                                Ok floor ->
-                                                    Task.succeed floor
+                                            case Json.Decode.decodeString decoder stringBody of
+                                                Ok a ->
+                                                    Task.succeed a
 
                                                 Err err ->
                                                     Task.fail e
