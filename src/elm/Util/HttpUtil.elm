@@ -86,16 +86,22 @@ get decoder url headers =
 
 
 getWithoutCache : Decoder value -> String -> List Header -> Task Http.Error value
-getWithoutCache decoder url headers =
-    let
-        headers_ =
-            [ Http.header "Pragma" "no-cache"
-            , Http.header "Cache-Control" "no-cache"
-            , Http.header "If-Modified-Since" "Thu, 01 Jun 1970 00:00:00 GMT"
-            ]
-                ++ headers
-    in
-        get decoder url headers_
+getWithoutCache =
+    wrapGet
+        [ Http.header "Pragma" "no-cache"
+        , Http.header "Cache-Control" "no-cache"
+        , Http.header "If-Modified-Since" "Thu, 01 Jun 1970 00:00:00 GMT"
+        ]
+
+
+getWithIfModifiedSince : String -> Decoder value -> String -> List Header -> Task Http.Error value
+getWithIfModifiedSince ifModifiedSince =
+    wrapGet [ Http.header "If-Modified-Since" ifModifiedSince ]
+
+
+wrapGet : List Header -> Decoder value -> String -> List Header -> Task Http.Error value
+wrapGet additionalHeader decoder url headers =
+    get decoder url (additionalHeader ++ headers)
 
 
 postJson : Decoder value -> String -> List Header -> Http.Body -> Task Http.Error value

@@ -44,6 +44,8 @@ import Model.SearchResult exposing (SearchResult)
 import Model.ColorPalette exposing (ColorPalette)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectChange)
 import API.Serialization exposing (..)
+import Json.Decode
+import Dict
 
 
 type alias ImageId =
@@ -147,12 +149,53 @@ getEditingFloor config floorId =
 
 getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
-    getWithoutCache
-        decodeFloor
-        -- (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/public") [])
-        (config.cacheRoot ++ "/floors/" ++ floorId)
-        -- [ authorization config.token ]
-        []
+    { method = "GET"
+    , headers = []
+    , url = config.cacheRoot ++ "/floors/" ++ floorId
+    , body = Http.emptyBody
+    , expect =
+        Http.expectStringResponse
+            (\res ->
+                if res.status.code < 300 then
+                    Ok ( res.headers, res.body )
+                else
+                    Err res.status.message
+            )
+    , timeout = Nothing
+    , withCredentials = True
+    }
+        |> Http.request
+        |> Http.toTask
+        |> Task.andThen
+            (\( headers, stringBody ) ->
+                let
+                    lastModified =
+                        Dict.get "Last-Modified" headers
+                            |> Maybe.withDefault "Thu, 01 Jun 1970 00:00:00 GMT"
+                in
+                    getWithIfModifiedSince
+                        lastModified
+                        decodeFloor
+                        (config.cacheRoot ++ "/floors/" ++ floorId)
+                        []
+                        |> Task.onError
+                            (\e ->
+                                case e of
+                                    Http.BadStatus res ->
+                                        if res.status.code == 304 then
+                                            case Json.Decode.decodeString decodeFloor stringBody of
+                                                Ok floor ->
+                                                    Task.succeed floor
+
+                                                Err err ->
+                                                    Task.fail e
+                                        else
+                                            Task.fail e
+
+                                    e ->
+                                        Task.fail e
+                            )
+            )
 
 
 getFloorMaybe : Config -> String -> Task Error (Maybe Floor)

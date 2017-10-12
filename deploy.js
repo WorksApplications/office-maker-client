@@ -12,7 +12,7 @@ var s3 = new AWS.S3({
 
 fs.readdirSync('dest/public').map(file => {
   var options = {
-    level: 3,
+    level: 6,
     name: file,
     timestamp: parseInt(Date.now() / 1000, 10)
   };
