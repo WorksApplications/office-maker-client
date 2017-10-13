@@ -151,67 +151,6 @@ getFloor config floorId =
         []
 
 
-getFloor_ : Config -> FloorId -> Task Error Floor
-getFloor_ config floorId =
-    handle304 decodeFloor (config.cacheRoot ++ "/floors/" ++ floorId)
-
-
-handle304 : Decoder a -> String -> Task Http.Error a
-handle304 decoder url =
-    { method = "GET"
-    , headers = []
-    , url = url
-    , body = Http.emptyBody
-    , expect =
-        Http.expectStringResponse
-            (\res ->
-                if res.status.code < 300 then
-                    Ok ( res.headers, res.body )
-                else
-                    Err res.status.message
-            )
-    , timeout = Nothing
-    , withCredentials = True
-    }
-        |> Http.request
-        |> Http.toTask
-        |> Task.andThen
-            (\( headers, stringBody ) ->
-                let
-                    lastModified =
-                        Dict.get "Last-Modified" headers
-                            |> Maybe.withDefault
-                                (Dict.get
-                                    "last-modified"
-                                    headers
-                                    |> Maybe.withDefault "Thu, 01 Jun 1970 00:00:00 GMT"
-                                )
-                in
-                    getWithIfModifiedSince
-                        lastModified
-                        decoder
-                        url
-                        []
-                        |> Task.onError
-                            (\e ->
-                                case e of
-                                    Http.BadStatus res ->
-                                        if res.status.code == 304 then
-                                            case Json.Decode.decodeString decoder stringBody of
-                                                Ok a ->
-                                                    Task.succeed a
-
-                                                Err err ->
-                                                    Task.fail e
-                                        else
-                                            Task.fail e
-
-                                    e ->
-                                        Task.fail e
-                            )
-            )
-
-
 getFloorMaybe : Config -> String -> Task Error (Maybe Floor)
 getFloorMaybe config id =
     getFloor config id
