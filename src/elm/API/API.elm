@@ -145,6 +145,14 @@ getEditingFloor config floorId =
 
 getFloor : Config -> FloorId -> Task Error Floor
 getFloor config floorId =
+    getWithoutCache
+        decodeFloor
+        (config.cacheRoot ++ "/floors/" ++ floorId)
+        []
+
+
+getFloor_ : Config -> FloorId -> Task Error Floor
+getFloor_ config floorId =
     handle304 decodeFloor (config.cacheRoot ++ "/floors/" ++ floorId)
 
 
