@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 const AWS = require('aws-sdk');
-const configJsonPath = path.resolve(__dirname, './config.json');
-const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
 const gzip = require('gzip-js');
+
+const env = process.argv[2];
+const configJsonPath = path.resolve(__dirname, `./config.${env}.json`);
+const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
 
 var s3 = new AWS.S3({
   apiVersion: '2006-03-01',

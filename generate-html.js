@@ -1,6 +1,8 @@
 const fs = require('fs');
 const ejs = require('ejs');
-const configJsonPath = __dirname + '/config.json';
+
+const env = process.argv[2];
+const configJsonPath = __dirname + `/config.${env}.json`;
 const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
 
 const publicDir = __dirname + '/dest/public';

@@ -24,13 +24,15 @@ Client implementation for Office Maker.
 ```
 $ elm-package install
 $ npm install
-$ cp defaultConfig.json config.json
+$ cp defaultConfig.json config.dev.json
 ```
+
+`config.${env}.json` is configuration for `dev` environment.
 
 ## Build
 
 ```
-$ sh build.sh
+$ sh build.sh ${env}
 ```
 
 - convert Elm code into JavaScript
@@ -44,7 +46,7 @@ $ sh build.sh
 $ node watch
 ```
 
-This automatically runs `build.sh` if any file is changed. It also run static server on `http://localhost:3000`.
+This automatically runs `sh build.sh dev` if any file is changed. It also run static server on `http://localhost:3000`.
 
 **Note:** You might need to disable CORS if server returns specific `Access-Control-Allow-Origin`.
 
@@ -61,13 +63,12 @@ $ google-chrome http://localhost:3000 --disable-web-security --user-data-dir=/tm
 ## Deploy
 
 ```
-$ sh deploy.sh
+$ sh deploy.sh ${env}
 ```
-
 
 ## Configuration
 
-Edit `config.json`. Bold properties are essential to work with various environment.
+Edit `config.${env}.json`. Bold properties are essential to work with various environment.
 
 |name||
 |:--|:--|
@@ -75,7 +76,7 @@ Edit `config.json`. Bold properties are essential to work with various environme
 |**accountServiceRoot**|URL of account service. http://xxx.xxx.xx.xx/accounts/api |
 |**profileServiceRoot**|URL of profile service. http://xxx.xxx.xx.xx/profiles/api |
 |**apiRoot**|URL of api server. http://xxx.xxx.xx.xx/api |
-|**cacheRoot**|Cached objects are fetched from this URL. http://xxx.xxx.xx.xx/images |
+|**cacheRoot**|Cached objects are fetched from this URL. http://xxx.xxx.xx.xx/cache |
 |**imageRoot**|Uploaded images are fetched from this URL. http://xxx.xxx.xx.xx/images |
 |**region**|S3 region you want to deploy static files to. |
 |**s3Bucket**|S3 bucket you want to deploy static files to. |
