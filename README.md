@@ -24,7 +24,7 @@ Client implementation for Office Maker.
 ```
 $ elm-package install
 $ npm install
-$ cp defaultConfig.json config.dev.json
+$ cp op/config-template.json config.dev.json
 ```
 
 `config.${env}.json` is configuration for `dev` environment.

@@ -5,6 +5,8 @@ const minimatch = require('minimatch');
 const express = require('express');
 
 const env = 'dev';
+const rootDir = __dirname;
+const publicDir = rootDir + '/dest/public';
 
 function runServer() {
   const app = express();
@@ -16,7 +18,7 @@ function runServer() {
     }
     next();
   });
-  app.use(express.static(__dirname + '/dest/public'));
+  app.use(express.static(publicDir));
   app.listen(3000, _ => {
     console.log('Example app listening on port 3000!')
   });
@@ -30,7 +32,7 @@ function taskBuild(cb) {
   if (queued.build) {
     queued.build = false;
     // console.log('build start\n');
-    const args = ['build.sh', env];
+    const args = [rootDir + '/build.sh', env];
     const sh = cp.spawn('sh', args, {
       stdio: 'inherit'
     });

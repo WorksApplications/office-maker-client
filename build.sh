@@ -19,4 +19,4 @@ cp -f doc/manual.pdf dest/public
 cp -f images/default-user.png dest/public
 
 # generate html
-node generate-html $env
+node op/generate-html $env

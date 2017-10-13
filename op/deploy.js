@@ -4,7 +4,9 @@ const AWS = require('aws-sdk');
 const gzip = require('gzip-js');
 
 const env = process.argv[2];
-const configJsonPath = path.resolve(__dirname, `./config.${env}.json`);
+const rootDir = __dirname + '/..';
+const publicDir = rootDir + '/dest/public';
+const configJsonPath = rootDir + `/config.${env}.json`;
 const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
 
 var s3 = new AWS.S3({
@@ -12,13 +14,13 @@ var s3 = new AWS.S3({
   region: config.region
 });
 
-fs.readdirSync('dest/public').map(file => {
+fs.readdirSync(publicDir).map(file => {
   var options = {
     level: 6,
     name: file,
     timestamp: parseInt(Date.now() / 1000, 10)
   };
-  var body = fs.readFileSync(__dirname + '/dest/public/' + file);
+  var body = fs.readFileSync(publicDir + '/' + file);
   if (!file.endsWith('.pdf')) {
     body = gzip.zip(body, options);
   }

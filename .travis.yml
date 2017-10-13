@@ -5,5 +5,5 @@ before_script:
   - npm install -g elm@0.18.0
   - npm install -g elm-test@0.18.8
   - elm-package install -y
-  - cp defaultConfig.json config.test.json
+  - cp op/config-template.json config.test.json
 script: sh build.sh test && elm-test --seed 504764720

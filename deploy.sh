@@ -17,4 +17,4 @@ if test "$answer" != "yes" ; then
 fi
 
 sh build.sh $env
-node deploy $env
+node op/deploy $env

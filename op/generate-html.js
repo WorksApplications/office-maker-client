@@ -2,11 +2,12 @@ const fs = require('fs');
 const ejs = require('ejs');
 
 const env = process.argv[2];
-const configJsonPath = __dirname + `/config.${env}.json`;
+const rootDir = __dirname + '/..';
+const configJsonPath = rootDir + `/config.${env}.json`;
 const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
 
-const publicDir = __dirname + '/dest/public';
-const templateDir = __dirname + '/src/template';
+const publicDir = rootDir + '/dest/public';
+const templateDir = rootDir + '/src/template';
 
 generate(config, templateDir + '/index.html', publicDir + '/index.html');
 generate(config, templateDir + '/login.html', publicDir + '/login');
