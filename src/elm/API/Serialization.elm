@@ -68,9 +68,9 @@ encodeObject object =
                 [ [ ( "id", E.string (Object.idOf object) ) ]
                 , [ ( "floorId", E.string (Object.floorIdOf object) ) ]
                 , if Object.isDesk object then
-                    [ ( "type", E.string "desk" ) ]
-                  else
                     []
+                  else
+                    [ ( "type", E.string "label" ) ]
                 , [ ( "x", E.int x ) ]
                 , [ ( "y", E.int y ) ]
                 , [ ( "width", E.int width ) ]
