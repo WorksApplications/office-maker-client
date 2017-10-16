@@ -2188,11 +2188,12 @@ updateOnFinishPen from model =
                 saveCmd =
                     requestSaveObjectsCmd objectsChange
             in
-                { model
+                ( { model
                     | seed = newSeed
                     , floor = Just newFloor
-                }
-                    ! [ saveCmd ]
+                  }
+                , saveCmd
+                )
 
         _ ->
             ( model, Cmd.none )
@@ -2207,20 +2208,20 @@ updateOnFinishResize objectId fromScreen model =
                     |> Maybe.andThen
                         (\o ->
                             Model.temporaryResizeRect model fromScreen (Object.positionOf o) (Object.sizeOf o)
-                                |> Maybe.map
-                                    (\( _, size ) ->
-                                        let
-                                            ( newFloor, objectsChange ) =
-                                                EditingFloor.updateObjects (Floor.resizeObject objectId size) editingFloor
+                        )
+                    |> Maybe.map
+                        (\( _, size ) ->
+                            let
+                                ( newFloor, objectsChange ) =
+                                    EditingFloor.updateObjects (Floor.resizeObject objectId size) editingFloor
 
-                                            saveCmd =
-                                                requestSaveObjectsCmd objectsChange
-                                        in
-                                            { model | floor = Just newFloor } ! [ saveCmd ]
-                                    )
+                                saveCmd =
+                                    requestSaveObjectsCmd objectsChange
+                            in
+                                ( { model | floor = Just newFloor }, saveCmd )
                         )
             )
-        |> Maybe.withDefault (( model, Cmd.none ))
+        |> Maybe.withDefault ( model, Cmd.none )
 
 
 updateOnPuttingLabel : Model -> ( Model, Cmd Msg )
@@ -2294,7 +2295,7 @@ updateOnPuttingLabel model =
                             newModel ! [ saveCmd, focusCmd ]
 
                     Nothing ->
-                        model_ ! [ saveCmd ]
+                        ( model_, saveCmd )
 
         _ ->
             ( model, Cmd.none )
@@ -2625,10 +2626,11 @@ removeSelectedObjects model floor =
         saveCmd =
             requestSaveObjectsCmd objectsChange
     in
-        { model
+        ( { model
             | floor = Just newFloor
-        }
-            ! [ saveCmd ]
+          }
+        , saveCmd
+        )
 
 
 moveSelecedObjectsToward : Direction -> Model -> EditingFloor -> ( Model, Cmd Msg )
@@ -2645,10 +2647,11 @@ moveSelecedObjectsToward direction model editingFloor =
         saveCmd =
             requestSaveObjectsCmd objectsChange
     in
-        { model
+        ( { model
             | floor = Just newFloor
-        }
-            ! [ saveCmd ]
+          }
+        , saveCmd
+        )
 
 
 updateByMoveObjectEnd : ObjectId -> Position -> Position -> Model -> ( Model, Cmd Msg )
@@ -2676,10 +2679,11 @@ updateByMoveObjectEnd objectId start end model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
                 else
                     ( model, Cmd.none )
 
