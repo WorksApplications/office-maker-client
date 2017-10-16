@@ -546,6 +546,14 @@ update msg model =
                     else
                         model0 ! []
 
+                loadPersonCmd =
+                    model.floor
+                        |> Maybe.map EditingFloor.present
+                        |> Maybe.andThen (Floor.getObject lastTouchedId)
+                        |> Maybe.andThen Object.relatedPerson
+                        |> Maybe.map (\personId -> getAndCachePersonIfNotCached personId model)
+                        |> Maybe.withDefault Cmd.none
+
                 -- TODO
                 help model =
                     { model
@@ -583,7 +591,14 @@ update msg model =
                         , selectorRect = Nothing
                     }
             in
-                help model_ ! [ cmd, emulateClick lastTouchedId True, focusCanvas {} ]
+                ( help model_
+                , Cmd.batch
+                    [ cmd
+                    , emulateClick lastTouchedId True
+                    , focusCanvas {}
+                    , loadPersonCmd
+                    ]
+                )
 
         MouseUpOnObject lastTouchedId pos ->
             let
@@ -964,15 +979,10 @@ update msg model =
 
                 loadPersonCmd =
                     model.floor
-                        |> Maybe.andThen
-                            (\eFloor ->
-                                Floor.getObject objectId (EditingFloor.present eFloor)
-                                    |> Maybe.andThen
-                                        (\obj ->
-                                            Object.relatedPerson obj
-                                                |> Maybe.map (\personId -> getAndCachePersonIfNotCached personId model)
-                                        )
-                            )
+                        |> Maybe.map EditingFloor.present
+                        |> Maybe.andThen (Floor.getObject objectId)
+                        |> Maybe.andThen Object.relatedPerson
+                        |> Maybe.map (\personId -> getAndCachePersonIfNotCached personId model)
                         |> Maybe.withDefault Cmd.none
             in
                 { model
