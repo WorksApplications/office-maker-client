@@ -241,29 +241,26 @@ update msg model =
         NoOp ->
             ( model, Cmd.none )
 
-        GotNewToken maybeToken ->
-            case maybeToken of
-                Just token ->
-                    let
-                        apiConfig =
-                            model.apiConfig
-                    in
-                        { model
-                            | apiConfig =
-                                { apiConfig | token = token }
-                        }
-                            ! [ Cache2.saveToken token ]
+        GotNewToken (Just token) ->
+            let
+                apiConfig =
+                    model.apiConfig
+            in
+                ( { model
+                    | apiConfig =
+                        { apiConfig | token = token }
+                  }
+                , Cache2.saveToken token
+                )
 
-                Nothing ->
-                    ( model, Cmd.none )
+        GotNewToken Nothing ->
+            ( model, Cmd.none )
 
-        UrlUpdate result ->
-            case result of
-                Ok newURL ->
-                    ( model, Cmd.none )
+        UrlUpdate (Ok newURL) ->
+            ( model, Cmd.none )
 
-                Err _ ->
-                    model ! [ Navigation.modifyUrl (URL.stringify "/" URL.init) ]
+        UrlUpdate (Err _) ->
+            ( model, Navigation.modifyUrl (URL.stringify "/" URL.init) )
 
         MouseMove position ->
             let
@@ -303,14 +300,13 @@ update msg model =
                 newModel_ ! []
 
         MouseUp ->
-            let
-                newModel =
-                    if Model.isMouseInCanvas model then
-                        model
-                    else
-                        { model | draggingContext = NoDragging }
-            in
-                newModel ! []
+            ( (if Model.isMouseInCanvas model then
+                model
+               else
+                { model | draggingContext = NoDragging }
+              )
+            , Cmd.none
+            )
 
         UserLoaded turnToEditMode user ->
             ( { model
@@ -706,23 +702,19 @@ update msg model =
 
         StartEditObject objectId ->
             model.floor
-                |> Maybe.andThen
-                    (\efloor ->
-                        Floor.getObject objectId (EditingFloor.present efloor)
-                            |> Maybe.map
-                                (\object ->
-                                    let
-                                        newModel =
-                                            Model.startEdit object
-                                                { model
-                                                    | selectedResult = Nothing
-                                                }
-                                    in
-                                        newModel
-                                            ! [ requestCandidate (idOf object) (nameOf object)
-                                              , focusCmd
-                                              ]
-                                )
+                |> Maybe.map EditingFloor.present
+                |> Maybe.andThen (Floor.getObject objectId)
+                |> Maybe.map
+                    (\object ->
+                        ( Model.startEdit object
+                            { model
+                                | selectedResult = Nothing
+                            }
+                        , Cmd.batch
+                            [ requestCandidate (idOf object) (nameOf object)
+                            , focusCmd
+                            ]
+                        )
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
@@ -894,18 +886,17 @@ update msg model =
                         ( model_, Cmd.none )
 
         RequestCandidate objectId name ->
-            let
-                ( searchCandidateDebounce, cmd ) =
-                    Debounce.push
-                        searchCandidateDebounceConfig
-                        ( objectId, name )
-                        model.searchCandidateDebounce
-            in
-                ( { model
-                    | searchCandidateDebounce = searchCandidateDebounce
-                  }
-                , cmd
-                )
+            (Debounce.push
+                searchCandidateDebounceConfig
+                ( objectId, name )
+                model.searchCandidateDebounce
+            )
+                |> Tuple.mapFirst
+                    (\searchCandidateDebounce ->
+                        { model
+                            | searchCandidateDebounce = searchCandidateDebounce
+                        }
+                    )
 
         SearchCandidateDebounceMsg msg ->
             let
@@ -1485,10 +1476,10 @@ update msg model =
                 |> Maybe.withDefault ( model, Cmd.none )
 
         GotDiffSource diffSource ->
-            { model | diff = Just diffSource } ! []
+            ( { model | diff = Just diffSource }, Cmd.none )
 
         CloseDiff ->
-            { model | diff = Nothing } ! []
+            ( { model | diff = Nothing }, Cmd.none )
 
         ConfirmDiff ->
             model.floor
@@ -1641,16 +1632,17 @@ update msg model =
                 if event == "dblclick" then
                     newModel |> update (StartEditObject id)
                 else if event == "unselectObject" then
-                    { newModel | selectedObjects = [] } ! []
+                    ( { newModel | selectedObjects = [] }, Cmd.none )
                 else
-                    newModel ! []
+                    ( newModel, Cmd.none )
 
         TokenRemoved ->
-            { model
+            ( { model
                 | user = User.guest
                 , mode = Mode.init
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         Undo ->
             case model.floor of
@@ -1665,7 +1657,7 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model | floor = Just newFloor } ! [ saveCmd ]
+                        ( { model | floor = Just newFloor }, saveCmd )
 
         Redo ->
             case model.floor of
@@ -1680,10 +1672,10 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model | floor = Just newFloor } ! [ saveCmd ]
+                        ( { model | floor = Just newFloor }, saveCmd )
 
         Focused ->
-            model ! [ setSelectionStart {} ]
+            ( model, setSelectionStart {} )
 
         PasteFromClipboard s ->
             case ( model.floor, model.selectorRect ) of
@@ -1773,8 +1765,7 @@ update msg model =
                             loadFloor model.apiConfig requestPrivateFloors floorId
                                 |> performAPI FloorLoaded
                     in
-                        model
-                            ! [ loadFloorCmd ]
+                        ( model, loadFloorCmd )
 
                 _ ->
                     ( model, Cmd.none )
@@ -1790,11 +1781,8 @@ update msg model =
 
         GotFileWithDataURL file dataURL ->
             let
-                ( id, newSeed ) =
+                ( url, newSeed ) =
                     IdGenerator.new model.seed
-
-                url =
-                    id
 
                 ( width, height ) =
                     File.getSizeOfImage dataURL
@@ -1803,23 +1791,23 @@ update msg model =
                     API.saveEditingImage model.apiConfig url file
                         |> performAPI (always <| ImageSaved url width height)
             in
-                { model | seed = newSeed }
-                    ! [ saveImageCmd ]
+                ( { model | seed = newSeed }, saveImageCmd )
 
         FloorDeleterMsg msg ->
-            let
-                ( floorDeleter, cmd ) =
-                    FloorDeleter.update
-                        FloorDeleterMsg
-                        { onDeleteFloor =
-                            \floor ->
-                                API.deleteEditingFloor model.apiConfig floor.id
-                                    |> performAPI (\_ -> FloorDeleted floor)
-                        }
-                        msg
-                        model.floorDeleter
-            in
-                { model | floorDeleter = floorDeleter } ! [ cmd ]
+            (FloorDeleter.update
+                FloorDeleterMsg
+                { onDeleteFloor =
+                    \floor ->
+                        API.deleteEditingFloor model.apiConfig floor.id
+                            |> performAPI (\_ -> FloorDeleted floor)
+                }
+                msg
+                model.floorDeleter
+            )
+                |> Tuple.mapFirst
+                    (\floorDeleter ->
+                        { model | floorDeleter = floorDeleter }
+                    )
 
         FloorDeleted floor ->
             let
@@ -1911,12 +1899,12 @@ update msg model =
 
         ShowInformation ((APIError (Http.BadStatus { status })) as information) ->
             if status.code == 401 then
-                model ! [ Navigation.load "./login" ]
+                ( model, Navigation.load "./login" )
             else
-                { model | information = information } ! []
+                ( { model | information = information }, Cmd.none )
 
         ShowInformation information ->
-            { model | information = information } ! []
+            ( { model | information = information }, Cmd.none )
 
 
 andThen : (Model -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -1998,7 +1986,7 @@ updateOnMouseUp pos model =
                     updateByMoveObjectEnd id start model.mousePosition model
 
                 Selector ->
-                    { model | selectorRect = Nothing } ! []
+                    ( { model | selectorRect = Nothing }, Cmd.none )
 
                 StampFromScreenPos _ ->
                     updateOnFinishStamp model
@@ -2054,14 +2042,15 @@ updateOnMouseUp pos model =
                             ( model, Cmd.none )
 
                 ShiftOffset from ->
-                    { model
+                    ( { model
                         | selectedResult =
                             if from == pos then
                                 Nothing
                             else
                                 model.selectedResult
-                    }
-                        ! []
+                      }
+                    , Cmd.none
+                    )
 
                 _ ->
                     ( model, Cmd.none )
@@ -2071,7 +2060,7 @@ updateOnMouseUp pos model =
                 | draggingContext = NoDragging
             }
     in
-        newModel ! [ cmd ]
+        ( newModel, cmd )
 
 
 updateOnSelectCandidate : ObjectId -> PersonId -> Model -> ( Model, Cmd Msg )
