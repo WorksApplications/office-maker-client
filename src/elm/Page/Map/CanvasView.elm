@@ -391,7 +391,7 @@ canvasViewStyles model floor =
         , ( "width", px <| size2.width )
         , ( "height", px <| size2.height )
         , ( "font-family", "default" )
-        , ( "background-color", "black" )
+        , ( "background-color", "white" )
         , ( "transition"
           , if model.transition then
                 "top 0.3s ease, left 0.3s ease"
@@ -593,11 +593,16 @@ canvasImage model floor =
                 model.scale
                 (Size (Floor.width floor) (Floor.height floor))
     in
-        img
-            [ style (canvasImageStyle floor.flipImage size)
-            , src (Maybe.withDefault "" (Floor.src model.apiConfig.imageRoot floor))
-            ]
-            []
+        Floor.src model.apiConfig.imageRoot floor
+            |> Maybe.map
+                (\url ->
+                    img
+                        [ style (canvasImageStyle floor.flipImage size)
+                        , src url
+                        ]
+                        []
+                )
+            |> Maybe.withDefault (text "")
 
 
 canvasImageStyle : Bool -> Size -> List ( String, String )
