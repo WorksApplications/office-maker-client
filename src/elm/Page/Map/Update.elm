@@ -164,9 +164,9 @@ init flags location =
     in
         case urlResult of
             Ok url ->
-                (toModel url)
-                    ! [ initCmd apiConfig url.editMode userState url.floorId
-                      ]
+                ( toModel url
+                , initCmd apiConfig url.editMode userState url.floorId
+                )
 
             Err _ ->
                 let
@@ -297,7 +297,7 @@ update msg model =
                         _ ->
                             model_
             in
-                newModel_ ! []
+                ( newModel_, Cmd.none )
 
         MouseUp ->
             ( (if Model.isMouseInCanvas model then
@@ -454,7 +454,7 @@ update msg model =
                         saveCmd =
                             requestSaveFloorCmd rawFloor
                     in
-                        { model | floor = Just newFloor } ! [ saveCmd ]
+                        ( { model | floor = Just newFloor }, saveCmd )
 
         RequestSave request ->
             Debounce.push
@@ -652,7 +652,7 @@ update msg model =
                             updateOnFinishNameInput False id name { model0 | objectNameInput = objectNameInput }
 
                         ( objectNameInput, _ ) ->
-                            { model0 | objectNameInput = objectNameInput } ! []
+                            ( { model0 | objectNameInput = objectNameInput }, Cmd.none )
 
                 ( model__, cmd2 ) =
                     if Mode.isLabelMode model.mode then
@@ -690,7 +690,7 @@ update msg model =
                             updateOnFinishNameInput False id name { model0 | objectNameInput = objectNameInput }
 
                         ( objectNameInput, _ ) ->
-                            { model0 | objectNameInput = objectNameInput } ! []
+                            ( { model0 | objectNameInput = objectNameInput }, Cmd.none )
 
                 newModel =
                     { model_
@@ -999,7 +999,9 @@ update msg model =
                 ( contextMenu, cmd ) =
                     ContextMenu.update msg model.contextMenu
             in
-                { model | contextMenu = contextMenu } ! [ Cmd.map ContextMenuMsg cmd ]
+                ( { model | contextMenu = contextMenu }
+                , Cmd.map ContextMenuMsg cmd
+                )
 
         GoToFloor floorId requestLastEdit ->
             let
@@ -1107,10 +1109,11 @@ update msg model =
                                                 (\e -> (backgroundColorOf e) == backgroundColor)
                                                 (Floor.objects floor)
                                     in
-                                        { model
+                                        ( { model
                                             | selectedObjects = List.map Object.idOf target
-                                        }
-                                            ! []
+                                          }
+                                        , Cmd.none
+                                        )
                                 )
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
@@ -1208,11 +1211,12 @@ update msg model =
                                     }
                                     model.prototypes
                         in
-                            { model
+                            ( { model
                                 | seed = seed
                                 , prototypes = newPrototypes
-                            }
-                                ! [ (savePrototypesCmd model.apiConfig) newPrototypes.data ]
+                              }
+                            , (savePrototypesCmd model.apiConfig) newPrototypes.data
+                            )
 
                     Nothing ->
                         ( model, Cmd.none )
@@ -1457,10 +1461,11 @@ update msg model =
                                 saveCmd =
                                     requestSaveObjectsCmd objectsChange
                             in
-                                { model
+                                ( { model
                                     | floor = Just newFloor
-                                }
-                                    ! [ saveCmd ]
+                                  }
+                                , saveCmd
+                                )
 
                         _ ->
                             ( model, Cmd.none )
@@ -1691,7 +1696,7 @@ update msg model =
                             saveCmd =
                                 requestSaveObjectsCmd objectsChange
                         in
-                            { model
+                            ( { model
                                 | floor = Just newFloor
                                 , seed = newSeed
                                 , selectedObjects =
@@ -1703,8 +1708,9 @@ update msg model =
                                         x ->
                                             x
                                 , selectorRect = Nothing
-                            }
-                                ! [ saveCmd ]
+                              }
+                            , saveCmd
+                            )
                     else
                         let
                             prototype =
@@ -1826,15 +1832,15 @@ update msg model =
                       ]
 
         InsertEmoji text ->
-            model
-                ! [ ObjectNameInput.insertText ObjectNameInputMsg text model.objectNameInput
-                  ]
+            ( model
+            , ObjectNameInput.insertText ObjectNameInputMsg text model.objectNameInput
+            )
 
         ChangeToObjectUrl objectId ->
-            model ! [ Navigation.modifyUrl ("?object=" ++ objectId) ]
+            ( model, Navigation.modifyUrl ("?object=" ++ objectId) )
 
         SetTransition transition ->
-            { model | transition = transition } ! []
+            ( { model | transition = transition }, Cmd.none )
 
         Copy ->
             ( model, Cmd.none )
