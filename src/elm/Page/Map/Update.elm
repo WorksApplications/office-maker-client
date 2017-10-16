@@ -47,6 +47,7 @@ import Page.Map.ObjectNameInput as ObjectNameInput
 import Page.Map.KeyOperation as KeyOperation
 import Http
 import CoreType exposing (..)
+import Set
 
 
 port removeToken : {} -> Cmd msg
@@ -2457,29 +2458,62 @@ updateOnFinishNameInput continueEditing objectId name model =
                     Floor.getObject objectId floor
                         |> Maybe.map
                             (\object ->
-                                if Object.isLabel object && String.trim name == "" then
-                                    EditingFloor.updateObjects
-                                        (Floor.removeObjects [ objectId ])
-                                        efloor
-                                else
-                                    EditingFloor.updateObjects
-                                        (Floor.changeObjectName [ objectId ] name)
-                                        efloor
+                                EditingFloor.updateObjects
+                                    (updateFloorObjectsWithInputName object name)
+                                    efloor
                             )
                         |> Maybe.withDefault ( efloor, ObjectsChange.empty )
 
                 saveCmd =
                     requestSaveObjectsCmd objectsChange
-
-                newModel =
-                    { model
-                        | floor = Just newFloor
-                        , objectNameInput = objectNameInput
-                        , candidates = []
-                        , selectedObjects = selectedObjects
-                    }
             in
-                newModel ! [ requestCandidateCmd, cachePersonCmd, saveCmd, focusCmd ]
+                ( { model
+                    | floor = Just newFloor
+                    , objectNameInput = objectNameInput
+                    , candidates = []
+                    , selectedObjects = selectedObjects
+                  }
+                , Cmd.batch
+                    [ requestCandidateCmd
+                    , cachePersonCmd
+                    , saveCmd
+                    , focusCmd
+                    ]
+                )
+
+
+updateFloorObjectsWithInputName : Object -> String -> Floor -> Floor
+updateFloorObjectsWithInputName object name floor =
+    let
+        targetObjectId =
+            Object.idOf object
+    in
+        if Object.isLabel object && String.trim name == "" then
+            Floor.removeObjects [ targetObjectId ] floor
+        else
+            floor
+                |> Floor.changeObjectName [ targetObjectId ] name
+                |> (if isTotallyDifferentNames (Object.nameOf object) name then
+                        Floor.unsetPerson targetObjectId
+                    else
+                        identity
+                   )
+
+
+isTotallyDifferentNames : String -> String -> Bool
+isTotallyDifferentNames first second =
+    let
+        firstSet =
+            first
+                |> String.toList
+                |> Set.fromList
+
+        secondSet =
+            second
+                |> String.toList
+                |> Set.fromList
+    in
+        Set.isEmpty (Set.intersect firstSet secondSet)
 
 
 cachePersonIfAPersonIsNotRelatedTo : API.Config -> Object -> Cmd Msg
