@@ -724,10 +724,10 @@ update msg model =
                                               ]
                                 )
                     )
-                |> Maybe.withDefault (( model, Cmd.none ))
+                |> Maybe.withDefault ( model, Cmd.none )
 
         Ctrl ctrl ->
-            { model | ctrl = ctrl } ! []
+            ( { model | ctrl = ctrl }, Cmd.none )
 
         SelectBackgroundColor color ->
             case model.floor of
@@ -744,10 +744,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         SelectColor color ->
             case model.floor of
@@ -764,10 +765,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         SelectShape shape ->
             case model.floor of
@@ -784,10 +786,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         SelectFontSize fontSize ->
             case model.floor of
@@ -804,10 +807,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         InputObjectUrl selectedObjects url ->
             case model.floor of
@@ -824,10 +828,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         ObjectNameInputMsg message ->
             let
@@ -867,7 +872,7 @@ update msg model =
                     ObjectNameInput.OnUnsetPerson objectId ->
                         case model_.floor of
                             Nothing ->
-                                model_ ! []
+                                ( model_, Cmd.none )
 
                             Just editingFloor ->
                                 let
@@ -879,13 +884,14 @@ update msg model =
                                     saveCmd =
                                         requestSaveObjectsCmd objectsChange
                                 in
-                                    { model_
+                                    ( { model_
                                         | floor = Just newFloor
-                                    }
-                                        ! [ saveCmd ]
+                                      }
+                                    , saveCmd
+                                    )
 
                     ObjectNameInput.None ->
-                        model_ ! []
+                        ( model_, Cmd.none )
 
         RequestCandidate objectId name ->
             let
@@ -895,10 +901,11 @@ update msg model =
                         ( objectId, name )
                         model.searchCandidateDebounce
             in
-                { model
+                ( { model
                     | searchCandidateDebounce = searchCandidateDebounce
-                }
-                    ! [ cmd ]
+                  }
+                , cmd
+                )
 
         SearchCandidateDebounceMsg msg ->
             let
@@ -917,18 +924,20 @@ update msg model =
                         msg
                         model.searchCandidateDebounce
             in
-                { model
+                ( { model
                     | searchCandidateDebounce = searchCandidateDebounce
-                }
-                    ! [ cmd ]
+                  }
+                , cmd
+                )
 
         GotCandidateSelection objectId people ->
-            { model
+            ( { model
                 | personInfo =
                     DictUtil.addAll (.id) people model.personInfo
                 , candidates = List.map .id people
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         GotMatchingList pairs ->
             case model.floor of
@@ -964,11 +973,12 @@ update msg model =
                         personInfo =
                             DictUtil.addAll (.id) allPeople model.personInfo
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
                             , personInfo = personInfo
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         BeforeContextMenuOnObject objectId contextmenuMsg ->
             let
@@ -1041,7 +1051,7 @@ update msg model =
                                     postName
                                 )
                     in
-                        model ! [ cmd ]
+                        ( model, cmd )
 
         SearchByPost postName ->
             searchBy ("\"" ++ postName ++ "\"") model
@@ -1149,34 +1159,34 @@ update msg model =
                         , offset = newOffset
                     }
             in
-                newModel ! [ (putUserState newModel) ]
+                ( newModel, putUserState newModel )
 
         WindowSize size ->
-            { model | windowSize = size } ! []
+            ( { model | windowSize = size }
+            , Cmd.none
+            )
 
         ChangeMode editingMode ->
-            { model | mode = Mode.changeEditingMode editingMode model.mode } ! []
+            ( { model | mode = Mode.changeEditingMode editingMode model.mode }
+            , Cmd.none
+            )
 
         PrototypesMsg msg ->
-            let
-                newModel =
-                    { model
-                        | prototypes = Prototypes.update msg model.prototypes
-                    }
-            in
-                newModel ! []
+            ( { model
+                | prototypes = Prototypes.update msg model.prototypes
+              }
+            , Cmd.none
+            )
 
         ClipboardOptionsMsg ( clipboardOptionsForm, maybeCellSizePerDesk ) ->
-            let
-                newModel =
-                    { model
-                        | clipboardOptionsForm = clipboardOptionsForm
-                        , cellSizePerDesk =
-                            maybeCellSizePerDesk
-                                |> Maybe.withDefault model.cellSizePerDesk
-                    }
-            in
-                newModel ! []
+            ( { model
+                | clipboardOptionsForm = clipboardOptionsForm
+                , cellSizePerDesk =
+                    maybeCellSizePerDesk
+                        |> Maybe.withDefault model.cellSizePerDesk
+              }
+            , Cmd.none
+            )
 
         RegisterPrototype objectId ->
             let
@@ -1235,7 +1245,7 @@ update msg model =
                                 , floorProperty = floorProperty
                             }
                     in
-                        newModel ! [ saveCmd ]
+                        ( newModel, saveCmd )
 
         RotateObjects ids ->
             case model.floor of
@@ -1252,10 +1262,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         FirstNameOnly ids ->
             case model.floor of
@@ -1272,10 +1283,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         RemoveSpaces ids ->
             case model.floor of
@@ -1290,19 +1302,20 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        { model
+                        ( { model
                             | floor = Just newFloor
-                        }
-                            ! [ saveCmd ]
+                          }
+                        , saveCmd
+                        )
 
         HeaderMsg msg ->
-            { model | header = Header.update msg model.header } ! []
+            ( { model | header = Header.update msg model.header }, Cmd.none )
 
         SignIn ->
-            model ! [ Navigation.load Page.login ]
+            ( model, Navigation.load Page.login )
 
         SignOut ->
-            model ! [ removeToken {} ]
+            ( model, removeToken {} )
 
         ToggleEditing ->
             let
@@ -1333,10 +1346,11 @@ update msg model =
                       ]
 
         TogglePrintView ->
-            { model
+            ( { model
                 | mode = Mode.togglePrintView model.mode
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         SelectLang lang ->
             let
@@ -1346,10 +1360,11 @@ update msg model =
                 newModel ! [ putUserState newModel ]
 
         UpdateSearchQuery searchQuery ->
-            { model
+            ( { model
                 | searchQuery = searchQuery
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         SubmitSearch ->
             submitSearch model
@@ -1405,7 +1420,7 @@ update msg model =
             searchBy "" model
 
         StartDraggingFromMissingPerson prototype personId personName ->
-            { model
+            ( { model
                 | draggingContext =
                     MoveFromSearchResult
                         { prototype
@@ -1413,11 +1428,12 @@ update msg model =
                             , personId = Just personId
                         }
                         personId
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         StartDraggingFromExistingObject prototype objectId name personId floorId ->
-            { model
+            ( { model
                 | draggingContext =
                     MoveExistingObjectFromSearchResult
                         floorId
@@ -1426,11 +1442,12 @@ update msg model =
                             , personId = personId
                         }
                         objectId
-            }
-                ! []
+              }
+            , Cmd.none
+            )
 
         CachePeople people ->
-            Model.cachePeople people model ! []
+            ( Model.cachePeople people model, Cmd.none )
 
         UpdatePersonCandidate objectId personIds ->
             case model.floor of
@@ -1474,19 +1491,14 @@ update msg model =
             { model | diff = Nothing } ! []
 
         ConfirmDiff ->
-            case model.floor of
-                Nothing ->
-                    ( model, Cmd.none )
-
-                Just editingFloor ->
-                    let
-                        cmd =
-                            requestPublishFloorCmd (EditingFloor.present editingFloor).id
-                    in
-                        { model
-                            | diff = Nothing
-                        }
-                            ! [ cmd ]
+            model.floor
+                |> Maybe.map
+                    (\editingFloor ->
+                        ( { model | diff = Nothing }
+                        , requestPublishFloorCmd (EditingFloor.present editingFloor).id
+                        )
+                    )
+                |> Maybe.withDefault ( model, Cmd.none )
 
         ClosePopup ->
             let
