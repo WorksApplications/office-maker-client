@@ -2061,12 +2061,11 @@ updateOnSelectCandidate objectId personId model =
                         (Floor.setPerson objectId personId)
                         floor
             in
-                updateOnFinishNameInput True
+                updateOnFinishNameInput
+                    True
                     objectId
                     person.name
-                    { model
-                        | floor = Just newFloor
-                    }
+                    { model | floor = Just newFloor }
                     |> andThen (flip (,) (requestSaveObjectsCmd objectsChange))
 
         _ ->
@@ -2493,13 +2492,15 @@ updateFloorObjectsWithInputName object name floor =
         else
             floor
                 |> Floor.changeObjectName [ targetObjectId ] name
-                |> (if isTotallyDifferentNames (Object.nameOf object) name then
+                |> (if String.trim name == "" then
                         Floor.unsetPerson targetObjectId
                     else
                         identity
                    )
 
 
+{-| this logic should be used but unable on current code
+-}
 isTotallyDifferentNames : String -> String -> Bool
 isTotallyDifferentNames first second =
     let
