@@ -2390,8 +2390,14 @@ regesterPersonOfObject apiConfig e =
 
 regesterPerson : API.Config -> PersonId -> Cmd Msg
 regesterPerson apiConfig personId =
-    API.getPerson apiConfig personId
-        |> performAPI (\person -> CachePeople [ person ])
+    API.getPersonMaybe apiConfig personId
+        |> performAPI
+            (\maybePerson ->
+                maybePerson
+                    |> Maybe.map List.singleton
+                    |> Maybe.withDefault []
+                    |> CachePeople
+            )
 
 
 regesterPersonIfNotCached : API.Config -> Dict PersonId Person -> PersonId -> Cmd Msg
