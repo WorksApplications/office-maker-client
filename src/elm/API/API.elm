@@ -106,7 +106,7 @@ saveObjects config changes =
     patchJsonNoResponse
         (config.apiRoot ++ "/objects")
         [ authorization config.token ]
-        (Http.jsonBody <| encodeObjectsChange <| Debug.log "saveObjects" changes)
+        (Http.jsonBody <| encodeObjectsChange changes)
 
 
 saveEditingFloor : Config -> Floor -> Task Error FloorBase

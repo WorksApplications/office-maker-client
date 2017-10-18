@@ -83,7 +83,10 @@ selector : () -> Html Msg
 selector _ =
     all
         |> ListUtil.sepBy 10
-        |> List.map (List.map selectorEach >> div [])
+        |> List.map
+            (List.map selectorEach
+                >> div [ style [ ( "display", "flex" ) ] ]
+            )
         |> div []
 
 
