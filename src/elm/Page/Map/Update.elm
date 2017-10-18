@@ -1958,11 +1958,11 @@ submitSearch model =
         )
     else
         let
-            withPrivate =
-                not (User.isGuest model.user)
+            private =
+                Mode.isEditMode model.mode
 
             searchCmd =
-                search model.apiConfig withPrivate model.personInfo model.searchQuery
+                search model.apiConfig private model.personInfo model.searchQuery
         in
             { model
                 | mode = Mode.showSearchResult model.mode
@@ -1973,9 +1973,9 @@ submitSearch model =
 
 
 search : API.Config -> Bool -> Dict PersonId Person -> String -> Cmd Msg
-search apiConfig withPrivate personInfo query =
+search apiConfig private personInfo query =
     Cmd.batch
-        [ API.search apiConfig withPrivate query
+        [ API.search apiConfig private query
             |> performAPI (\( results, people ) -> GotSearchResult results people)
 
         -- , API.searchObjects apiConfig withPrivate query
