@@ -197,7 +197,7 @@ initCmd apiConfig needsEditMode defaultUserState selectedFloor =
 
 debug : Bool
 debug =
-    False
+    True
 
 
 debugMsg : Msg -> Msg
@@ -477,19 +477,19 @@ update msg model =
                             (SaveRequest.reduceRequest model.floor (head :: tail))
                     else
                         Cmd.none
-
-                ( saveFloorDebounce, cmd ) =
-                    Debounce.update
-                        saveFloorDebounceConfig
-                        (Debounce.takeAll save)
-                        msg
-                        model.saveFloorDebounce
             in
-                ( { model
-                    | saveFloorDebounce = saveFloorDebounce
-                  }
-                , Cmd.none
+                (Debounce.update
+                    saveFloorDebounceConfig
+                    (Debounce.takeAll save)
+                    msg
+                    model.saveFloorDebounce
                 )
+                    |> Tuple.mapFirst
+                        (\saveFloorDebounce ->
+                            { model
+                                | saveFloorDebounce = saveFloorDebounce
+                            }
+                        )
 
         ObjectsSaved ->
             -- TODO don't sync for now
