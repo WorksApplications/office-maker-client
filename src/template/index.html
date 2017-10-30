@@ -16,6 +16,10 @@
 	<style id="debug-style"></style>
 	<input id="paste" hidden>
 	<script>
+		var dynamicOptions = location.search.substring(1).split('&')
+			  .map(keyValue => keyValue.split('='))
+				.reduce((obj, keyValue) => { obj[keyValue[0]] = keyValue[1]; return obj; }, {});
+		console.log(dynamicOptions);
 	  if(location.host.indexOf('-dev') > 0) {
 			document.getElementById('debug-style').innerHTML = 'header { background-color: #8a6 !important; }';
 		}
@@ -32,11 +36,11 @@
 			// TODO: Decoding large integer causes an error. Replace with below when it is fixed.
 			// [Math.floor(Math.random()*0xFFFFFFFF), Math.floor(Math.random()*0xFFFFFFFF)]
 			visitDate: new Date().getTime(),
-			apiRoot: '<%= apiRoot %>',
-			cacheRoot: '<%= cacheRoot %>',
+			apiRoot: dynamicOptions.apiRoot || '<%= apiRoot %>',
+			cacheRoot: dynamicOptions.cacheRoot || '<%= cacheRoot %>',
 			accountServiceRoot: '<%= accountServiceRoot %>',
 			profileServiceRoot: '<%= profileServiceRoot %>',
-			imageRoot: '<%= imageRoot %>',
+			imageRoot: dynamicOptions.imageRoot || '<%= imageRoot %>',
 			title: '🐱 <%= title %> 🐳',
 			authToken: localStorage.getItem('authToken') || '',
 			lang: lang
