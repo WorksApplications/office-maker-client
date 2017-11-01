@@ -1,4 +1,4 @@
-module Page.Map.Emoji exposing (TextFragment(..), split, view, selector)
+module Page.Map.Emoji exposing (TextFragment(..), split, selector)
 
 import Json.Decode as Decode exposing (Decoder)
 import Html exposing (..)
@@ -76,7 +76,7 @@ view attr s =
                             ]
                             []
             )
-        |> div []
+        |> div attr
 
 
 selector : () -> Html Msg
