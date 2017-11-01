@@ -51,7 +51,7 @@ sendJson method decoder url headers body =
     , body = body
     , expect = Http.expectJson decoder
     , timeout = Nothing
-    , withCredentials = True
+    , withCredentials = False
     }
         |> Http.request
         |> Http.toTask
@@ -65,7 +65,7 @@ sendJsonNoResponse method url headers body =
     , body = body
     , expect = Http.expectStringResponse (\_ -> Ok ())
     , timeout = Nothing
-    , withCredentials = True
+    , withCredentials = False
     }
         |> Http.request
         |> Http.toTask
@@ -79,7 +79,7 @@ get decoder url headers =
     , body = Http.emptyBody
     , expect = Http.expectJson decoder
     , timeout = Nothing
-    , withCredentials = True
+    , withCredentials = False
     }
         |> Http.request
         |> Http.toTask
