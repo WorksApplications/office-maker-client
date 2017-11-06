@@ -44,8 +44,6 @@ import Model.SearchResult exposing (SearchResult)
 import Model.ColorPalette exposing (ColorPalette)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectChange)
 import API.Serialization exposing (..)
-import Json.Decode exposing (Decoder)
-import Dict
 
 
 type alias ImageId =

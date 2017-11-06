@@ -242,6 +242,7 @@ view_ showSuggestion objectId name maybePerson screenPosOfDesk screenSizeOfDesk 
             )
 
 
+tagger : Page.Map.Msg.ObjectNameInputMsg -> Page.Map.Msg.Msg
 tagger =
     Page.Map.Msg.ObjectNameInputMsg
 
