@@ -50,10 +50,6 @@ type alias ImageId =
     String
 
 
-type alias UserId =
-    String
-
-
 type alias Error =
     Http.Error
 
