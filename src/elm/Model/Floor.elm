@@ -1,7 +1,7 @@
 module Model.Floor exposing (..)
 
 import Dict exposing (Dict)
-import Regex
+import Regex exposing (Regex)
 import Date exposing (Date)
 import Model.Object as Object exposing (Object)
 import Model.ObjectsOperation as ObjectsOperation
@@ -307,12 +307,17 @@ removeSpaces : List ObjectId -> Floor -> Floor
 removeSpaces ids floor =
     let
         change name =
-            (Regex.replace Regex.All (Regex.regex "[ \x0D\n\x3000]") (\_ -> "")) name
+            (Regex.replace Regex.All whiteSpaces (\_ -> "")) name
 
         f object =
             Object.changeName (change <| Object.nameOf object) object
     in
         partiallyChangeObjects f ids floor
+
+
+whiteSpaces : Regex
+whiteSpaces =
+    Regex.regex "[ \x0D\n\x3000]"
 
 
 resizeObject : ObjectId -> Size -> Floor -> Floor
