@@ -1,6 +1,6 @@
 module Model.EditingFloor exposing (..)
 
-import Model.Floor as Floor exposing (Floor)
+import Model.Floor exposing (Floor)
 import Model.FloorDiff as FloorDiff
 import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
 import Util.UndoList as UndoList exposing (UndoList)

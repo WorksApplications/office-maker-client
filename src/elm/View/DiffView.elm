@@ -9,9 +9,9 @@ import Html.Lazy exposing (..)
 import View.Styles as Styles
 import View.DialogView as DialogView
 import Model.DateFormatter as DateFormatter
-import Model.Object as Object exposing (..)
+import Model.Object exposing (..)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectModification)
-import Model.Floor as Floor exposing (Floor)
+import Model.Floor exposing (Floor)
 import Model.FloorDiff as FloorDiff
 import Model.Person exposing (Person)
 import Model.I18n as I18n exposing (Language)

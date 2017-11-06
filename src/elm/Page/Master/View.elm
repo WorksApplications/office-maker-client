@@ -6,7 +6,7 @@ import Html.Events exposing (..)
 import Html.Lazy as Lazy
 import Component.Header as Header
 import Model.User as User exposing (User)
-import Model.I18n as I18n exposing (Language(..))
+import Model.I18n exposing (Language(..))
 import View.Common exposing (..)
 import View.MessageBar as MessageBar
 import View.PrototypePreviewView as PrototypePreviewView

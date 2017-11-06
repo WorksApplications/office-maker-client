@@ -4,7 +4,7 @@ import Task exposing (..)
 import Native.HttpUtil
 import Util.File as File exposing (File(File))
 import Http exposing (..)
-import Json.Decode as D exposing (Decoder)
+import Json.Decode exposing (Decoder)
 import Json.Encode as E
 
 

@@ -1,7 +1,7 @@
 module Model.SaveRequest exposing (..)
 
 import Model.Floor exposing (Floor)
-import Model.EditingFloor as EditingFloor exposing (EditingFloor)
+import Model.EditingFloor exposing (EditingFloor)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
 import CoreType exposing (..)
 

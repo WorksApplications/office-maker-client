@@ -16,13 +16,13 @@ import ContextMenu
 import View.ObjectView as ObjectView
 import View.CommonStyles as CommonStyles
 import Util.StyleUtil exposing (px)
-import Util.HtmlUtil as HtmlUtil exposing (..)
+import Util.HtmlUtil exposing (..)
 import Model.Mode as Mode exposing (Mode(..))
 import Model.Floor as Floor exposing (Floor)
 import Model.Object as Object exposing (..)
 import Model.Scale as Scale exposing (Scale)
 import Model.ObjectsOperation as ObjectsOperation
-import Model.Prototypes as Prototypes exposing (PositionedPrototype)
+import Model.Prototypes exposing (PositionedPrototype)
 import Model.ClipboardData as ClipboardData
 import Model.User as User
 import Page.Map.Model as Model exposing (Model, DraggingContext(..))

@@ -13,7 +13,7 @@ import Model.Person exposing (Person)
 import Model.Object as Object exposing (Object, Shape(..), ObjectPropertyChange)
 import Model.Prototype exposing (Prototype)
 import Model.SearchResult as SearchResult exposing (SearchResult)
-import Model.ColorPalette as ColorPalette exposing (ColorPalette)
+import Model.ColorPalette exposing (ColorPalette)
 import Model.ObjectsChange as ObjectsChange exposing (..)
 import CoreType exposing (..)
 import API.Defaults as Defaults

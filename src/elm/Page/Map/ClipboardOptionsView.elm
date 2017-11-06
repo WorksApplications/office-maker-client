@@ -1,7 +1,7 @@
 module Page.Map.ClipboardOptionsView exposing (Form, init, view)
 
 import Html exposing (..)
-import Html.Attributes as Attributes exposing (..)
+import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import CoreType exposing (..)
 import View.Styles as Styles

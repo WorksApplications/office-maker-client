@@ -17,7 +17,7 @@ import Model.Prototypes as Prototypes
 import View.Icons as I
 import View.Styles as S
 import CoreType exposing (..)
-import Page.Map.Model as Model exposing (Model, DraggingContext(..))
+import Page.Map.Model exposing (Model, DraggingContext(..))
 import Page.Map.Msg exposing (Msg(..))
 import Page.Map.SearchResultItemView as SearchResultItemView exposing (Item(..))
 

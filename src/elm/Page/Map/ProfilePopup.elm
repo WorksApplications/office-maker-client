@@ -3,11 +3,11 @@ module Page.Map.ProfilePopup exposing (view, personView, nonPersonView)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html.Lazy as Lazy exposing (..)
+import Html.Lazy exposing (..)
 import View.Styles as Styles
 import View.Icons as Icons
-import Model.Scale as Scale exposing (Scale)
-import Model.Person as Person exposing (Person)
+import Model.Scale exposing (Scale)
+import Model.Person exposing (Person)
 import Model.Object as Object exposing (Object)
 import Model.ProfilePopupLogic as ProfilePopupLogic
 import Util.HtmlUtil as HtmlUtil

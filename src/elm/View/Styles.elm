@@ -2,7 +2,7 @@ module View.Styles exposing (..)
 
 import Model.ProfilePopupLogic as ProfilePopupLogic
 import Util.StyleUtil exposing (..)
-import View.CommonStyles as Common exposing (..)
+import View.CommonStyles exposing (..)
 import CoreType exposing (..)
 
 

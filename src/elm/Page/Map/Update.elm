@@ -17,7 +17,7 @@ import Util.File as File exposing (..)
 import Util.HttpUtil as HttpUtil
 import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
 import Model.User as User exposing (User)
-import Model.Person as Person exposing (Person)
+import Model.Person exposing (Person)
 import Model.Object as Object exposing (..)
 import Model.ObjectsOperation as ObjectsOperation
 import Model.Scale as Scale
@@ -26,8 +26,8 @@ import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
 import Model.Floor as Floor exposing (Floor)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
-import Model.Information as Information exposing (Information(..))
-import Model.I18n as I18n exposing (Language(..))
+import Model.Information exposing (Information(..))
+import Model.I18n exposing (Language(..))
 import Model.SaveRequest as SaveRequest exposing (SaveRequest(..), ReducedSaveRequest)
 import Model.EditingFloor as EditingFloor exposing (EditingFloor)
 import Model.ClipboardData as ClipboardData

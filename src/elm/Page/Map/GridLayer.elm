@@ -3,9 +3,9 @@ module Page.Map.GridLayer exposing (view)
 import Svg exposing (..)
 import Svg.Attributes exposing (..)
 import Svg.Lazy exposing (..)
-import Model.Scale as Scale exposing (Scale)
+import Model.Scale exposing (Scale)
 import Model.Floor as Floor exposing (Floor)
-import Page.Map.Model as Model exposing (Model)
+import Page.Map.Model exposing (Model)
 
 
 view : Model -> Floor -> Svg msg

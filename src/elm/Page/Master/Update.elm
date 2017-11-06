@@ -8,7 +8,7 @@ import API.API as API
 import API.Page as Page
 import API.Cache as Cache exposing (Cache, UserState)
 import Component.Header as Header
-import Model.I18n as I18n exposing (Language(..))
+import Model.I18n exposing (Language(..))
 import Model.User as User exposing (User)
 import Model.Prototype exposing (Prototype)
 import Model.ColorPalette as ColorPalette exposing (ColorPalette)

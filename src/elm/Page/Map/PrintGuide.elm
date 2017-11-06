@@ -3,7 +3,7 @@ module Page.Map.PrintGuide exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html.Lazy as Lazy exposing (..)
+import Html.Lazy exposing (..)
 import Model.I18n as I18n exposing (Language)
 import View.Styles as Styles
 import Util.StyleUtil exposing (..)

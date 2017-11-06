@@ -9,7 +9,7 @@ import Model.EditingFloor as EditingFloor
 import Model.I18n as I18n
 import Model.Floor as Floor
 import Page.Map.Msg exposing (..)
-import Page.Map.Model as Model exposing (Model, DraggingContext(..))
+import Page.Map.Model exposing (Model, DraggingContext(..))
 import Page.Map.ContextMenuContext exposing (..)
 
 
