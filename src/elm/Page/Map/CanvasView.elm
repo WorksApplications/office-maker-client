@@ -1,14 +1,14 @@
 module Page.Map.CanvasView exposing (view, temporaryStampView)
 
 import Dict exposing (..)
-import Json.Decode as Decode exposing (Decoder)
+import Json.Decode as Decode
 import Mouse
 import Html exposing (..)
 import Html.Attributes as Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Keyed as Keyed
 import Html.Lazy as Lazy exposing (..)
-import Svg exposing (Svg)
+import Svg
 import Svg.Attributes
 import Svg.Keyed
 import VirtualDom

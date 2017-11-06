@@ -1,30 +1,30 @@
 port module Page.Map.Update exposing (..)
 
-import Task exposing (Task, andThen, onError)
+import Task exposing (Task, andThen)
 import Window
 import Process
 import Keyboard
 import Dict exposing (Dict)
 import Navigation exposing (Location)
-import Time exposing (Time, second)
+import Time exposing (second)
 import Dom
 import Mouse
-import Debounce exposing (Debounce)
+import Debounce
 import ContextMenu
 import Util.IdGenerator as IdGenerator exposing (Seed)
 import Util.DictUtil as DictUtil
 import Util.File as File exposing (..)
 import Util.HttpUtil as HttpUtil
 import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
-import Model.User as User exposing (User)
+import Model.User as User
 import Model.Person exposing (Person)
 import Model.Object as Object exposing (..)
 import Model.ObjectsOperation as ObjectsOperation
 import Model.Scale as Scale
 import Model.Prototype exposing (Prototype)
-import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
+import Model.Prototypes as Prototypes exposing (PositionedPrototype)
 import Model.Floor as Floor exposing (Floor)
-import Model.FloorInfo as FloorInfo exposing (FloorInfo)
+import Model.FloorInfo as FloorInfo
 import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
 import Model.Information exposing (Information(..))
 import Model.I18n exposing (Language(..))
@@ -34,7 +34,7 @@ import Model.ClipboardData as ClipboardData
 import Model.SearchResult as SearchResult
 import API.API as API
 import API.Page as Page
-import API.Cache as Cache exposing (Cache, UserState)
+import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
 import Component.FloorProperty as FloorProperty
 import Component.Header as Header
@@ -42,7 +42,7 @@ import Component.ImageLoader as ImageLoader
 import Component.FloorDeleter as FloorDeleter
 import Page.Map.Model as Model exposing (Model, DraggingContext(..))
 import Page.Map.Msg exposing (Msg(..))
-import Page.Map.URL as URL exposing (URL)
+import Page.Map.URL as URL
 import Page.Map.ObjectNameInput as ObjectNameInput
 import Page.Map.KeyOperation as KeyOperation
 import Http

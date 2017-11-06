@@ -1,7 +1,7 @@
 port module Page.Login.Main exposing (..)
 
-import Html exposing (Html, text, div, input, form, h2)
-import Html.Attributes exposing (type_, value, action, method, style, autofocus)
+import Html exposing (Html, text, div, input, h2)
+import Html.Attributes exposing (type_, value, style, autofocus)
 import Task
 import Http
 import Navigation

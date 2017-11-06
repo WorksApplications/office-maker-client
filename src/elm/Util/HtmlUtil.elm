@@ -1,7 +1,7 @@
 module Util.HtmlUtil exposing (..)
 
 import Mouse exposing (Position)
-import Html exposing (Html, Attribute, text)
+import Html exposing (Html, Attribute)
 import Html.Attributes
 import Html.Events exposing (on, onWithOptions, targetValue, defaultOptions)
 import Json.Decode as Decode exposing (..)

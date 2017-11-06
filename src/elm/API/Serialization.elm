@@ -1,10 +1,10 @@
 module API.Serialization exposing (..)
 
 import Date
-import Dict exposing (Dict)
+import Dict
 import Json.Encode as E exposing (Value)
 import Json.Decode as D exposing (Decoder)
-import Json.Decode.Pipeline exposing (decode, required, optional, hardcoded, custom)
+import Json.Decode.Pipeline exposing (decode, required, optional)
 import Util.DecodeUtil exposing (..)
 import Model.Floor as Floor exposing (Floor, FloorBase)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)

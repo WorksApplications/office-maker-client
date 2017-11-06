@@ -15,7 +15,7 @@ import Component.ImageLoader as ImageLoader
 import Component.FloorDeleter as FloorDeleter
 import Util.HtmlUtil exposing (..)
 import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
-import Model.Prototypes as Prototypes exposing (PositionedPrototype)
+import Model.Prototypes as Prototypes
 import Model.EditingFloor as EditingFloor
 import Model.I18n as I18n exposing (Language)
 import Model.User as User exposing (User)

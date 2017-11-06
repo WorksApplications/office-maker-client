@@ -1,14 +1,14 @@
 module Page.Map.Msg exposing (..)
 
 import Time exposing (Time)
-import Debounce exposing (Debounce)
-import ContextMenu exposing (ContextMenu)
+import Debounce
+import ContextMenu
 import Model.Mode exposing (Mode(..), EditingMode(..))
 import Model.User exposing (User)
 import Model.Person exposing (Person)
 import Model.Object as Object exposing (..)
 import Model.Prototype exposing (Prototype)
-import Model.Prototypes as Prototypes exposing (Prototypes)
+import Model.Prototypes as Prototypes
 import Model.Floor exposing (Floor, FloorBase)
 import Model.FloorInfo exposing (FloorInfo)
 import Model.Information exposing (Information(..))
@@ -17,7 +17,7 @@ import Model.SearchResult exposing (SearchResult)
 import Model.SaveRequest exposing (SaveRequest(..))
 import Model.ColorPalette exposing (ColorPalette)
 import Util.File exposing (File)
-import API.Cache exposing (Cache, UserState)
+import API.Cache exposing (UserState)
 import Component.FloorProperty as FloorProperty
 import Component.Header as Header exposing (..)
 import Component.ImageLoader as ImageLoader

@@ -1,8 +1,8 @@
 module Page.Master.Msg exposing (..)
 
 import Http
-import Debounce exposing (Debounce)
-import API.Cache exposing (Cache, UserState)
+import Debounce
+import API.Cache exposing (UserState)
 import Component.Header as Header
 import Model.User exposing (User)
 import Model.Prototype exposing (Prototype)

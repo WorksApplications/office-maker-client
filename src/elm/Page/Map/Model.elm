@@ -18,14 +18,14 @@ import Model.Floor as Floor exposing (Floor)
 import Model.FloorInfo exposing (FloorInfo)
 import Model.Information exposing (Information(..))
 import Model.I18n exposing (Language)
-import Model.SearchResult exposing (SearchResult, SearchResultsForOnePost)
+import Model.SearchResult exposing (SearchResult)
 import Model.ProfilePopupLogic as ProfilePopupLogic
 import Model.ColorPalette as ColorPalette exposing (ColorPalette)
 import Model.EditingFloor as EditingFloor exposing (EditingFloor)
 import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
 import Model.SaveRequest exposing (SaveRequest(..))
 import API.API as API
-import API.Cache as Cache exposing (Cache, UserState)
+import API.Cache as Cache exposing (Cache)
 import Component.FloorProperty as FloorProperty exposing (FloorProperty)
 import Component.Header as Header
 import Component.FloorDeleter as FloorDeleter exposing (FloorDeleter)

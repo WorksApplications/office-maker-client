@@ -6,7 +6,7 @@ import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy as Lazy
 import Model.Object as Object exposing (..)
-import Model.Floor exposing (Floor, FloorBase)
+import Model.Floor exposing (FloorBase)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo(..))
 import Model.Person exposing (Person)
 import Model.Mode as Mode exposing (Mode(..))

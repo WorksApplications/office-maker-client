@@ -2,11 +2,11 @@ module View.PrototypePreviewView exposing (view, singleView, emptyView)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Svg exposing (Svg)
+import Svg
 import Svg.Attributes
 import View.Styles as S
 import View.ObjectView as ObjectView
-import Model.Scale as Scale exposing (Scale)
+import Model.Scale as Scale
 import Model.Prototype exposing (Prototype)
 import CoreType exposing (..)
 

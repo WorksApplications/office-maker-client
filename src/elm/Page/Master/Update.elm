@@ -3,13 +3,13 @@ module Page.Master.Update exposing (..)
 import Time exposing (second)
 import Task
 import Navigation
-import Debounce exposing (Debounce)
+import Debounce
 import API.API as API
 import API.Page as Page
-import API.Cache as Cache exposing (Cache, UserState)
+import API.Cache as Cache exposing (UserState)
 import Component.Header as Header
 import Model.I18n exposing (Language(..))
-import Model.User as User exposing (User)
+import Model.User as User
 import Model.Prototype exposing (Prototype)
 import Model.ColorPalette as ColorPalette exposing (ColorPalette)
 import Util.ListUtil as ListUtil

@@ -5,7 +5,7 @@ import Html.Attributes exposing (..)
 import Util.HtmlUtil exposing (..)
 import Util.ListUtil exposing (..)
 import Model.Prototype exposing (Prototype)
-import Model.Prototypes as Prototypes exposing (PositionedPrototype)
+import Model.Prototypes as Prototypes
 import View.Styles as S
 import View.PrototypePreviewView as PrototypePreviewView
 import Page.Map.Msg exposing (..)

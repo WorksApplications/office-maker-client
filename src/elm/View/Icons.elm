@@ -1,7 +1,7 @@
 module View.Icons exposing (..)
 
 import Svg exposing (Svg)
-import Color exposing (Color, white, black, gray)
+import Color exposing (Color, white)
 import FontAwesome exposing (..)
 
 

@@ -1,6 +1,5 @@
 module Model.Object exposing (..)
 
-import Time exposing (Time)
 import CoreType exposing (..)
 
 
