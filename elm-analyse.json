@@ -1,0 +1,33 @@
+{
+  "checks": {
+    "DebugCrash": false,
+    "DebugLog": false,
+    "DropConcatOfLists": false,
+    "DropConsOfItemAndList": false,
+    "DuplicateImport": true,
+    "DuplicateImportedVariable": true,
+    "ExposeAll": false,
+    "ImportAll": false,
+    "LineLengthExceeded": false,
+    "MultiLineRecordFormatting": false,
+    "NoTopLevelSignature": false,
+    "NoUncurriedPrefix": true,
+    "NonStaticRegex": true,
+    "RedefineVariable": false,
+    "SingleFieldRecord": false,
+    "UnnecessaryListConcat": false,
+    "UnnecessaryParens": true,
+    "UnusedImport": true,
+    "UnusedImportAlias": true,
+    "UnusedImportedVariable": true,
+    "UnusedPatternVariable": false,
+    "UnusedTopLevel": true,
+    "UnusedTypeAlias": true,
+    "UnusedVariable": false,
+    "UseConsOverConcat": false,
+    "UnformattedFile": true
+  },
+  "TriggerWords": {
+    "words": ["todo_", "fix_"]
+  }
+}
