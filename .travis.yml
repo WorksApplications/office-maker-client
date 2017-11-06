@@ -1,9 +1,0 @@
-language: node_js
-node_js:
-  - "6"
-before_script:
-  - npm install -g elm@0.18.0
-  - npm install -g elm-test@0.18.8
-  - elm-package install -y
-  - cp op/config-template.json config.test.json
-script: sh build.sh test && elm-test --seed 504764720
