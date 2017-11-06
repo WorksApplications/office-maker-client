@@ -388,13 +388,13 @@ decodeSearchedPeopleWithObjectsAsSearchResults =
                                     SearchResult.MissingPerson person.id :: results
 
                                 objects ->
-                                    (++) results
-                                        (objects
-                                            |> List.map
-                                                (\object ->
-                                                    SearchResult.Object object (Object.floorIdOf object)
-                                                )
-                                        )
+                                    results
+                                        ++ (objects
+                                                |> List.map
+                                                    (\object ->
+                                                        SearchResult.Object object (Object.floorIdOf object)
+                                                    )
+                                           )
                               )
                             , person :: people
                             )
