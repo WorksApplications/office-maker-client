@@ -17,6 +17,7 @@ dest
 # work
 tmp
 test.sh
+elm-analyse.json
 
 # doc
 doc
