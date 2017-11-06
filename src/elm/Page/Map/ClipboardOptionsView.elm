@@ -18,16 +18,6 @@ init =
     Form Nothing Nothing
 
 
-maybeError : Result e a -> Maybe e
-maybeError result =
-    case result of
-        Ok _ ->
-            Nothing
-
-        Err message ->
-            Just message
-
-
 type Msg
     = ChangeWidth (Result String Int)
     | ChangeHeight (Result String Int)

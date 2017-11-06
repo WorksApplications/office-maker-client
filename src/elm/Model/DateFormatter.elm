@@ -51,17 +51,12 @@ sameDay d1 d2 =
         && (day d1 == day d2)
 
 
-am : Date -> Bool
-am date =
+isAM : Date -> Bool
+isAM date =
     if hour date < 12 then
         True
     else
         False
-
-
-pm : Date -> Bool
-pm =
-    not << am
 
 
 hourOfAmPm : Int -> Int
@@ -78,7 +73,7 @@ ampm date =
         ++ ":"
         ++ fillZero2 (toString (minute date))
         ++ " "
-        ++ (if am date then
+        ++ (if isAM date then
                 "a.m."
             else
                 "p.m."
