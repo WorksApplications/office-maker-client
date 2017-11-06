@@ -189,7 +189,7 @@ encodeObjectPropertyChange objectId floorId changes =
 
 encodeObjectPropertyChangeProperty : ObjectPropertyChange -> List ( String, Value )
 encodeObjectPropertyChangeProperty change =
-    case Debug.log "change" change of
+    case change of
         Object.ChangeName new _ ->
             [ ( "name", E.string new ) ]
 
