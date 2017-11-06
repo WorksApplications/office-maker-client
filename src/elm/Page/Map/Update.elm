@@ -525,9 +525,6 @@ update msg model =
                 model0 =
                     { model | mousePosition = mousePosition }
 
-                canvasPosition =
-                    Model.canvasPosition model0
-
                 ( model_, cmd ) =
                     if ObjectNameInput.isEditing model0.objectNameInput then
                         let

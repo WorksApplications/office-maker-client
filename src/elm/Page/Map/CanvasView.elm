@@ -298,16 +298,6 @@ canvasView model floor =
               )
             ]
 
-        position =
-            Scale.imageToScreenForPosition
-                model.scale
-                model.offset
-
-        size =
-            Scale.screenToImageForSize
-                model.scale
-                (Size (Floor.width floor) (Floor.height floor))
-
         children2 =
             [ ( "paste-handler"
               , pasteHandler
