@@ -1,8 +1,8 @@
 module View.Icons exposing (..)
 
-import Svg exposing (Svg)
 import Color exposing (Color, white)
 import FontAwesome exposing (..)
+import Svg exposing (Svg)
 
 
 defaultColor : Color
@@ -120,6 +120,11 @@ searchResultItemPost =
 personDetailPopupPersonTel : Svg msg
 personDetailPopupPersonTel =
     phone defaultColor 16
+
+
+personDetailPopupPersonEmployeeId : Svg msg
+personDetailPopupPersonEmployeeId =
+    credit_card defaultColor 16
 
 
 personDetailPopupPersonMail : Svg msg

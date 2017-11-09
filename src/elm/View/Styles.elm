@@ -1,9 +1,9 @@
 module View.Styles exposing (..)
 
+import CoreType exposing (..)
 import Model.ProfilePopupLogic as ProfilePopupLogic
 import Util.StyleUtil exposing (..)
 import View.CommonStyles exposing (..)
-import CoreType exposing (..)
 
 
 type alias S =
@@ -93,11 +93,11 @@ deskInput pos size =
         size_ =
             Size (max size.width 100) (max size.height 15)
     in
-        absoluteRect pos size_
-            ++ noPadding
-            ++ [ ( "z-index", zIndex.deskInput )
-               , ( "box-sizing", "border-box" )
-               ]
+    absoluteRect pos size_
+        ++ noPadding
+        ++ [ ( "z-index", zIndex.deskInput )
+           , ( "box-sizing", "border-box" )
+           ]
 
 
 nameInputTextArea : Position -> Size -> S
@@ -763,11 +763,20 @@ personDetailPopupPersonPost =
     ]
 
 
+personDetailPopupPersonEmployeeId : S
+personDetailPopupPersonEmployeeId =
+    flex
+        ++ [ ( "position", "absolute" )
+           , ( "top", "40px" )
+           , ( "left", "100px" )
+           ]
+
+
 personDetailPopupPersonTel : Bool -> S
 personDetailPopupPersonTel second =
     flex
         ++ [ ( "position", "absolute" )
-           , ( "top", "50px" )
+           , ( "top", "60px" )
            , ( "left"
              , if second then
                 "180px"
@@ -781,7 +790,7 @@ personDetailPopupPersonMail : S
 personDetailPopupPersonMail =
     flex
         ++ [ ( "position", "absolute" )
-           , ( "top", "70px" )
+           , ( "top", "80px" )
            , ( "left", "100px" )
            ]
 
@@ -810,17 +819,17 @@ candidatesViewContainer screenPosOfDesk screenSizeOfDesk relatedPersonExists can
                 + (candidateItemHeight * candidateLength)
 
         left =
-            screenPosOfDesk.x + (max screenSizeOfDesk.width 100) + 15
+            screenPosOfDesk.x + max screenSizeOfDesk.width 100 + 15
 
         top =
             Basics.max 10 (screenPosOfDesk.y - totalHeight // 2)
     in
-        [ ( "position", "absolute" )
-        , ( "top", px top )
-        , ( "left", px left )
-        , ( "z-index", zIndex.candidatesView )
-        ]
-            ++ shadow
+    [ ( "position", "absolute" )
+    , ( "top", px top )
+    , ( "left", px left )
+    , ( "z-index", zIndex.candidatesView )
+    ]
+        ++ shadow
 
 
 candidateViewPointer : Position -> Size -> S
@@ -832,10 +841,10 @@ candidateViewPointer screenPosOfDesk screenSizeOfDesk =
         top =
             screenPosOfDesk.y + 10
     in
-        popupPointerLeft
-            ++ [ ( "top", px top )
-               , ( "left", px left )
-               ]
+    popupPointerLeft
+        ++ [ ( "top", px top )
+           , ( "left", px left )
+           ]
 
 
 candidatesView : S

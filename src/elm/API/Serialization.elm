@@ -1,22 +1,22 @@
 module API.Serialization exposing (..)
 
+import API.Defaults as Defaults
+import CoreType exposing (..)
 import Date
 import Dict
-import Json.Encode as E exposing (Value)
 import Json.Decode as D exposing (Decoder)
-import Json.Decode.Pipeline exposing (decode, required, optional)
-import Util.DecodeUtil exposing (..)
+import Json.Decode.Pipeline exposing (decode, optional, required)
+import Json.Encode as E exposing (Value)
+import Model.ColorPalette exposing (ColorPalette)
 import Model.Floor as Floor exposing (Floor, FloorBase)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo)
-import Model.User as User exposing (User)
+import Model.Object as Object exposing (Object, ObjectPropertyChange, Shape(..))
+import Model.ObjectsChange as ObjectsChange exposing (..)
 import Model.Person exposing (Person)
-import Model.Object as Object exposing (Object, Shape(..), ObjectPropertyChange)
 import Model.Prototype exposing (Prototype)
 import Model.SearchResult as SearchResult exposing (SearchResult)
-import Model.ColorPalette exposing (ColorPalette)
-import Model.ObjectsChange as ObjectsChange exposing (..)
-import CoreType exposing (..)
-import API.Defaults as Defaults
+import Model.User as User exposing (User)
+import Util.DecodeUtil exposing (..)
 
 
 decodeAuthToken : Decoder String
@@ -63,41 +63,41 @@ encodeObject object =
         { width, height } =
             Object.sizeOf object
     in
-        E.object <|
-            List.concat
-                [ [ ( "id", E.string (Object.idOf object) ) ]
-                , [ ( "floorId", E.string (Object.floorIdOf object) ) ]
-                , if Object.isDesk object then
-                    []
-                  else
-                    [ ( "type", E.string "label" ) ]
-                , [ ( "x", E.int x ) ]
-                , [ ( "y", E.int y ) ]
-                , [ ( "width", E.int width ) ]
-                , [ ( "height", E.int height ) ]
-                , [ ( "backgroundColor", E.string (Object.backgroundColorOf object) ) ]
-                , if Object.colorOf object == Defaults.color then
-                    []
-                  else
-                    [ ( "color", E.string (Object.colorOf object) ) ]
-                , if Object.isBold object then
-                    [ ( "bold", E.bool True ) ]
-                  else
-                    []
-                , [ ( "url", E.string (Object.urlOf object) ) ]
-                , [ ( "shape", encodeShape (Object.shapeOf object) ) ]
-                , [ ( "name", E.string (Object.nameOf object) ) ]
-                , if Object.fontSizeOf object == Defaults.fontSize then
-                    []
-                  else
-                    [ ( "fontSize", E.float (Object.fontSizeOf object) ) ]
-                , case Object.relatedPerson object of
-                    Just personId ->
-                        [ ( "personId", E.string personId ) ]
+    E.object <|
+        List.concat
+            [ [ ( "id", E.string (Object.idOf object) ) ]
+            , [ ( "floorId", E.string (Object.floorIdOf object) ) ]
+            , if Object.isDesk object then
+                []
+              else
+                [ ( "type", E.string "label" ) ]
+            , [ ( "x", E.int x ) ]
+            , [ ( "y", E.int y ) ]
+            , [ ( "width", E.int width ) ]
+            , [ ( "height", E.int height ) ]
+            , [ ( "backgroundColor", E.string (Object.backgroundColorOf object) ) ]
+            , if Object.colorOf object == Defaults.color then
+                []
+              else
+                [ ( "color", E.string (Object.colorOf object) ) ]
+            , if Object.isBold object then
+                [ ( "bold", E.bool True ) ]
+              else
+                []
+            , [ ( "url", E.string (Object.urlOf object) ) ]
+            , [ ( "shape", encodeShape (Object.shapeOf object) ) ]
+            , [ ( "name", E.string (Object.nameOf object) ) ]
+            , if Object.fontSizeOf object == Defaults.fontSize then
+                []
+              else
+                [ ( "fontSize", E.float (Object.fontSizeOf object) ) ]
+            , case Object.relatedPerson object of
+                Just personId ->
+                    [ ( "personId", E.string personId ) ]
 
-                    Nothing ->
-                        []
-                ]
+                Nothing ->
+                    []
+            ]
 
 
 encodeShape : Shape -> Value
@@ -292,6 +292,7 @@ decodePerson =
         |> optional_ "tel1" D.string
         |> optional_ "tel2" D.string
         |> optional_ "image" D.string
+        |> optional_ "employeeId" D.string
 
 
 {-| this is needed for historical reason...
@@ -306,6 +307,7 @@ decodePersonFromProfileService =
         |> optional_ "extensionPhone" D.string
         |> optional_ "cellPhone" D.string
         |> optional_ "picture" D.string
+        |> optional_ "employeeId" D.string
 
 
 decodePeopleFromProfileServiceSearch : Decoder (List Person)
@@ -383,7 +385,7 @@ decodeSearchedPeopleWithObjectsAsSearchResults =
                 results
                     |> List.foldl
                         (\( person, objects ) ( results, people ) ->
-                            ( (case objects of
+                            ( case objects of
                                 [] ->
                                     SearchResult.MissingPerson person.id :: results
 
@@ -395,7 +397,6 @@ decodeSearchedPeopleWithObjectsAsSearchResults =
                                                         SearchResult.Object object (Object.floorIdOf object)
                                                     )
                                            )
-                              )
                             , person :: people
                             )
                         )
@@ -612,7 +613,7 @@ makeColorPalette : List ColorEntity -> ColorPalette
 makeColorPalette entities =
     let
         sorted =
-            List.sortBy (.ord) entities
+            List.sortBy .ord entities
 
         backgroundColors =
             List.filterMap
@@ -634,9 +635,9 @@ makeColorPalette entities =
                 )
                 sorted
     in
-        { backgroundColors = backgroundColors
-        , textColors = textColors
-        }
+    { backgroundColors = backgroundColors
+    , textColors = textColors
+    }
 
 
 makeColorEntities : ColorPalette -> List ColorEntity
