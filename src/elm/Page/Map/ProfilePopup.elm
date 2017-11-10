@@ -1,18 +1,18 @@
-module Page.Map.ProfilePopup exposing (view, personView, nonPersonView)
+module Page.Map.ProfilePopup exposing (nonPersonView, personView, view)
 
+import CoreType exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy exposing (..)
-import View.Styles as Styles
-import View.Icons as Icons
-import Model.Scale exposing (Scale)
-import Model.Person exposing (Person)
 import Model.Object as Object exposing (Object)
+import Model.Person exposing (Person)
 import Model.ProfilePopupLogic as ProfilePopupLogic
-import Util.HtmlUtil as HtmlUtil
-import CoreType exposing (..)
+import Model.Scale exposing (Scale)
 import Page.Map.Msg exposing (Msg(..))
+import Util.HtmlUtil as HtmlUtil
+import View.Icons as Icons
+import View.Styles as Styles
 
 
 personPopupSize : Size
@@ -26,22 +26,22 @@ view closeMsg transition scale offsetScreenXY object person =
         centerTopScreenXY =
             ProfilePopupLogic.centerTopScreenXYOfObject scale offsetScreenXY object
     in
-        case person of
-            Just person ->
-                div
-                    [ style (Styles.personDetailPopupDefault transition personPopupSize centerTopScreenXY)
-                    ]
-                    (lazy2 pointerDefault transition personPopupSize.width
-                        :: personView (Just closeMsg) (Object.idOf object) person
-                    )
+    case person of
+        Just person ->
+            div
+                [ style (Styles.personDetailPopupDefault transition personPopupSize centerTopScreenXY)
+                ]
+                (lazy2 pointerDefault transition personPopupSize.width
+                    :: personView (Just closeMsg) (Object.idOf object) person
+                )
 
-            Nothing ->
-                nonPersonPopup
-                    transition
-                    centerTopScreenXY
-                    (Object.idOf object)
-                    (Object.nameOf object)
-                    (Object.urlOf object)
+        Nothing ->
+            nonPersonPopup
+                transition
+                centerTopScreenXY
+                (Object.idOf object)
+                (Object.nameOf object)
+                (Object.urlOf object)
 
 
 nonPersonPopup : Bool -> Position -> ObjectId -> String -> String -> Html Msg
@@ -58,13 +58,13 @@ nonPersonPopup transition centerTopScreenXY objectId name url =
                         size =
                             smallPopupSize (String.length name)
                     in
-                        ( size, Styles.personDetailPopupSmall transition size centerTopScreenXY )
+                    ( size, Styles.personDetailPopupSmall transition size centerTopScreenXY )
         in
-            div
-                [ style styles
-                , classList [ ( "popup-blink", transition ) ]
-                ]
-                (pointerSmall transition size :: nonPersonView objectId name url)
+        div
+            [ style styles
+            , classList [ ( "popup-blink", transition ) ]
+            ]
+            (pointerSmall transition size :: nonPersonView objectId name url)
 
 
 nonPersonView : ObjectId -> String -> String -> List (Html Msg)
@@ -114,23 +114,24 @@ personView maybeCloseMsg objectId person =
                 Nothing ->
                     text ""
     in
-        [ closeButton
-        , lazy photo url
-        , div
-            [ style Styles.personDetailPopupPersonName ]
-            [ text person.name
-            , objectLink
-                [ ( "position", "absolute" )
-                , ( "top", "4px" )
-                , ( "margin-left", "5px" )
-                ]
-                objectId
+    [ closeButton
+    , lazy photo url
+    , div
+        [ style Styles.personDetailPopupPersonName ]
+        [ text person.name
+        , objectLink
+            [ ( "position", "absolute" )
+            , ( "top", "4px" )
+            , ( "margin-left", "5px" )
             ]
-        , lazy2 viewTel False person.tel1
-        , lazy2 viewTel True person.tel2
-        , lazy mail person
-        , div [ style Styles.personDetailPopupPersonPost ] [ text person.post ]
+            objectId
         ]
+    , lazy viewEmployeeId person.employeeId
+    , lazy2 viewTel False person.tel1
+    , lazy2 viewTel True person.tel2
+    , lazy mail person
+    , div [ style Styles.personDetailPopupPersonPost ] [ text person.post ]
+    ]
 
 
 objectLink : List ( String, String ) -> String -> Html Msg
@@ -160,6 +161,22 @@ pointerSmall transition size =
         , classList [ ( "popup-blink", transition ) ]
         ]
         []
+
+
+viewEmployeeId : Maybe String -> Html msg
+viewEmployeeId employeeId =
+    div [ style Styles.personDetailPopupPersonEmployeeId ]
+        [ Icons.personDetailPopupPersonEmployeeId
+        , div
+            [ style Styles.personDetailPopupPersonIconText ]
+            [ case employeeId of
+                Just employeeId ->
+                    text employeeId
+
+                Nothing ->
+                    text ""
+            ]
+        ]
 
 
 viewTel : Bool -> Maybe String -> Html msg

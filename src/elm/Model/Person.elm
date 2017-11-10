@@ -13,4 +13,5 @@ type alias Person =
     , tel1 : Maybe String
     , tel2 : Maybe String
     , image : Maybe String
+    , employeeId : Maybe String
     }
