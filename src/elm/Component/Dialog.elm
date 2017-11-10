@@ -1,11 +1,11 @@
 module Component.Dialog exposing (..)
 
-import Task
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import View.DialogView as DialogView
+import Task
 import View.CommonStyles as S
+import View.DialogView as DialogView
 
 
 type alias Config msg =
@@ -70,13 +70,13 @@ view config content opened =
                         ConfirmOrClose _ ( cancelText, cancelMsg ) ->
                             Close cancelMsg
         in
-            DialogView.viewWithSize clickBackgroundMsg
-                100000
-                300
-                150
-                [ div [] [ text content ]
-                , footer
-                ]
+        DialogView.viewWithSize clickBackgroundMsg
+            100000
+            300
+            150
+            [ div [] [ text content ]
+            , footer
+            ]
     else
         text ""
 

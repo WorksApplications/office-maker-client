@@ -1,8 +1,8 @@
 module Model.Information exposing (..)
 
+import API.API as API exposing (..)
 import Dom
 import Util.File as File
-import API.API as API exposing (..)
 
 
 type Information

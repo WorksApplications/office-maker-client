@@ -1,11 +1,11 @@
 module Util.HttpUtil exposing (..)
 
-import Task exposing (..)
-import Native.HttpUtil
-import Util.File as File exposing (File(File))
 import Http exposing (..)
 import Json.Decode exposing (Decoder)
 import Json.Encode as E
+import Native.HttpUtil
+import Task exposing (..)
+import Util.File as File exposing (File(File))
 
 
 encodeHeaders : List ( String, String ) -> E.Value

@@ -1,4 +1,4 @@
-module View.DialogView exposing (viewWithSize, viewWithMarginParcentage)
+module View.DialogView exposing (viewWithMarginParcentage, viewWithSize)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)

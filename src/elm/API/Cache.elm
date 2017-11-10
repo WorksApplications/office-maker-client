@@ -1,11 +1,11 @@
 module API.Cache exposing (..)
 
-import Task exposing (..)
-import Json.Encode as E exposing (Value)
 import Json.Decode as D exposing (Decoder)
-import PersistentCache as Cache
-import Model.Scale as Scale exposing (Scale)
+import Json.Encode as E exposing (Value)
 import Model.I18n as I18n exposing (..)
+import Model.Scale as Scale exposing (Scale)
+import PersistentCache as Cache
+import Task exposing (..)
 import Util.DecodeUtil exposing (..)
 
 

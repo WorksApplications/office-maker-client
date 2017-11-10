@@ -1,8 +1,8 @@
 module Model.ObjectsChange exposing (..)
 
+import CoreType exposing (..)
 import Dict exposing (Dict)
 import Model.Object as Object exposing (..)
-import CoreType exposing (..)
 
 
 type alias ObjectModification =
@@ -106,7 +106,7 @@ separate change =
                 ( [], [], [] )
                 change
     in
-        { added = added
-        , modified = modified
-        , deleted = deleted
-        }
+    { added = added
+    , modified = modified
+    , deleted = deleted
+    }

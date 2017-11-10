@@ -1,24 +1,24 @@
 module Model.FloorInfo
     exposing
         ( FloorInfo
-        , init
-        , isNeverPublished
-        , idOf
-        , publicFloor
         , editingFloor
-        , findPublicFloor
         , findFloor
+        , findPublicFloor
+        , idOf
+        , init
+        , intToOrd
+        , isNeverPublished
         , mergeEditingFloor
         , mergePublicFloor
-        , toValues
-        , toPublicList
-        , toEditingList
-        , intToOrd
+        , publicFloor
         , sortByPublicOrder
+        , toEditingList
+        , toPublicList
+        , toValues
         )
 
-import Dict exposing (Dict)
 import CoreType exposing (..)
+import Dict exposing (Dict)
 import Model.Floor exposing (FloorBase)
 
 

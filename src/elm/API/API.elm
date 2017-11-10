@@ -1,48 +1,48 @@
 module API.API
     exposing
-        ( sustainToken
-        , getAuth
-        , search
-        , searchObjects
-        , saveEditingFloor
-        , getObject
-        , saveObjects
-        , publishFloor
+        ( Config
+        , Error
         , deleteEditingFloor
+        , getAuth
+        , getColors
+        , getDiffSource
         , getEditingFloor
         , getFloor
         , getFloorsInfo
-        , saveEditingImage
-        , login
-        , personCandidate
-        , getDiffSource
+        , getObject
+        , getPeopleByFloorAndPost
         , getPerson
         , getPersonMaybe
-        , getPeopleByFloorAndPost
-        , getColors
-        , saveColors
         , getPrototypes
+        , login
+        , personCandidate
+        , publishFloor
+        , saveColors
+        , saveEditingFloor
+        , saveEditingImage
+        , saveObjects
         , savePrototype
         , savePrototypes
-        , Config
-        , Error
+        , search
+        , searchObjects
+        , sustainToken
         )
 
-import Http
-import Task exposing (Task)
-import Util.HttpUtil as HttpUtil exposing (..)
-import Util.File exposing (File)
+import API.Serialization exposing (..)
 import CoreType exposing (..)
+import Http
+import Model.ColorPalette exposing (ColorPalette)
 import Model.Floor exposing (Floor, FloorBase)
 import Model.FloorInfo exposing (FloorInfo)
-import Model.User as User exposing (User)
-import Model.Person exposing (Person)
 import Model.Object exposing (..)
+import Model.ObjectsChange exposing (ObjectChange)
+import Model.Person exposing (Person)
 import Model.Prototype exposing (Prototype)
 import Model.SearchResult exposing (SearchResult)
-import Model.ColorPalette exposing (ColorPalette)
-import Model.ObjectsChange exposing (ObjectChange)
-import API.Serialization exposing (..)
+import Model.User as User exposing (User)
+import Task exposing (Task)
+import Util.File exposing (File)
+import Util.HttpUtil as HttpUtil exposing (..)
 
 
 type alias ImageId =
@@ -231,10 +231,10 @@ search config withPrivate query =
                     []
                 )
     in
-        HttpUtil.get
-            decodeSearchedPeopleWithObjectsAsSearchResults
-            url
-            [ authorization config.token ]
+    HttpUtil.get
+        decodeSearchedPeopleWithObjectsAsSearchResults
+        url
+        [ authorization config.token ]
 
 
 searchObjects : Config -> Bool -> String -> Task Error ( List SearchResult, List Person )
@@ -249,10 +249,10 @@ searchObjects config withPrivate query =
                     []
                 )
     in
-        HttpUtil.get
-            decodeSearchedObjectsAsSearchResults
-            url
-            [ authorization config.token ]
+    HttpUtil.get
+        decodeSearchedObjectsAsSearchResults
+        url
+        [ authorization config.token ]
 
 
 personCandidate : Config -> String -> Task Error (List Person)

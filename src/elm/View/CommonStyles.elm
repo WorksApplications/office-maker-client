@@ -1,7 +1,7 @@
 module View.CommonStyles exposing (..)
 
-import Util.StyleUtil exposing (..)
 import CoreType exposing (..)
+import Util.StyleUtil exposing (..)
 
 
 type alias S =
@@ -68,7 +68,7 @@ rect { x, y } { width, height } =
 
 absoluteRect : Position -> Size -> S
 absoluteRect pos size =
-    ( "position", "absolute" ) :: (rect pos size)
+    ( "position", "absolute" ) :: rect pos size
 
 
 card : S

@@ -1,20 +1,20 @@
 module View.DiffView exposing (view)
 
-import Dict exposing (Dict)
 import Date exposing (Date)
+import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy exposing (..)
-import View.Styles as Styles
-import View.DialogView as DialogView
 import Model.DateFormatter as DateFormatter
-import Model.Object exposing (..)
-import Model.ObjectsChange as ObjectsChange exposing (ObjectModification)
 import Model.Floor exposing (Floor)
 import Model.FloorDiff as FloorDiff
-import Model.Person exposing (Person)
 import Model.I18n as I18n exposing (Language)
+import Model.Object exposing (..)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectModification)
+import Model.Person exposing (Person)
+import View.DialogView as DialogView
+import View.Styles as Styles
 
 
 type alias Options msg =
@@ -41,12 +41,12 @@ viewBody lang current prev =
         { added, modified, deleted } =
             ObjectsChange.separate objectsChange
     in
-        div [ style Styles.diffPopupBody ]
-            [ propertyChangesView lang propertyChanges
-            , viewAdditions lang added
-            , viewModifications lang modified
-            , viewDeletions lang deleted
-            ]
+    div [ style Styles.diffPopupBody ]
+        [ propertyChangesView lang propertyChanges
+        , viewAdditions lang added
+        , viewModifications lang modified
+        , viewDeletions lang deleted
+        ]
 
 
 viewAdditions : Language -> List Object -> Html msg
@@ -176,7 +176,7 @@ buttons lang onClose onConfirm =
                 ]
                 [ text (I18n.confirm lang) ]
     in
-        div [ style Styles.diffPopupFooter ] [ cancelButton, confirmButton ]
+    div [ style Styles.diffPopupFooter ] [ cancelButton, confirmButton ]
 
 
 popup : msg -> List (Html msg) -> Html msg

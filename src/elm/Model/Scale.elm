@@ -100,7 +100,7 @@ imageToScreen scale screenLength =
 
 imageToScreenRatio : Scale -> Float
 imageToScreenRatio scale =
-    1.0 / step ^ (toFloat scale.scaleDown)
+    1.0 / step ^ toFloat scale.scaleDown
 
 
 ratio : Scale -> Scale -> Float

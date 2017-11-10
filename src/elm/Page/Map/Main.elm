@@ -1,11 +1,11 @@
 module Page.Map.Main exposing (..)
 
+import Html.Lazy exposing (lazy)
 import Navigation
 import Page.Map.Model exposing (Model)
+import Page.Map.Msg exposing (Msg)
 import Page.Map.Update as Update exposing (Flags)
 import Page.Map.View as View
-import Page.Map.Msg exposing (Msg)
-import Html.Lazy exposing (lazy)
 
 
 main : Program Flags Model Msg

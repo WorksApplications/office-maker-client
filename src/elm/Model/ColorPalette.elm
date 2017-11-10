@@ -36,7 +36,7 @@ addTextColorToLast color colorPalette =
         | textColors =
             colorPalette.textColors
                 |> List.reverse
-                |> ((::) color)
+                |> (::) color
                 |> List.reverse
     }
 
@@ -47,7 +47,7 @@ addBackgroundColorToLast color colorPalette =
         | backgroundColors =
             colorPalette.backgroundColors
                 |> List.reverse
-                |> ((::) color)
+                |> (::) color
                 |> List.reverse
     }
 

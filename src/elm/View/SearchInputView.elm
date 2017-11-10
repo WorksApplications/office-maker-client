@@ -4,8 +4,8 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Lazy as Lazy
 import Model.I18n as I18n exposing (Language)
-import View.Styles as S
 import Util.HtmlUtil as HtmlUtil
+import View.Styles as S
 
 
 view : Language -> (String -> msg) -> msg -> String -> Html msg

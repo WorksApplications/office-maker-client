@@ -1,16 +1,16 @@
 module Component.FloorProperty exposing (..)
 
-import Json.Decode as Decode
+import Component.Dialog as Dialog exposing (Dialog)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy as Lazy
-import Util.HtmlUtil exposing (..)
-import View.Styles as Styles
-import Model.User as User exposing (User)
+import Json.Decode as Decode
 import Model.Floor exposing (Floor)
 import Model.I18n as I18n exposing (Language)
-import Component.Dialog as Dialog exposing (Dialog)
+import Model.User as User exposing (User)
+import Util.HtmlUtil exposing (..)
+import View.Styles as Styles
 
 
 type Msg
@@ -68,28 +68,28 @@ update message model =
                     else
                         Nothing
             in
-                ( newModel, event )
+            ( newModel, event )
 
         InputFloorOrd ord ->
             let
                 newModel =
                     { model | ordInput = ord }
             in
-                ( newModel, ordEvent ord )
+            ( newModel, ordEvent ord )
 
         InputFloorRealWidth width ->
             let
                 newModel =
                     { model | realWidthInput = width }
             in
-                ( newModel, sizeEvent newModel )
+            ( newModel, sizeEvent newModel )
 
         InputFloorRealHeight height ->
             let
                 newModel =
                     { model | realHeightInput = height }
             in
-                ( newModel, sizeEvent newModel )
+            ( newModel, sizeEvent newModel )
 
 
 ordEvent : String -> Maybe Event
@@ -139,11 +139,11 @@ floorNameInputView lang user model =
         floorNameLabel =
             label [ style Styles.floorNameLabel ] [ text (I18n.name lang) ]
     in
-        div
-            [ style Styles.floorNameInputContainer ]
-            [ floorNameLabel
-            , nameInput user model.nameInput
-            ]
+    div
+        [ style Styles.floorNameInputContainer ]
+        [ floorNameLabel
+        , nameInput user model.nameInput
+        ]
 
 
 nameInput : User -> String -> Html Msg
@@ -153,7 +153,7 @@ nameInput user value =
         input
             ([ style Styles.floorNameInput
              ]
-                ++ (inputAttributes InputFloorName (always NoOp) value Nothing)
+                ++ inputAttributes InputFloorName (always NoOp) value Nothing
             )
             []
     else
@@ -166,7 +166,7 @@ floorOrdInputView lang user model =
         floorOrdLabel =
             label [ style Styles.floorOrdLabel ] [ text (I18n.order lang) ]
     in
-        div [ style Styles.floorOrdInputContainer ] [ floorOrdLabel, ordInput user model.ordInput ]
+    div [ style Styles.floorOrdInputContainer ] [ floorOrdLabel, ordInput user model.ordInput ]
 
 
 ordInput : User -> String -> Html Msg
@@ -175,7 +175,7 @@ ordInput user value =
         input
             ([ style Styles.floorOrdInput
              ]
-                ++ (inputAttributes InputFloorOrd (always NoOp) value Nothing)
+                ++ inputAttributes InputFloorOrd (always NoOp) value Nothing
             )
             []
     else
@@ -194,12 +194,12 @@ floorRealSizeInputView lang user model =
         heightLabel =
             label [ style Styles.widthHeightLabel ] [ text (I18n.heightMeter lang) ]
     in
-        div [ style Styles.floorSizeInputContainer ]
-            [ widthLabel
-            , widthOrHeightValueView InputFloorRealWidth forEdit model.realWidthInput
-            , heightLabel
-            , widthOrHeightValueView InputFloorRealHeight forEdit model.realHeightInput
-            ]
+    div [ style Styles.floorSizeInputContainer ]
+        [ widthLabel
+        , widthOrHeightValueView InputFloorRealWidth forEdit model.realWidthInput
+        , heightLabel
+        , widthOrHeightValueView InputFloorRealHeight forEdit model.realHeightInput
+        ]
 
 
 inputAttributes : (String -> msg) -> (Int -> msg) -> String -> Maybe msg -> List (Attribute msg)
@@ -228,7 +228,7 @@ widthOrHeightValueView toMsg forEdit value =
         input
             ([ style Styles.realSizeInput
              ]
-                ++ (inputAttributes toMsg (always NoOp) value Nothing)
+                ++ inputAttributes toMsg (always NoOp) value Nothing
             )
             []
     else

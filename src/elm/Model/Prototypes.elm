@@ -1,9 +1,9 @@
 module Model.Prototypes exposing (..)
 
-import Model.Prototype exposing (Prototype)
-import Model.ObjectsOperation as ObjectsOperation
-import Util.ListUtil exposing (..)
 import CoreType exposing (..)
+import Model.ObjectsOperation as ObjectsOperation
+import Model.Prototype exposing (Prototype)
+import Util.ListUtil exposing (..)
 
 
 type alias PositionedPrototype =
@@ -67,10 +67,10 @@ register prototype model =
         newPrototypes =
             model.data ++ [ prototype ]
     in
-        { model
-            | data = newPrototypes
-            , selected = List.length newPrototypes - 1
-        }
+    { model
+        | data = newPrototypes
+        , selected = List.length newPrototypes - 1
+    }
 
 
 selectedPrototype : Prototypes -> Maybe Prototype
@@ -117,7 +117,7 @@ stampIndices horizontal deskSize pos1 pos2 =
                         else
                             0
                 in
-                    ( amountX, amountY )
+                ( amountX, amountY )
             else
                 let
                     amountX =
@@ -129,25 +129,25 @@ stampIndices horizontal deskSize pos1 pos2 =
                     amountY =
                         (abs (pos2.y - pos1.y) + deskSize.height // 2) // deskSize.height
                 in
-                    ( amountX, amountY )
+                ( amountX, amountY )
     in
-        ( List.map
-            (\i ->
-                if pos2.x > pos1.x then
-                    i
-                else
-                    -i
-            )
-            (List.range 0 amountX)
-        , List.map
-            (\i ->
-                if pos2.y > pos1.y then
-                    i
-                else
-                    -i
-            )
-            (List.range 0 amountY)
+    ( List.map
+        (\i ->
+            if pos2.x > pos1.x then
+                i
+            else
+                -i
         )
+        (List.range 0 amountX)
+    , List.map
+        (\i ->
+            if pos2.y > pos1.y then
+                i
+            else
+                -i
+        )
+        (List.range 0 amountY)
+    )
 
 
 generateAllCandidatePosition : Size -> Position -> ( List Int, List Int ) -> List Position
@@ -159,7 +159,7 @@ generateAllCandidatePosition deskSize centerPos ( indicesX, indicesY ) =
         tops =
             List.map (\index -> centerPos.y + deskSize.height * index) indicesY
     in
-        List.concatMap (\left -> List.map (\top -> Position left top) tops) lefts
+    List.concatMap (\left -> List.map (\top -> Position left top) tops) lefts
 
 
 positionedPrototypesOnDragging : Int -> Prototype -> Position -> Position -> List PositionedPrototype
@@ -213,4 +213,4 @@ positionedPrototypesOnDragging gridSize prototype xy1 xy2 =
                 , height = deskHeight
             }
     in
-        List.map ((,) prototype_) all
+    List.map ((,) prototype_) all

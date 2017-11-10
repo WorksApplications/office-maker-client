@@ -2,8 +2,8 @@ module View.Common exposing (card, formControl)
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import View.CommonStyles exposing (..)
 import Util.StyleUtil exposing (..)
+import View.CommonStyles exposing (..)
 
 
 card : Bool -> String -> Maybe Int -> Maybe Int -> List (Html msg) -> Html msg

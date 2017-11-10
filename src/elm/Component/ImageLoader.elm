@@ -1,10 +1,10 @@
 module Component.ImageLoader exposing (..)
 
-import Task
 import Html exposing (Html)
+import Model.I18n as I18n exposing (Language)
+import Task
 import Util.File as File exposing (..)
 import Util.HtmlUtil as HtmlUtil
-import Model.I18n as I18n exposing (Language)
 import View.Styles as S
 
 

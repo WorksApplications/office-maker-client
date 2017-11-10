@@ -1,21 +1,21 @@
 module View.ObjectView exposing (EventOptions, noEvents, viewDesk, viewLabel)
 
 import Char
+import CoreType exposing (..)
+import Html.Attributes
+import Html.Events
 import Json.Decode as Decode
+import Model.Scale as Scale exposing (Scale)
+import Mouse
+import Page.Map.Emoji as Emoji
 import Svg exposing (..)
 import Svg.Attributes as Attributes exposing (..)
 import Svg.Lazy exposing (..)
-import Html.Attributes
-import Html.Events
-import VirtualDom exposing (attributeNS)
-import Mouse
+import Util.HtmlUtil as HtmlUtil
+import Util.StyleUtil exposing (px)
 import View.CommonStyles as CommonStyles
 import View.Icons as Icons
-import Model.Scale as Scale exposing (Scale)
-import Page.Map.Emoji as Emoji
-import Util.StyleUtil exposing (px)
-import Util.HtmlUtil as HtmlUtil
-import CoreType exposing (..)
+import VirtualDom exposing (attributeNS)
 
 
 type alias EventOptions msg =
@@ -57,7 +57,7 @@ viewDesk eventOptions showPersonMatch pos size backgroundColor name fontSize sel
         nameView =
             objectLabelView size False "" fontSize pos size name
     in
-        viewInternal eventOptions size selected scale gStyles_ rectStyles_ nameView personMatchIcon
+    viewInternal eventOptions size selected scale gStyles_ rectStyles_ nameView personMatchIcon
 
 
 viewLabel : EventOptions msg -> Position -> Size -> String -> String -> String -> Float -> Bool -> Bool -> Bool -> Bool -> Scale -> Svg msg
@@ -72,7 +72,7 @@ viewLabel eventOptions pos size backgroundColor fontColor name fontSize isEllips
         nameView =
             objectLabelView size True fontColor fontSize pos size name
     in
-        viewInternal eventOptions size selected scale gStyles_ rectStyles_ nameView (text "")
+    viewInternal eventOptions size selected scale gStyles_ rectStyles_ nameView (text "")
 
 
 rectStyles : Size -> Bool -> Bool -> String -> Bool -> List (Svg.Attribute msg)
@@ -95,10 +95,11 @@ rectStyles size rectVisible dashed backgroundColor selected =
             "1.5"
         )
     ]
-        ++ if (dashed && not selected) then
-            [ strokeDasharray "5,5" ]
-           else
-            []
+        ++ (if dashed && not selected then
+                [ strokeDasharray "5,5" ]
+            else
+                []
+           )
 
 
 gStyles : Bool -> Position -> List (Svg.Attribute msg)
@@ -155,20 +156,20 @@ viewInternal eventOptions size selected scale gStyles rectStyles nameView person
                             []
                    )
     in
-        g
-            gStyles
-            [ rect (rectStyles ++ eventHandlers) []
-            , nameView
-            , personMatchIcon
-            , resizeGripView size selected scale eventOptions.onStartResize
-            ]
+    g
+        gStyles
+        [ rect (rectStyles ++ eventHandlers) []
+        , nameView
+        , personMatchIcon
+        , resizeGripView size selected scale eventOptions.onStartResize
+        ]
 
 
 resizeGripView : Size -> Bool -> Scale -> Maybe (Position -> msg) -> Svg msg
 resizeGripView containerSize selected scale onStartResize =
     case ( selected, onStartResize ) of
         ( True, Just msg ) ->
-            (lazy3 resizeGripViewHelp containerSize selected scale)
+            lazy3 resizeGripViewHelp containerSize selected scale
                 |> Svg.map msg
 
         _ ->
@@ -184,18 +185,18 @@ resizeGripViewHelp containerSize selected scale =
         screenHeight =
             screenWidth
     in
-        rect
-            [ class "object-resize-grip"
-            , width (toString screenWidth)
-            , height (toString screenHeight)
-            , x (toString <| containerSize.width - screenWidth // 2)
-            , y (toString <| containerSize.height - screenHeight // 2)
-            , Html.Events.onWithOptions "mousedown" { stopPropagation = True, preventDefault = True } Mouse.position
-            , stroke "black"
-            , fill "white"
-            , Attributes.cursor "nw-resize"
-            ]
-            []
+    rect
+        [ class "object-resize-grip"
+        , width (toString screenWidth)
+        , height (toString screenHeight)
+        , x (toString <| containerSize.width - screenWidth // 2)
+        , y (toString <| containerSize.height - screenHeight // 2)
+        , Html.Events.onWithOptions "mousedown" { stopPropagation = True, preventDefault = True } Mouse.position
+        , stroke "black"
+        , fill "white"
+        , Attributes.cursor "nw-resize"
+        ]
+        []
 
 
 personMatchingView : String -> Bool -> Svg msg
@@ -241,26 +242,26 @@ objectLabelView containerSize canBeEmoji color fontSize_ screenPos screenSize na
             else
                 [ Emoji.TextNode name ]
     in
-        fragments
-            |> List.concatMap
-                (\fragment ->
-                    case fragment of
-                        Emoji.TextNode s ->
-                            String.trim s
-                                |> breakWords containerSize.width fontSize_
-                                |> List.map TextRow
+    fragments
+        |> List.concatMap
+            (\fragment ->
+                case fragment of
+                    Emoji.TextNode s ->
+                        String.trim s
+                            |> breakWords containerSize.width fontSize_
+                            |> List.map TextRow
 
-                        Emoji.Image original url ->
-                            [ ImageRow original url ]
-                )
-            |> viewLabelRow containerSize 0.2 fontSize_
-            |> g
-                [ transform ("translate(0," ++ (toString <| toFloat containerSize.height / 2) ++ ")")
-                , fill color
-                , fontSize (toString fontSize_)
-                , textAnchor "middle"
-                , pointerEvents "none"
-                ]
+                    Emoji.Image original url ->
+                        [ ImageRow original url ]
+            )
+        |> viewLabelRow containerSize 0.2 fontSize_
+        |> g
+            [ transform ("translate(0," ++ (toString <| toFloat containerSize.height / 2) ++ ")")
+            , fill color
+            , fontSize (toString fontSize_)
+            , textAnchor "middle"
+            , pointerEvents "none"
+            ]
 
 
 viewLabelRow : Size -> Float -> Float -> List LabelRow -> List (Svg msg)
@@ -270,36 +271,36 @@ viewLabelRow containerSize spaceHeight fontSize lines =
             List.length lines
 
         top =
-            (toFloat len + spaceHeight * toFloat (len - 1)) * (-0.5) + 0.5
+            (toFloat len + spaceHeight * toFloat (len - 1)) * -0.5 + 0.5
 
         center =
             toFloat containerSize.width / 2
     in
-        lines
-            |> List.indexedMap
-                (\i row ->
-                    case row of
-                        TextRow s ->
-                            text_
-                                [ y (toString (top + (1 + spaceHeight) * toFloat i) ++ "em")
-                                , x (toString center)
-                                , alignmentBaseline "middle"
-                                , dominantBaseline "middle"
-                                ]
-                                [ text s ]
+    lines
+        |> List.indexedMap
+            (\i row ->
+                case row of
+                    TextRow s ->
+                        text_
+                            [ y (toString (top + (1 + spaceHeight) * toFloat i) ++ "em")
+                            , x (toString center)
+                            , alignmentBaseline "middle"
+                            , dominantBaseline "middle"
+                            ]
+                            [ text s ]
 
-                        ImageRow original url ->
-                            image
-                                [ y (toString (top + (1 + spaceHeight) * toFloat i - fontSize / 2))
-                                , x (toString (center - fontSize / 2))
-                                , attributeNS "" "href" url
-                                , alignmentBaseline "middle"
-                                , dominantBaseline "middle"
-                                , width (toString fontSize)
-                                , height (toString fontSize)
-                                ]
-                                []
-                )
+                    ImageRow original url ->
+                        image
+                            [ y (toString (top + (1 + spaceHeight) * toFloat i - fontSize / 2))
+                            , x (toString (center - fontSize / 2))
+                            , attributeNS "" "href" url
+                            , alignmentBaseline "middle"
+                            , dominantBaseline "middle"
+                            , width (toString fontSize)
+                            , height (toString fontSize)
+                            ]
+                            []
+            )
 
 
 words : String -> List String
@@ -348,26 +349,26 @@ breakWordsHelp containerWidth fontSize words result =
                 measuredWidth =
                     HtmlUtil.measureText "sans-self" fontSize s
             in
-                if measuredWidth < toFloat containerWidth then
-                    case result of
-                        [] ->
-                            breakWordsHelp containerWidth fontSize ss (s :: result)
+            if measuredWidth < toFloat containerWidth then
+                case result of
+                    [] ->
+                        breakWordsHelp containerWidth fontSize ss (s :: result)
 
-                        x :: xs ->
-                            let
-                                measuredWidth =
-                                    HtmlUtil.measureText "sans-self" fontSize (x ++ " " ++ s)
-                            in
-                                if measuredWidth < toFloat containerWidth then
-                                    breakWordsHelp containerWidth fontSize ss ((x ++ " " ++ s) :: xs)
-                                else
-                                    breakWordsHelp containerWidth fontSize ss (s :: result)
-                else
-                    let
-                        brokenWord =
-                            breakWord containerWidth fontSize s
-                    in
-                        breakWordsHelp containerWidth fontSize ss (brokenWord ++ result)
+                    x :: xs ->
+                        let
+                            measuredWidth =
+                                HtmlUtil.measureText "sans-self" fontSize (x ++ " " ++ s)
+                        in
+                        if measuredWidth < toFloat containerWidth then
+                            breakWordsHelp containerWidth fontSize ss ((x ++ " " ++ s) :: xs)
+                        else
+                            breakWordsHelp containerWidth fontSize ss (s :: result)
+            else
+                let
+                    brokenWord =
+                        breakWord containerWidth fontSize s
+                in
+                breakWordsHelp containerWidth fontSize ss (brokenWord ++ result)
 
 
 breakWord : Int -> Float -> String -> List String
@@ -402,9 +403,9 @@ cutHelp containerWidth fontSize s i =
             measuredWidth =
                 HtmlUtil.measureText "sans-self" fontSize left
         in
-            if measuredWidth < toFloat containerWidth then
-                cutHelp containerWidth fontSize s (i + 1)
-            else
-                ( String.left (Basics.max 1 (i - 1)) s
-                , Just <| String.dropLeft (Basics.max 1 (i - 1)) s
-                )
+        if measuredWidth < toFloat containerWidth then
+            cutHelp containerWidth fontSize s (i + 1)
+        else
+            ( String.left (Basics.max 1 (i - 1)) s
+            , Just <| String.dropLeft (Basics.max 1 (i - 1)) s
+            )

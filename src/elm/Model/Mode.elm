@@ -36,7 +36,7 @@ toggleEditing : Mode -> Mode
 toggleEditing (Mode mode) =
     Mode
         { mode
-            | editing = not (mode.editing)
+            | editing = not mode.editing
         }
 
 
@@ -44,7 +44,7 @@ togglePrintView : Mode -> Mode
 togglePrintView (Mode mode) =
     Mode
         { mode
-            | printMode = not (mode.printMode)
+            | printMode = not mode.printMode
         }
 
 

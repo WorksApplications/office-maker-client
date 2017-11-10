@@ -1,12 +1,12 @@
 module Model.Floor exposing (..)
 
-import Dict exposing (Dict)
-import Regex exposing (Regex)
-import Date exposing (Date)
-import Model.Object as Object exposing (Object)
-import Model.ObjectsOperation as ObjectsOperation
-import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange, ObjectModification)
 import CoreType exposing (..)
+import Date exposing (Date)
+import Dict exposing (Dict)
+import Model.Object as Object exposing (Object)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectModification, ObjectsChange)
+import Model.ObjectsOperation as ObjectsOperation
+import Regex exposing (Regex)
 
 
 type alias FloorBase =
@@ -65,9 +65,9 @@ initWithOrder id ord =
         floor =
             init id
     in
-        { floor
-            | ord = ord
-        }
+    { floor
+        | ord = ord
+    }
 
 
 changeName : String -> Floor -> Floor
@@ -210,7 +210,7 @@ moveObjects gridSize ( dx, dy ) object =
                 gridSize
                 (Position (pos.x + dx) (pos.y + dy))
     in
-        Object.changePosition new object
+    Object.changePosition new object
 
 
 paste : List ( Object, ObjectId ) -> Position -> Floor -> Floor
@@ -222,7 +222,7 @@ paste copiedWithNewIds base floor =
 
 rotateObjects : List ObjectId -> Floor -> Floor
 rotateObjects ids floor =
-    partiallyChangeObjects (Object.rotate) ids floor
+    partiallyChangeObjects Object.rotate ids floor
 
 
 changeObjectColor : List ObjectId -> String -> Floor -> Floor
@@ -261,10 +261,10 @@ changeObjectsByChanges change floor =
         separated =
             ObjectsChange.separate change
     in
-        floor
-            |> addObjects separated.added
-            |> modifyObjects separated.modified
-            |> removeObjects (List.map Object.idOf separated.deleted)
+    floor
+        |> addObjects separated.added
+        |> modifyObjects separated.modified
+        |> removeObjects (List.map Object.idOf separated.deleted)
 
 
 toFirstNameOnly : List ObjectId -> Floor -> Floor
@@ -281,7 +281,7 @@ toFirstNameOnly ids floor =
         f object =
             Object.changeName (change (Object.nameOf object)) object
     in
-        partiallyChangeObjects f ids floor
+    partiallyChangeObjects f ids floor
 
 
 fullyChangeObjects : (Object -> Object) -> Floor -> Floor
@@ -307,12 +307,12 @@ removeSpaces : List ObjectId -> Floor -> Floor
 removeSpaces ids floor =
     let
         change name =
-            (Regex.replace Regex.All whiteSpaces (\_ -> "")) name
+            Regex.replace Regex.All whiteSpaces (\_ -> "") name
 
         f object =
             Object.changeName (change <| Object.nameOf object) object
     in
-        partiallyChangeObjects f ids floor
+    partiallyChangeObjects f ids floor
 
 
 whiteSpaces : Regex
@@ -343,9 +343,9 @@ setPeople pairs floor =
                 |> Dict.update objectId (Maybe.map (Object.setPerson (Just personId)))
 
         newObjects =
-            List.foldl f (floor.objects) pairs
+            List.foldl f floor.objects pairs
     in
-        { floor | objects = newObjects }
+    { floor | objects = newObjects }
 
 
 objects : Floor -> List Object

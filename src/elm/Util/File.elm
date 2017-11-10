@@ -1,7 +1,7 @@
 module Util.File exposing (..)
 
-import Native.File
 import Json.Decode exposing (..)
+import Native.File
 import Task exposing (Task)
 
 
@@ -41,7 +41,7 @@ getAt index fileList =
 
 decodeFile : Decoder FileList
 decodeFile =
-    Json.Decode.map FileList (at [ "target", "files" ] (value))
+    Json.Decode.map FileList (at [ "target", "files" ] value)
 
 
 getSizeOfImage : String -> ( Int, Int )

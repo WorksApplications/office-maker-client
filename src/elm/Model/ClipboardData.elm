@@ -1,15 +1,15 @@
 module Model.ClipboardData exposing (..)
 
+import API.Serialization as Serialization
+import CoreType exposing (..)
 import Dict exposing (Dict)
-import Json.Encode as Encode
-import Json.Decode as Decode exposing (Decoder)
 import HtmlParser exposing (Attributes)
 import HtmlParser.Util exposing (..)
-import CoreType exposing (..)
-import Model.Prototype exposing (Prototype)
+import Json.Decode as Decode exposing (Decoder)
+import Json.Encode as Encode
 import Model.Object exposing (Object)
 import Model.ObjectsOperation as ObjectsOperation
-import API.Serialization as Serialization
+import Model.Prototype exposing (Prototype)
 import Native.ClipboardData
 
 
@@ -75,11 +75,11 @@ toObjectCandidates gridSize cellSizePerDesk prototype pos s =
             else
                 parseString s
     in
-        rows
-            |> List.foldl (consRow gridSize cellSizePerDesk prototype pos) ( Dict.empty, 0, [] )
-            |> (\( _, _, result ) -> result)
-            |> List.reverse
-            |> List.concatMap identity
+    rows
+        |> List.foldl (consRow gridSize cellSizePerDesk prototype pos) ( Dict.empty, 0, [] )
+        |> (\( _, _, result ) -> result)
+        |> List.reverse
+        |> List.concatMap identity
 
 
 consRow : Int -> Size -> Prototype -> Position -> List Cell -> ( Dict ( Int, Int ) Int, Int, List (List PositionedPrototype) ) -> ( Dict ( Int, Int ) Int, Int, List (List PositionedPrototype) )
@@ -107,20 +107,20 @@ consCell gridSize cellSizePerDesk prototype pos rowIndex cell ( skipCells, colIn
                 newSkipCells =
                     updateSkipCells rowIndex colIndex cell skipCells
              in
-                if String.trim cell.text /= "" then
-                    let
-                        protoWithPos =
-                            ( { prototype
-                                | name = cell.text
-                                , width = prototype.width * cell.cols // cellSizePerDesk.width |> ObjectsOperation.fitToGrid gridSize
-                                , height = prototype.height * cell.rows // cellSizePerDesk.height |> ObjectsOperation.fitToGrid gridSize
-                              }
-                            , calcPosition gridSize cellSizePerDesk prototype pos rowIndex colIndex
-                            )
-                    in
-                        ( newSkipCells, colIndex + cell.cols, protoWithPos :: resultCols )
-                else
-                    ( newSkipCells, colIndex + 1, resultCols )
+             if String.trim cell.text /= "" then
+                let
+                    protoWithPos =
+                        ( { prototype
+                            | name = cell.text
+                            , width = prototype.width * cell.cols // cellSizePerDesk.width |> ObjectsOperation.fitToGrid gridSize
+                            , height = prototype.height * cell.rows // cellSizePerDesk.height |> ObjectsOperation.fitToGrid gridSize
+                          }
+                        , calcPosition gridSize cellSizePerDesk prototype pos rowIndex colIndex
+                        )
+                in
+                ( newSkipCells, colIndex + cell.cols, protoWithPos :: resultCols )
+             else
+                ( newSkipCells, colIndex + 1, resultCols )
             )
 
 
@@ -163,7 +163,7 @@ parseHtml table =
                                 s =
                                     textContent innerTd
                             in
-                                Cell cols rows s
+                            Cell cols rows s
                         )
             )
 

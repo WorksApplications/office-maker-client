@@ -64,13 +64,13 @@ f c ( s, s1, s2 ) =
             ( c_, s1_ ) =
                 Random.step r1 s1
         in
-            ( s ++ c_, s1_, s2 )
+        ( s ++ c_, s1_, s2 )
     else if c == 'y' then
         let
             ( c_, s2_ ) =
                 Random.step r2 s2
         in
-            ( s ++ c_, s1, s2_ )
+        ( s ++ c_, s1, s2_ )
     else
         ( s ++ String.fromChar c, s1, s2 )
 
@@ -86,4 +86,4 @@ step (Seed s1 s2) =
         ( s, s1_, s2_ ) =
             List.foldl f ( "", s1, s2 ) (String.toList "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx")
     in
-        ( s, Seed s1_ s2_ )
+    ( s, Seed s1_ s2_ )

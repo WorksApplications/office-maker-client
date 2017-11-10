@@ -1,12 +1,12 @@
 module Util.HtmlUtil exposing (..)
 
-import Mouse exposing (Position)
-import Html exposing (Html, Attribute)
+import Html exposing (Attribute, Html)
 import Html.Attributes
-import Html.Events exposing (on, onWithOptions, targetValue, defaultOptions)
+import Html.Events exposing (defaultOptions, on, onWithOptions, targetValue)
 import Json.Decode as Decode exposing (..)
-import Util.File exposing (..)
+import Mouse exposing (Position)
 import Native.HtmlUtil
+import Util.File exposing (..)
 
 
 type Error
@@ -115,11 +115,10 @@ onMouseWheel toMsg =
 
 decodeWheelEvent : Decoder ( Float, Position )
 decodeWheelEvent =
-    (oneOf
+    oneOf
         [ at [ "deltaY" ] float
         , at [ "wheelDelta" ] float |> map (\v -> -v)
         ]
-    )
         |> andThen
             (\value ->
                 if value /= 0 then

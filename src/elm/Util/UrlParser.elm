@@ -1,8 +1,8 @@
 module Util.UrlParser exposing (..)
 
 import Dict exposing (Dict)
-import Util.StringUtil exposing (..)
 import Http
+import Util.StringUtil exposing (..)
 
 
 type alias URL =
@@ -38,4 +38,4 @@ parseSearch s_ =
                 Nothing ->
                     dict
     in
-        List.foldl updateDict Dict.empty maybeKeyValues
+    List.foldl updateDict Dict.empty maybeKeyValues

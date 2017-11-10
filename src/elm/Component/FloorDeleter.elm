@@ -1,14 +1,14 @@
 module Component.FloorDeleter exposing (..)
 
+import Component.Dialog as Dialog exposing (Dialog)
 import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import InlineHover exposing (hover)
-import Util.HtmlUtil as HtmlUtil
+import Model.Floor exposing (Floor)
 import Model.I18n as I18n exposing (Language)
 import Model.User as User exposing (User)
-import Model.Floor exposing (Floor)
-import Component.Dialog as Dialog exposing (Dialog)
+import Util.HtmlUtil as HtmlUtil
 import View.Styles as S
 
 
@@ -45,11 +45,11 @@ update transform config message model =
                 ( dialog, cmd ) =
                     Dialog.update msg model.dialog
             in
-                ( { model
-                    | dialog = dialog
-                  }
-                , cmd |> Cmd.map transform
-                )
+            ( { model
+                | dialog = dialog
+              }
+            , cmd |> Cmd.map transform
+            )
 
         DeleteFloor floor ok ->
             ( model

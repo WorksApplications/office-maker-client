@@ -41,10 +41,10 @@ updateFloorAndObjects f efloor =
             else
                 efloor.undoList
     in
-        ( { efloor | undoList = newUndoList }
-        , newFloor
-        , objectsChange
-        )
+    ( { efloor | undoList = newUndoList }
+    , newFloor
+    , objectsChange
+    )
 
 
 updateFloor : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, Floor )
@@ -68,9 +68,9 @@ updateFloor f efloor =
             else
                 efloor.undoList
     in
-        ( { efloor | undoList = newUndoList }
-        , newFloor
-        )
+    ( { efloor | undoList = newUndoList }
+    , newFloor
+    )
 
 
 updateObjects : (Floor -> Floor) -> EditingFloor -> ( EditingFloor, ObjectsChange )
@@ -94,7 +94,7 @@ updateObjects f efloor =
             else
                 efloor.undoList
     in
-        ( { efloor | undoList = newUndoList }, objectsChange )
+    ( { efloor | undoList = newUndoList }, objectsChange )
 
 
 undo : EditingFloor -> ( EditingFloor, ObjectsChange )
@@ -107,12 +107,12 @@ undo efloor =
                 )
                 efloor.undoList
     in
-        case maybeObjectsChange of
-            Just objectsChange ->
-                ( { efloor | undoList = undoList }, objectsChange )
+    case maybeObjectsChange of
+        Just objectsChange ->
+            ( { efloor | undoList = undoList }, objectsChange )
 
-            Nothing ->
-                ( efloor, ObjectsChange.empty )
+        Nothing ->
+            ( efloor, ObjectsChange.empty )
 
 
 redo : EditingFloor -> ( EditingFloor, ObjectsChange )
@@ -125,12 +125,12 @@ redo efloor =
                 )
                 efloor.undoList
     in
-        case maybeObjectsChange of
-            Just objectsChange ->
-                ( { efloor | undoList = undoList }, objectsChange )
+    case maybeObjectsChange of
+        Just objectsChange ->
+            ( { efloor | undoList = undoList }, objectsChange )
 
-            Nothing ->
-                ( efloor, ObjectsChange.empty )
+        Nothing ->
+            ( efloor, ObjectsChange.empty )
 
 
 present : EditingFloor -> Floor

@@ -1,7 +1,7 @@
 module Model.SearchResult exposing (..)
 
-import Dict exposing (Dict)
 import CoreType exposing (..)
+import Dict exposing (Dict)
 import Model.Object as Object exposing (Object)
 import Model.Person exposing (Person)
 
@@ -56,16 +56,16 @@ groupBy f list =
                 ( key, realKey ) =
                     f a
             in
-                Dict.update key
-                    (\maybeValue ->
-                        case maybeValue of
-                            Just ( realKey, value ) ->
-                                Just ( realKey, a :: value )
+            Dict.update key
+                (\maybeValue ->
+                    case maybeValue of
+                        Just ( realKey, value ) ->
+                            Just ( realKey, a :: value )
 
-                            Nothing ->
-                                Just ( realKey, [ a ] )
-                    )
-                    dict
+                        Nothing ->
+                            Just ( realKey, [ a ] )
+                )
+                dict
         )
         Dict.empty
         list
@@ -90,7 +90,7 @@ reorderResults thisFloorId results =
                 ( [], [], [] )
                 results
     in
-        inThisFloor ++ inOtherFloor ++ missing
+    inThisFloor ++ inOtherFloor ++ missing
 
 
 mergeObjectInfo : String -> List Object -> List SearchResult -> List SearchResult

@@ -1,9 +1,9 @@
 module Model.FloorDiff exposing (..)
 
-import Dict exposing (Dict)
 import CoreType exposing (..)
-import Model.Object as Object exposing (..)
+import Dict exposing (Dict)
 import Model.Floor as Floor exposing (Floor)
+import Model.Object as Object exposing (..)
 import Model.ObjectsChange as ObjectsChange exposing (..)
 
 
@@ -92,7 +92,7 @@ propertyChangesHelp current prev =
             else
                 []
     in
-        nameChange ++ ordChange ++ sizeChange ++ imageChange ++ flipImageChange
+    nameChange ++ ordChange ++ sizeChange ++ imageChange ++ flipImageChange
 
 
 diffObjects : Dict ObjectId Object -> Dict ObjectId Object -> ObjectsChange
@@ -139,10 +139,10 @@ objectPropertyChange f toProperty new old =
         oldProp =
             toProperty old
     in
-        if newProp /= oldProp then
-            Just (f newProp oldProp)
-        else
-            Nothing
+    if newProp /= oldProp then
+        Just (f newProp oldProp)
+    else
+        Nothing
 
 
 

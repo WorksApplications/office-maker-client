@@ -1,7 +1,7 @@
 module Model.ObjectsOperation exposing (..)
 
-import Model.Object as Object exposing (Object)
 import CoreType exposing (..)
+import Model.Object as Object exposing (Object)
 
 
 centerOf : Object -> PositionFloat
@@ -13,7 +13,7 @@ centerOf object =
         { width, height } =
             Object.sizeOf object
     in
-        PositionFloat (toFloat x + toFloat width / 2) (toFloat y + toFloat height / 2)
+    PositionFloat (toFloat x + toFloat width / 2) (toFloat y + toFloat height / 2)
 
 
 linked : ( Position, Size ) -> ( Position, Size ) -> Bool
@@ -38,11 +38,11 @@ linkedByAnyOf list newObject =
         newRect =
             ( Object.positionOf newObject, Object.sizeOf newObject )
     in
-        List.any
-            (\object ->
-                linked ( Object.positionOf object, Object.sizeOf object ) newRect
-            )
-            list
+    List.any
+        (\object ->
+            linked ( Object.positionOf object, Object.sizeOf object ) newRect
+        )
+        list
 
 
 island : List Object -> List Object -> List Object
@@ -51,10 +51,10 @@ island current rest =
         ( newObjects, rest_ ) =
             List.partition (linkedByAnyOf current) rest
     in
-        if List.isEmpty newObjects then
-            current ++ newObjects
-        else
-            island (current ++ newObjects) rest_
+    if List.isEmpty newObjects then
+        current ++ newObjects
+    else
+        island (current ++ newObjects) rest_
 
 
 compareBy : Direction -> Object -> Object -> Order
@@ -66,28 +66,28 @@ compareBy direction from new =
         newCenter =
             centerOf new
     in
-        if center.x == newCenter.x && center.y == newCenter.y then
-            EQ
+    if center.x == newCenter.x && center.y == newCenter.y then
+        EQ
+    else
+        let
+            greater =
+                case direction of
+                    Up ->
+                        (newCenter.x < center.x) || (newCenter.x == center.x && newCenter.y < center.y)
+
+                    Down ->
+                        (newCenter.x > center.x) || (newCenter.x == center.x && newCenter.y > center.y)
+
+                    Left ->
+                        (newCenter.y < center.y) || (newCenter.y == center.y && newCenter.x < center.x)
+
+                    Right ->
+                        (newCenter.y > center.y) || (newCenter.y == center.y && newCenter.x > center.x)
+        in
+        if greater then
+            GT
         else
-            let
-                greater =
-                    case direction of
-                        Up ->
-                            (newCenter.x < center.x) || (newCenter.x == center.x && newCenter.y < center.y)
-
-                        Down ->
-                            (newCenter.x > center.x) || (newCenter.x == center.x && newCenter.y > center.y)
-
-                        Left ->
-                            (newCenter.y < center.y) || (newCenter.y == center.y && newCenter.x < center.x)
-
-                        Right ->
-                            (newCenter.y > center.y) || (newCenter.y == center.y && newCenter.x > center.x)
-            in
-                if greater then
-                    GT
-                else
-                    LT
+            LT
 
 
 lessBy : Direction -> Object -> Object -> Bool
@@ -114,7 +114,7 @@ minimumBy direction list =
                 Nothing ->
                     Just o1
     in
-        List.foldl f Nothing list
+    List.foldl f Nothing list
 
 
 {-| Defines if given object can be selected next.
@@ -132,10 +132,10 @@ nearest direction from list =
         filtered =
             List.filter (filterCandidate direction from) list
     in
-        if List.isEmpty filtered then
-            minimumBy direction list
-        else
-            minimumBy direction filtered
+    if List.isEmpty filtered then
+        minimumBy direction list
+    else
+        minimumBy direction filtered
 
 
 withinRange : ( Object, Object ) -> List Object -> List Object
@@ -159,7 +159,7 @@ withinRange ( startObject, endObject ) list =
         bottom =
             max start.y end.y
     in
-        withinRect ( left, top ) ( right, bottom ) list
+    withinRect ( left, top ) ( right, bottom ) list
 
 
 withinRect : ( Float, Float ) -> ( Float, Float ) -> List Object -> List Object
@@ -191,7 +191,7 @@ bounds list =
                     , max bottom (Object.bottom o)
                     )
             in
-                Just <| List.foldl f ( Object.left head, Object.top head, Object.right head, Object.bottom head ) tail
+            Just <| List.foldl f ( Object.left head, Object.top head, Object.right head, Object.bottom head ) tail
 
         [] ->
             Nothing
@@ -268,7 +268,7 @@ minimumPartsOf direction list =
                 _ ->
                     [ o ]
     in
-        List.foldl f [] list
+    List.foldl f [] list
 
 
 maximumPartsOf : Direction -> List Object -> List Object
@@ -290,7 +290,7 @@ maximumPartsOf direction list =
                 _ ->
                     [ o ]
     in
-        List.foldl f [] list
+    List.foldl f [] list
 
 
 restOfMinimumPartsOf : Direction -> List Object -> List Object
@@ -299,7 +299,7 @@ restOfMinimumPartsOf direction list =
         minimumParts =
             minimumPartsOf direction list
     in
-        List.filter (\o -> not (List.member o minimumParts)) list
+    List.filter (\o -> not (List.member o minimumParts)) list
 
 
 restOfMaximumPartsOf : Direction -> List Object -> List Object
@@ -308,7 +308,7 @@ restOfMaximumPartsOf direction list =
         maximumParts =
             maximumPartsOf direction list
     in
-        List.filter (\o -> not (List.member o maximumParts)) list
+    List.filter (\o -> not (List.member o maximumParts)) list
 
 
 expandOrShrinkToward : Direction -> Object -> List Object -> List Object -> List Object
@@ -345,28 +345,28 @@ expandOrShrinkToward direction primary current all =
                 Right ->
                     left == left0 && right >= right0
     in
-        if isExpand then
-            let
-                filter o1 =
-                    case direction of
-                        Up ->
-                            Object.left o1 >= left && Object.right o1 <= right && Object.top o1 < top
+    if isExpand then
+        let
+            filter o1 =
+                case direction of
+                    Up ->
+                        Object.left o1 >= left && Object.right o1 <= right && Object.top o1 < top
 
-                        Down ->
-                            Object.left o1 >= left && Object.right o1 <= right && Object.bottom o1 > bottom
+                    Down ->
+                        Object.left o1 >= left && Object.right o1 <= right && Object.bottom o1 > bottom
 
-                        Left ->
-                            Object.top o1 >= top && Object.bottom o1 <= bottom && Object.left o1 < left
+                    Left ->
+                        Object.top o1 >= top && Object.bottom o1 <= bottom && Object.left o1 < left
 
-                        Right ->
-                            Object.top o1 >= top && Object.bottom o1 <= bottom && Object.right o1 > right
+                    Right ->
+                        Object.top o1 >= top && Object.bottom o1 <= bottom && Object.right o1 > right
 
-                filtered =
-                    List.filter filter all
-            in
-                current ++ minimumPartsOf direction filtered
-        else
-            restOfMaximumPartsOf (opposite direction) current
+            filtered =
+                List.filter filter all
+        in
+        current ++ minimumPartsOf direction filtered
+    else
+        restOfMaximumPartsOf (opposite direction) current
 
 
 pasteObjects : FloorId -> Position -> List ( Object, ObjectId ) -> List Object
@@ -387,14 +387,14 @@ pasteObjects floorId base copiedWithNewIds =
                         pos =
                             Position (base.x + (x - min.x)) (base.y + (y - min.y))
                     in
-                        object
-                            |> Object.changePosition pos
-                            |> Object.changeId newId
-                            |> Object.changeFloorId floorId
+                    object
+                        |> Object.changePosition pos
+                        |> Object.changeId newId
+                        |> Object.changeFloorId floorId
                 )
                 copiedWithNewIds
     in
-        newObjects
+    newObjects
 
 
 minBoundsOf : List Position -> Position
@@ -462,23 +462,23 @@ collectSameProperty getProp selectedObjects =
                     firstProp =
                         getProp object
                 in
-                    List.foldl
-                        (\object maybeProp ->
-                            let
-                                prop =
-                                    getProp object
-                            in
-                                maybeProp
-                                    |> Maybe.andThen
-                                        (\prop_ ->
-                                            if prop == prop_ then
-                                                Just prop
-                                            else
-                                                Nothing
-                                        )
-                        )
-                        (Just firstProp)
-                        selectedObjects
+                List.foldl
+                    (\object maybeProp ->
+                        let
+                            prop =
+                                getProp object
+                        in
+                        maybeProp
+                            |> Maybe.andThen
+                                (\prop_ ->
+                                    if prop == prop_ then
+                                        Just prop
+                                    else
+                                        Nothing
+                                )
+                    )
+                    (Just firstProp)
+                    selectedObjects
             )
 
 
@@ -497,7 +497,7 @@ flipObject floorSize object =
         newTop =
             floorSize.height - bottom
     in
-        Object.changePosition (Position newLeft newTop) object
+    Object.changePosition (Position newLeft newTop) object
 
 
 

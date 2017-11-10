@@ -1,39 +1,39 @@
-module Page.Map.CanvasView exposing (view, temporaryStampView)
+module Page.Map.CanvasView exposing (temporaryStampView, view)
 
+import ContextMenu
+import CoreType exposing (..)
 import Dict exposing (..)
-import Json.Decode as Decode
-import Mouse
 import Html exposing (..)
 import Html.Attributes as Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Keyed as Keyed
 import Html.Lazy as Lazy exposing (..)
-import Svg
-import Svg.Attributes
-import Svg.Keyed
-import VirtualDom
-import ContextMenu
-import View.ObjectView as ObjectView
-import View.CommonStyles as CommonStyles
-import Util.StyleUtil exposing (px)
-import Util.HtmlUtil exposing (..)
-import Model.Mode as Mode exposing (Mode(..))
+import Json.Decode as Decode
+import Model.ClipboardData as ClipboardData
 import Model.Floor as Floor exposing (Floor)
+import Model.Mode as Mode exposing (Mode(..))
 import Model.Object as Object exposing (..)
-import Model.Scale as Scale exposing (Scale)
 import Model.ObjectsOperation as ObjectsOperation
 import Model.Prototypes exposing (PositionedPrototype)
-import Model.ClipboardData as ClipboardData
+import Model.Scale as Scale exposing (Scale)
 import Model.User as User
-import Page.Map.Model as Model exposing (Model, DraggingContext(..))
+import Mouse
+import Native.ClipboardData
 import Page.Map.ContextMenuContext exposing (ContextMenuContext(ObjectContextMenu))
+import Page.Map.GridLayer as GridLayer
+import Page.Map.KeyOperation as KeyOperation
+import Page.Map.Model as Model exposing (DraggingContext(..), Model)
 import Page.Map.Msg exposing (..)
 import Page.Map.ObjectNameInput as ObjectNameInput
 import Page.Map.ProfilePopup as ProfilePopup
-import Page.Map.GridLayer as GridLayer
-import Page.Map.KeyOperation as KeyOperation
-import Native.ClipboardData
-import CoreType exposing (..)
+import Svg
+import Svg.Attributes
+import Svg.Keyed
+import Util.HtmlUtil exposing (..)
+import Util.StyleUtil exposing (px)
+import View.CommonStyles as CommonStyles
+import View.ObjectView as ObjectView
+import VirtualDom
 
 
 viewModeEventOptions : ObjectId -> ObjectView.EventOptions Msg
@@ -42,14 +42,14 @@ viewModeEventOptions id =
         noEvents =
             ObjectView.noEvents
     in
-        { noEvents
-            | onMouseDown =
-                Just <|
-                    onWithOptions
-                        "mousedown"
-                        { stopPropagation = True, preventDefault = True }
-                        (Decode.succeed <| ShowDetailForObject id)
-        }
+    { noEvents
+        | onMouseDown =
+            Just <|
+                onWithOptions
+                    "mousedown"
+                    { stopPropagation = True, preventDefault = True }
+                    (Decode.succeed <| ShowDetailForObject id)
+    }
 
 
 editModeEventOptions : Bool -> ObjectId -> ObjectView.EventOptions Msg
@@ -183,16 +183,16 @@ view model =
                 isRangeSelectMode =
                     Mode.isSelectMode model.mode && model.ctrl
             in
-                div
-                    [ style (canvasContainerStyle model.mode isRangeSelectMode)
-                    , on "mousedown" Mouse.position |> Attributes.map MouseDownOnCanvas
-                    , onWithOptions "mouseup" { stopPropagation = True, preventDefault = False } (Mouse.position |> Decode.map MouseUpOnCanvas)
-                    , onClick ClickOnCanvas
-                    , onMouseWheel MouseWheel
-                    ]
-                    [ canvasView model floor
-                    , {- if Mode.isEditMode model.mode then text "" else -} profilePopupView model floor
-                    ]
+            div
+                [ style (canvasContainerStyle model.mode isRangeSelectMode)
+                , on "mousedown" Mouse.position |> Attributes.map MouseDownOnCanvas
+                , onWithOptions "mouseup" { stopPropagation = True, preventDefault = False } (Mouse.position |> Decode.map MouseUpOnCanvas)
+                , onClick ClickOnCanvas
+                , onMouseWheel MouseWheel
+                ]
+                [ canvasView model floor
+                , {- if Mode.isEditMode model.mode then text "" else -} profilePopupView model floor
+                ]
 
         Nothing ->
             div
@@ -265,12 +265,12 @@ canvasView model floor =
                             screenSize =
                                 Scale.imageToScreenForSize scale (Object.sizeOf object)
                         in
-                            ( screenPos
-                            , screenSize
-                            , relatedPerson object
-                                |> Maybe.andThen (\personId -> Dict.get personId personInfo)
-                            , not (Object.isLabel object)
-                            )
+                        ( screenPos
+                        , screenSize
+                        , relatedPerson object
+                            |> Maybe.andThen (\personId -> Dict.get personId personInfo)
+                        , not (Object.isLabel object)
+                        )
                     )
 
         nameInput =
@@ -346,11 +346,11 @@ canvasView model floor =
             else
                 []
     in
-        Keyed.node
-            "div"
-            [ style (canvasViewStyles model floor)
-            ]
-            (children1 ++ children2 ++ children3)
+    Keyed.node
+        "div"
+        [ style (canvasViewStyles model floor)
+        ]
+        (children1 ++ children2 ++ children3)
 
 
 execCopy : String -> msg -> msg
@@ -359,7 +359,7 @@ execCopy s msg =
         _ =
             Native.ClipboardData.execCopy s
     in
-        msg
+    msg
 
 
 canvasViewStyles : Model -> Floor -> List ( String, String )
@@ -375,26 +375,26 @@ canvasViewStyles model floor =
                 model.scale
                 (Size (Floor.width floor) (Floor.height floor))
     in
-        [ ( "position", "absolute" )
-        , ( "left", px position.x )
-        , ( "top", px position.y )
-        , ( "width", px <| size2.width )
-        , ( "height", px <| size2.height )
-        , ( "font-family", "default" )
-        , ( "background-color", "white" )
-        , ( "transition"
-          , if model.transition then
-                "top 0.3s ease, left 0.3s ease"
+    [ ( "position", "absolute" )
+    , ( "left", px position.x )
+    , ( "top", px position.y )
+    , ( "width", px <| size2.width )
+    , ( "height", px <| size2.height )
+    , ( "font-family", "default" )
+    , ( "background-color", "white" )
+    , ( "transition"
+      , if model.transition then
+            "top 0.3s ease, left 0.3s ease"
+        else
+            ""
+      )
+    ]
+        ++ CommonStyles.noUserSelect
+        ++ (if Mode.isViewMode model.mode then
+                [ ( "overflow", "hidden" ) ]
             else
-                ""
-          )
-        ]
-            ++ CommonStyles.noUserSelect
-            ++ (if Mode.isViewMode model.mode then
-                    [ ( "overflow", "hidden" ) ]
-                else
-                    []
-               )
+                []
+           )
 
 
 objectsView : Model -> Floor -> List ( String, Html Msg )
@@ -445,12 +445,12 @@ objectsView model floor =
 compareZIndex : ( Object, Bool ) -> Int
 compareZIndex ( object, selected ) =
     (if Object.isLabel object then
-        1
+        2
      else
         0
     )
         + (if selected then
-            2
+            1
            else
             0
           )
@@ -485,7 +485,7 @@ objectsViewWhileMoving model floor start =
                             model.mousePosition
                             (Object.positionOf object)
                 in
-                    Object.changePosition newPosition object
+                Object.changePosition newPosition object
             else
                 object
 
@@ -507,7 +507,7 @@ objectsViewWhileMoving model floor start =
                         )
                     )
     in
-        (ghostsView ++ normalView)
+    ghostsView ++ normalView
 
 
 adjustImagePositionOfMovingObject : Int -> Scale -> Position -> Position -> Position -> Position
@@ -518,9 +518,9 @@ adjustImagePositionOfMovingObject gridSize scale start end from =
                 scale
                 (Position (end.x - start.x) (end.y - start.y))
     in
-        ObjectsOperation.fitPositionToGrid
-            gridSize
-            (Position (from.x + shift.x) (from.y + shift.y))
+    ObjectsOperation.fitPositionToGrid
+        gridSize
+        (Position (from.x + shift.x) (from.y + shift.y))
 
 
 objectsViewWhileResizing : Model -> Floor -> ObjectId -> Position -> List ( String, Html Msg )
@@ -572,7 +572,7 @@ objectsViewWhileResizing model floor id from =
                         )
                     )
     in
-        normalView ++ ghostsView
+    normalView ++ ghostsView
 
 
 canvasImage : Model -> Floor -> Html msg
@@ -583,16 +583,16 @@ canvasImage model floor =
                 model.scale
                 (Size (Floor.width floor) (Floor.height floor))
     in
-        Floor.src model.apiConfig.imageRoot floor
-            |> Maybe.map
-                (\url ->
-                    img
-                        [ style (canvasImageStyle floor.flipImage size)
-                        , src url
-                        ]
-                        []
-                )
-            |> Maybe.withDefault (text "")
+    Floor.src model.apiConfig.imageRoot floor
+        |> Maybe.map
+            (\url ->
+                img
+                    [ style (canvasImageStyle floor.flipImage size)
+                    , src url
+                    ]
+                    []
+            )
+        |> Maybe.withDefault (text "")
 
 
 canvasImageStyle : Bool -> Size -> List ( String, String )
@@ -680,7 +680,7 @@ selectorRectView mode scale selectorRect =
                 , Svg.Attributes.y (toString pos.y)
                 , Svg.Attributes.width (toString size.width)
                 , Svg.Attributes.height (toString size.height)
-                , Svg.Attributes.stroke (CommonStyles.selectColor)
+                , Svg.Attributes.stroke CommonStyles.selectColor
                 , Svg.Attributes.strokeWidth "3"
                 , Svg.Attributes.fill "none"
                 ]
@@ -696,18 +696,18 @@ canvasContainerStyle mode rangeSelectMode =
         crosshair =
             rangeSelectMode || Mode.isLabelMode mode
     in
-        [ ( "position", "relative" )
-        , ( "background"
-          , if Mode.isPrintMode mode then
-                "#ddd"
-            else
-                "#000"
-          )
-        , ( "flex", "1" )
-        , ( "cursor"
-          , if crosshair then
-                "crosshair"
-            else
-                "default"
-          )
-        ]
+    [ ( "position", "relative" )
+    , ( "background"
+      , if Mode.isPrintMode mode then
+            "#ddd"
+        else
+            "#000"
+      )
+    , ( "flex", "1" )
+    , ( "cursor"
+      , if crosshair then
+            "crosshair"
+        else
+            "default"
+      )
+    ]

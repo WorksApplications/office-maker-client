@@ -1,14 +1,14 @@
-module View.PrototypePreviewView exposing (view, singleView, emptyView)
+module View.PrototypePreviewView exposing (emptyView, singleView, view)
 
+import CoreType exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Model.Prototype exposing (Prototype)
+import Model.Scale as Scale
 import Svg
 import Svg.Attributes
-import View.Styles as S
 import View.ObjectView as ObjectView
-import Model.Scale as Scale
-import Model.Prototype exposing (Prototype)
-import CoreType exposing (..)
+import View.Styles as S
 
 
 view : Size -> Int -> List Prototype -> Html msg
@@ -22,7 +22,7 @@ view containerSize selectedIndex prototypes =
                 ]
                 (List.indexedMap (eachView containerSize selectedIndex) prototypes)
     in
-        div [ style (S.prototypePreviewView containerSize.width containerSize.height) ] [ inner ]
+    div [ style (S.prototypePreviewView containerSize.width containerSize.height) ] [ inner ]
 
 
 singleView : Size -> Prototype -> Html msg
@@ -47,21 +47,21 @@ eachView containerSize selectedIndex index prototype =
         top =
             containerSize.height // 2 - prototype.height // 2
     in
-        ObjectView.viewDesk
-            ObjectView.noEvents
-            False
-            (Position left top)
-            (Size prototype.width prototype.height)
-            prototype.backgroundColor
-            prototype.name
-            --name
-            prototype.fontSize
-            False
-            -- selected
-            False
-            -- alpha
-            (Scale.init 0)
-            False
+    ObjectView.viewDesk
+        ObjectView.noEvents
+        False
+        (Position left top)
+        (Size prototype.width prototype.height)
+        prototype.backgroundColor
+        prototype.name
+        --name
+        prototype.fontSize
+        False
+        -- selected
+        False
+        -- alpha
+        (Scale.init 0)
+        False
 
 
 

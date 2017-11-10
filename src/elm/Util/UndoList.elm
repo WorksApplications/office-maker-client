@@ -2,11 +2,11 @@ module Util.UndoList
     exposing
         ( UndoList
         , init
-        , undo
-        , undoWithDiff
+        , new
         , redo
         , redoWithDiff
-        , new
+        , undo
+        , undoWithDiff
         )
 
 

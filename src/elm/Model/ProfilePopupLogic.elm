@@ -1,8 +1,8 @@
 module Model.ProfilePopupLogic exposing (..)
 
-import Model.Scale as Scale exposing (Scale)
-import Model.Object as Object exposing (Object)
 import CoreType exposing (..)
+import Model.Object as Object exposing (Object)
+import Model.Scale as Scale exposing (Scale)
 
 
 personPopupSize : Size
@@ -19,9 +19,9 @@ centerTopScreenXYOfObject scale offset object =
         { width } =
             Object.sizeOf object
     in
-        Scale.imageToScreenForPosition
-            scale
-            (Position (offset.x + x + width // 2) (offset.y + y))
+    Scale.imageToScreenForPosition
+        scale
+        (Position (offset.x + x + width // 2) (offset.y + y))
 
 
 bottomScreenYOfObject : Scale -> Position -> Object -> Int
@@ -33,7 +33,7 @@ bottomScreenYOfObject scale offset object =
         { height } =
             Object.sizeOf object
     in
-        Scale.imageToScreen scale (offset.y + y + height)
+    Scale.imageToScreen scale (offset.y + y + height)
 
 
 calcPopupLeftFromObjectCenter : Int -> Int -> Int
@@ -75,7 +75,7 @@ adjustOffset containerSize popupSize scale offset object =
         offsetY_ =
             adjust scale containerSize.height top bottom offset.y
     in
-        Position offsetX_ offsetY_
+    Position offsetX_ offsetY_
 
 
 adjust : Scale -> Int -> Int -> Int -> Int -> Int

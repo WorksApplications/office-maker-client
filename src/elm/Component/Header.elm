@@ -4,12 +4,12 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy as Lazy
+import Model.I18n as I18n exposing (Language(..))
 import Model.Person exposing (..)
 import Model.User as User exposing (..)
-import Model.I18n as I18n exposing (Language(..))
-import View.Styles as S
-import View.Icons as Icons
 import View.HeaderView as HeaderView
+import View.Icons as Icons
+import View.Styles as S
 
 
 type alias Model =
@@ -100,7 +100,7 @@ normalMenu context menuOpened =
                 Nothing ->
                     []
     in
-        menu (searchInput :: others)
+    menu (searchInput :: others)
 
 
 userMenuToggle : (Msg -> msg) -> User -> Bool -> Html msg
@@ -196,7 +196,7 @@ printButtonView onTogglePrintView lang printMode =
         , class "no-print"
         ]
         [ div [ style S.editingToggleIcon ] [ Icons.printButton printMode ]
-        , div [ style (S.editingToggleText) ]
+        , div [ style S.editingToggleText ]
             [ text
                 (if printMode then
                     I18n.close lang
@@ -214,7 +214,7 @@ editingToggleView onToggleEditing lang editing =
         , style (S.editingToggleContainer editing)
         ]
         [ div [ style S.editingToggleIcon ] [ Icons.editingToggle ]
-        , div [ style (S.editingToggleText) ] [ text (I18n.edit lang) ]
+        , div [ style S.editingToggleText ] [ text (I18n.edit lang) ]
         ]
 
 
@@ -226,7 +226,7 @@ helpView lang =
         , href "./doc" -- TODO configuration
         ]
         [ div [ style S.editingToggleIcon ] [ Icons.helpButton ]
-        , div [ style (S.editingToggleText) ] [ text (I18n.help lang) ]
+        , div [ style S.editingToggleText ] [ text (I18n.help lang) ]
         ]
 
 
@@ -254,12 +254,12 @@ greetingForPerson person menuOpened =
                 Nothing ->
                     text ""
     in
-        div
-            [ style S.userMenuToggle ]
-            [ image
-            , div [ style S.greetingName ] [ text person.name ]
-            , div [ style S.userMenuToggleIcon ] [ Icons.userMenuToggle menuOpened ]
-            ]
+    div
+        [ style S.userMenuToggle ]
+        [ image
+        , div [ style S.greetingName ] [ text person.name ]
+        , div [ style S.userMenuToggleIcon ] [ Icons.userMenuToggle menuOpened ]
+        ]
 
 
 userName : User -> String

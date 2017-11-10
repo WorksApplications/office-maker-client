@@ -18,7 +18,7 @@ new (Seed seed) =
         ( newValue, newSeed ) =
             UUID.step seed
     in
-        ( newValue, Seed newSeed )
+    ( newValue, Seed newSeed )
 
 
 zipWithNewIds : Seed -> List a -> ( List ( a, String ), Seed )
@@ -29,7 +29,7 @@ zipWithNewIds seed list =
                 ( newId, newSeed ) =
                     new seed
             in
-                ( ( a, newId ) :: list, newSeed )
+            ( ( a, newId ) :: list, newSeed )
         )
         ( [], seed )
         list
