@@ -318,9 +318,9 @@ decodePeopleFromProfileServiceSearch =
 decodeObject : Decoder Object
 decodeObject =
     decode
-        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape ->
+        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape updateAt ->
             if tipe == "desk" then
-                Object.initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize personId
+                Object.initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize personId updateAt
             else
                 Object.initLabel id
                     floorId
@@ -338,6 +338,7 @@ decodeObject =
                             Object.Ellipse
                         )
                     )
+                    updateAt
         )
         |> required "id" D.string
         |> required "floorId" D.string
@@ -357,6 +358,7 @@ decodeObject =
         |> optional "bold" D.bool Defaults.bold
         |> optional "url" D.string ""
         |> optional "shape" D.string "rectangle"
+        |> required "updateAt" D.float
 
 
 decodeSearchResult : Decoder (Maybe SearchResult)
@@ -432,13 +434,14 @@ decodePersonWithObjects : Decoder ( Person, List Object )
 decodePersonWithObjects =
     D.map2 (,)
         (D.field "person" decodePerson)
+        -- (D.field "objects" (D.list decodeObject))
         (D.field "objects" (D.list decodeDesk))
 
 
 decodeDesk : Decoder Object
 decodeDesk =
     decode
-        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape ->
+        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape updateAt ->
             if tipe == "desk" then
                 Object.initDesk
                     id
@@ -449,6 +452,7 @@ decodeDesk =
                     name
                     fontSize
                     personId
+                    updateAt
             else
                 Debug.crash "got non-desk object."
         )
@@ -470,6 +474,7 @@ decodeDesk =
         |> optional "bold" D.bool Defaults.bold
         |> optional "url" D.string ""
         |> optional "shape" D.string "rectangle"
+        |> required "updateAt" D.float
 
 
 decodeFloor : Decoder Floor

@@ -400,21 +400,28 @@ canvasViewStyles model floor =
 objectsView : Model -> Floor -> List ( String, Html Msg )
 objectsView model floor =
     if Mode.isPrintMode model.mode then
-        List.map
-            (\object ->
-                ( Object.idOf object
-                , lazy2 printModeObjectView model.scale object
+        Floor.objects floor
+            |> List.map
+                (\object ->
+                    ( Object.idOf object
+                    , lazy2 printModeObjectView model.scale object
+                    )
                 )
-            )
-            (Floor.objects floor)
     else if Mode.isViewMode model.mode then
-        List.map
-            (\object ->
-                ( Object.idOf object
-                , lazy2 viewModeObjectView model.scale object
+        Floor.objects floor
+            |> List.map
+                (\object ->
+                    ( object, False )
                 )
-            )
-            (Floor.objects floor)
+            |> List.sortBy compareZIndex
+            |> List.map
+                Tuple.first
+            |> List.map
+                (\object ->
+                    ( Object.idOf object
+                    , lazy2 viewModeObjectView model.scale object
+                    )
+                )
     else
         case model.draggingContext of
             MoveObject _ start ->
@@ -442,18 +449,18 @@ objectsView model floor =
                         )
 
 
-compareZIndex : ( Object, Bool ) -> Int
+compareZIndex : ( Object, Bool ) -> ( Int, Int, Float )
 compareZIndex ( object, selected ) =
-    (if Object.isLabel object then
-        2
-     else
+    ( if selected then
+        1
+      else
         0
+    , if Object.isLabel object then
+        1
+      else
+        0
+    , Object.updateAtOf object
     )
-        + (if selected then
-            1
-           else
-            0
-          )
 
 
 objectsViewWhileMoving : Model -> Floor -> Position -> List ( String, Html Msg )

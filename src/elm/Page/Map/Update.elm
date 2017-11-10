@@ -1,53 +1,53 @@
 port module Page.Map.Update exposing (..)
 
-import Task exposing (Task, andThen)
-import Window
-import Process
-import Keyboard
-import Dict exposing (Dict)
-import Navigation exposing (Location)
-import Time exposing (second)
-import Dom
-import Mouse
-import Debounce
-import ContextMenu
-import Util.IdGenerator as IdGenerator exposing (Seed)
-import Util.DictUtil as DictUtil
-import Util.File as File exposing (..)
-import Util.HttpUtil as HttpUtil
-import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
-import Model.User as User
-import Model.Person exposing (Person)
-import Model.Object as Object exposing (..)
-import Model.ObjectsOperation as ObjectsOperation
-import Model.Scale as Scale
-import Model.Prototype exposing (Prototype)
-import Model.Prototypes as Prototypes exposing (PositionedPrototype)
-import Model.Floor as Floor exposing (Floor)
-import Model.FloorInfo as FloorInfo
-import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
-import Model.Information exposing (Information(..))
-import Model.I18n exposing (Language(..))
-import Model.SaveRequest as SaveRequest exposing (SaveRequest(..), ReducedSaveRequest)
-import Model.EditingFloor as EditingFloor exposing (EditingFloor)
-import Model.ClipboardData as ClipboardData
-import Model.SearchResult as SearchResult
 import API.API as API
-import API.Page as Page
 import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
+import API.Page as Page
+import Component.FloorDeleter as FloorDeleter
 import Component.FloorProperty as FloorProperty
 import Component.Header as Header
 import Component.ImageLoader as ImageLoader
-import Component.FloorDeleter as FloorDeleter
-import Page.Map.Model as Model exposing (Model, DraggingContext(..))
-import Page.Map.Msg exposing (Msg(..))
-import Page.Map.URL as URL
-import Page.Map.ObjectNameInput as ObjectNameInput
-import Page.Map.KeyOperation as KeyOperation
-import Http
+import ContextMenu
 import CoreType exposing (..)
+import Debounce
+import Dict exposing (Dict)
+import Dom
+import Http
+import Keyboard
+import Model.ClipboardData as ClipboardData
+import Model.EditingFloor as EditingFloor exposing (EditingFloor)
+import Model.Floor as Floor exposing (Floor)
+import Model.FloorInfo as FloorInfo
+import Model.I18n exposing (Language(..))
+import Model.Information exposing (Information(..))
+import Model.Mode as Mode exposing (EditingMode(..), Mode(..))
+import Model.Object as Object exposing (..)
+import Model.ObjectsChange as ObjectsChange exposing (ObjectsChange)
+import Model.ObjectsOperation as ObjectsOperation
+import Model.Person exposing (Person)
+import Model.Prototype exposing (Prototype)
+import Model.Prototypes as Prototypes exposing (PositionedPrototype)
+import Model.SaveRequest as SaveRequest exposing (ReducedSaveRequest, SaveRequest(..))
+import Model.Scale as Scale
+import Model.SearchResult as SearchResult
+import Model.User as User
+import Mouse
+import Navigation exposing (Location)
+import Page.Map.KeyOperation as KeyOperation
+import Page.Map.Model as Model exposing (DraggingContext(..), Model)
+import Page.Map.Msg exposing (Msg(..))
+import Page.Map.ObjectNameInput as ObjectNameInput
+import Page.Map.URL as URL
+import Process
 import Set
+import Task exposing (Task, andThen)
+import Time exposing (second)
+import Util.DictUtil as DictUtil
+import Util.File as File exposing (..)
+import Util.HttpUtil as HttpUtil
+import Util.IdGenerator as IdGenerator exposing (Seed)
+import Window
 
 
 port removeToken : {} -> Cmd msg
@@ -102,7 +102,7 @@ subscriptions model =
         , Window.resizes WindowSize
         , tokenRemoved (always TokenRemoved)
         , Sub.map ContextMenuMsg (ContextMenu.subscriptions model.contextMenu)
-        , Sub.map HeaderMsg (Header.subscriptions)
+        , Sub.map HeaderMsg Header.subscriptions
         , ObjectNameInput.subscriptions ObjectNameInputMsg
         ]
 
@@ -162,25 +162,25 @@ init flags location =
                 userState.lang
                 contextMenu
     in
-        case urlResult of
-            Ok url ->
-                ( toModel url
-                , initCmd apiConfig url.editMode userState url.floorId
-                )
+    case urlResult of
+        Ok url ->
+            ( toModel url
+            , initCmd apiConfig url.editMode userState url.floorId
+            )
 
-            Err _ ->
-                let
-                    url =
-                        URL.init
+        Err _ ->
+            let
+                url =
+                    URL.init
 
-                    model =
-                        toModel url
-                in
-                    model
-                        ! [ initCmd apiConfig url.editMode userState url.floorId
-                          , Navigation.modifyUrl (URL.stringify "/" url)
-                          , Cmd.map ContextMenuMsg contextMenuMsg
-                          ]
+                model =
+                    toModel url
+            in
+            model
+                ! [ initCmd apiConfig url.editMode userState url.floorId
+                  , Navigation.modifyUrl (URL.stringify "/" url)
+                  , Cmd.map ContextMenuMsg contextMenuMsg
+                  ]
 
 
 initCmd : API.Config -> Bool -> UserState -> Maybe String -> Cmd Msg
@@ -246,12 +246,12 @@ update msg model =
                 apiConfig =
                     model.apiConfig
             in
-                ( { model
-                    | apiConfig =
-                        { apiConfig | token = token }
-                  }
-                , Cache2.saveToken token
-                )
+            ( { model
+                | apiConfig =
+                    { apiConfig | token = token }
+              }
+            , Cache2.saveToken token
+            )
 
         GotNewToken Nothing ->
             ( model, Cmd.none )
@@ -288,23 +288,22 @@ update msg model =
                                         (model.offset.x + Scale.screenToImage model.scale dx)
                                         (model.offset.y + Scale.screenToImage model.scale dy)
                             in
-                                { model_
-                                    | offset = newOffset
-                                    , draggingContext =
-                                        ShiftOffset model.mousePosition
-                                }
+                            { model_
+                                | offset = newOffset
+                                , draggingContext =
+                                    ShiftOffset model.mousePosition
+                            }
 
                         _ ->
                             model_
             in
-                ( newModel_, Cmd.none )
+            ( newModel_, Cmd.none )
 
         MouseUp ->
-            ( (if Model.isMouseInCanvas model then
+            ( if Model.isMouseInCanvas model then
                 model
-               else
+              else
                 { model | draggingContext = NoDragging }
-              )
             , Cmd.none
             )
 
@@ -382,17 +381,17 @@ update msg model =
                     API.getFloorsInfo model.apiConfig
                         |> performAPI (FloorsInfoLoaded (selectedFloor /= Nothing || model.selectedResult /= Nothing))
             in
-                { model
-                    | scale = userState.scale
-                    , offset = userState.offset
-                    , lang = userState.lang
-                    , mode = mode
-                }
-                    ! [ focusObjectCmd
-                      , searchCmd
-                      , loadFloorInfoCmd
-                      , loadFloorCmd
-                      ]
+            { model
+                | scale = userState.scale
+                , offset = userState.offset
+                , lang = userState.lang
+                , mode = mode
+            }
+                ! [ focusObjectCmd
+                  , searchCmd
+                  , loadFloorInfoCmd
+                  , loadFloorCmd
+                  ]
 
         ColorsLoaded colorPalette ->
             ( { model | colorPalette = colorPalette }, Cmd.none )
@@ -419,22 +418,22 @@ update msg model =
                         _ ->
                             Cmd.none
             in
-                { model
-                    | floorsInfo = floorsInfo
-                }
-                    ! [ cmd ]
-                    |> andThen
-                        (\model ->
-                            model.floor
-                                |> Maybe.andThen
-                                    (\efloor ->
-                                        if floorIsSelected then
-                                            Just <| updateOnFloorLoaded (EditingFloor.present efloor |> Just) model
-                                        else
-                                            Nothing
-                                    )
-                                |> Maybe.withDefault ( model, Cmd.none )
-                        )
+            { model
+                | floorsInfo = floorsInfo
+            }
+                ! [ cmd ]
+                |> andThen
+                    (\model ->
+                        model.floor
+                            |> Maybe.andThen
+                                (\efloor ->
+                                    if floorIsSelected then
+                                        Just <| updateOnFloorLoaded (EditingFloor.present efloor |> Just) model
+                                    else
+                                        Nothing
+                                )
+                            |> Maybe.withDefault ( model, Cmd.none )
+                    )
 
         FloorLoaded floor ->
             updateOnFloorLoaded floor model
@@ -454,7 +453,7 @@ update msg model =
                         saveCmd =
                             requestSaveFloorCmd rawFloor
                     in
-                        ( { model | floor = Just newFloor }, saveCmd )
+                    ( { model | floor = Just newFloor }, saveCmd )
 
         RequestSave request ->
             Debounce.push
@@ -478,18 +477,17 @@ update msg model =
                     else
                         Cmd.none
             in
-                (Debounce.update
-                    saveFloorDebounceConfig
-                    (Debounce.takeAll save)
-                    msg
-                    model.saveFloorDebounce
-                )
-                    |> Tuple.mapFirst
-                        (\saveFloorDebounce ->
-                            { model
-                                | saveFloorDebounce = saveFloorDebounce
-                            }
-                        )
+            Debounce.update
+                saveFloorDebounceConfig
+                (Debounce.takeAll save)
+                msg
+                model.saveFloorDebounce
+                |> Tuple.mapFirst
+                    (\saveFloorDebounce ->
+                        { model
+                            | saveFloorDebounce = saveFloorDebounce
+                        }
+                    )
 
         ObjectsSaved ->
             -- TODO don't sync for now
@@ -531,12 +529,12 @@ update msg model =
                             ( objectNameInput, ev ) =
                                 ObjectNameInput.forceFinish model0.objectNameInput
                         in
-                            case ev of
-                                Just ( id, name ) ->
-                                    updateOnFinishNameInput False id name { model0 | objectNameInput = objectNameInput }
+                        case ev of
+                            Just ( id, name ) ->
+                                updateOnFinishNameInput False id name { model0 | objectNameInput = objectNameInput }
 
-                                Nothing ->
-                                    ( { model0 | objectNameInput = objectNameInput }, Cmd.none )
+                            Nothing ->
+                                ( { model0 | objectNameInput = objectNameInput }, Cmd.none )
                     else
                         ( model0, Cmd.none )
 
@@ -560,19 +558,19 @@ update msg model =
                             else if shift then
                                 let
                                     floor =
-                                        (Model.getEditingFloorOrDummy model)
+                                        Model.getEditingFloorOrDummy model
 
                                     objectsExcept target =
                                         List.filter (\e -> idOf e /= idOf target) (Floor.objects floor)
                                 in
-                                    case ( Floor.getObject lastTouchedId floor, Model.primarySelectedObject model ) of
-                                        ( Just object, Just primary ) ->
-                                            List.map Object.idOf <|
-                                                primary
-                                                    :: ObjectsOperation.withinRange ( primary, object ) (objectsExcept primary)
+                                case ( Floor.getObject lastTouchedId floor, Model.primarySelectedObject model ) of
+                                    ( Just object, Just primary ) ->
+                                        List.map Object.idOf <|
+                                            primary
+                                                :: ObjectsOperation.withinRange ( primary, object ) (objectsExcept primary)
 
-                                        _ ->
-                                            [ lastTouchedId ]
+                                    _ ->
+                                        [ lastTouchedId ]
                             else if List.member lastTouchedId model.selectedObjects then
                                 model.selectedObjects
                             else
@@ -585,21 +583,21 @@ update msg model =
                         , selectorRect = Nothing
                     }
             in
-                ( help model_
-                , Cmd.batch
-                    [ cmd
-                    , emulateClick lastTouchedId True
-                    , focusCanvas {}
-                    , loadPersonCmd
-                    ]
-                )
+            ( help model_
+            , Cmd.batch
+                [ cmd
+                , emulateClick lastTouchedId True
+                , focusCanvas {}
+                , loadPersonCmd
+                ]
+            )
 
         MouseUpOnObject lastTouchedId pos ->
             let
                 ( newModel, cmd ) =
                     updateOnMouseUp pos model
             in
-                newModel ! [ cmd, emulateClick lastTouchedId False ]
+            newModel ! [ cmd, emulateClick lastTouchedId False ]
 
         ClickOnCanvas ->
             ( model, Cmd.none )
@@ -619,7 +617,7 @@ update msg model =
                                 ObjectsOperation.fitPositionToGrid model0.gridSize <|
                                     Model.screenToImageWithOffset model0.scale canvasPosition model0.offset
                         in
-                            Just ( fitted, Size model0.gridSize model0.gridSize )
+                        Just ( fitted, Size model0.gridSize model0.gridSize )
                     else
                         model0.selectorRect
 
@@ -663,18 +661,18 @@ update msg model =
                         , draggingContext = draggingContext
                     }
             in
-                newModel ! [ cmd, cmd2, emulateClick "" True ]
+            newModel ! [ cmd, cmd2, emulateClick "" True ]
 
         MouseUpOnCanvas pos ->
             let
                 ( newModel, cmd1 ) =
                     updateOnMouseUp pos model
             in
-                newModel
-                    ! [ cmd1
-                      , putUserState newModel
-                      , emulateClick "" False
-                      ]
+            newModel
+                ! [ cmd1
+                  , putUserState newModel
+                  , emulateClick "" False
+                  ]
 
         MouseDownOnResizeGrip id mousePosition ->
             let
@@ -695,7 +693,7 @@ update msg model =
                         , draggingContext = ResizeFromScreenPos id (Model.canvasPosition model_)
                     }
             in
-                ( newModel, cmd )
+            ( newModel, cmd )
 
         StartEditObject objectId ->
             model.floor
@@ -733,11 +731,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         SelectColor color ->
             case model.floor of
@@ -754,11 +752,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         SelectShape shape ->
             case model.floor of
@@ -775,11 +773,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         SelectFontSize fontSize ->
             case model.floor of
@@ -796,11 +794,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         InputObjectUrl selectedObjects url ->
             case model.floor of
@@ -817,11 +815,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         ObjectNameInputMsg message ->
             let
@@ -833,61 +831,60 @@ update msg model =
                         | objectNameInput = objectNameInput
                     }
             in
-                case event of
-                    ObjectNameInput.OnInput id name ->
-                        model_.floor
-                            |> Maybe.andThen (EditingFloor.present >> Floor.getObject id)
-                            |> Maybe.andThen
-                                (\object ->
-                                    if Object.isLabel object then
-                                        Nothing
-                                    else
-                                        Just <| requestCandidate id name
-                                )
-                            |> Maybe.withDefault Cmd.none
-                            |> (,) model_
+            case event of
+                ObjectNameInput.OnInput id name ->
+                    model_.floor
+                        |> Maybe.andThen (EditingFloor.present >> Floor.getObject id)
+                        |> Maybe.andThen
+                            (\object ->
+                                if Object.isLabel object then
+                                    Nothing
+                                else
+                                    Just <| requestCandidate id name
+                            )
+                        |> Maybe.withDefault Cmd.none
+                        |> (,) model_
 
-                    ObjectNameInput.OnFinish objectId name candidateId ->
-                        case candidateId of
-                            Just personId ->
-                                updateOnSelectCandidate objectId personId model_
+                ObjectNameInput.OnFinish objectId name candidateId ->
+                    case candidateId of
+                        Just personId ->
+                            updateOnSelectCandidate objectId personId model_
 
-                            Nothing ->
-                                updateOnFinishNameInput True objectId name model_
+                        Nothing ->
+                            updateOnFinishNameInput True objectId name model_
 
-                    ObjectNameInput.OnSelectCandidate objectId personId ->
-                        updateOnSelectCandidate objectId personId model_
+                ObjectNameInput.OnSelectCandidate objectId personId ->
+                    updateOnSelectCandidate objectId personId model_
 
-                    ObjectNameInput.OnUnsetPerson objectId ->
-                        case model_.floor of
-                            Nothing ->
-                                ( model_, Cmd.none )
+                ObjectNameInput.OnUnsetPerson objectId ->
+                    case model_.floor of
+                        Nothing ->
+                            ( model_, Cmd.none )
 
-                            Just editingFloor ->
-                                let
-                                    ( newFloor, objectsChange ) =
-                                        EditingFloor.updateObjects
-                                            (Floor.unsetPerson objectId)
-                                            editingFloor
+                        Just editingFloor ->
+                            let
+                                ( newFloor, objectsChange ) =
+                                    EditingFloor.updateObjects
+                                        (Floor.unsetPerson objectId)
+                                        editingFloor
 
-                                    saveCmd =
-                                        requestSaveObjectsCmd objectsChange
-                                in
-                                    ( { model_
-                                        | floor = Just newFloor
-                                      }
-                                    , saveCmd
-                                    )
+                                saveCmd =
+                                    requestSaveObjectsCmd objectsChange
+                            in
+                            ( { model_
+                                | floor = Just newFloor
+                              }
+                            , saveCmd
+                            )
 
-                    ObjectNameInput.None ->
-                        ( model_, Cmd.none )
+                ObjectNameInput.None ->
+                    ( model_, Cmd.none )
 
         RequestCandidate objectId name ->
-            (Debounce.push
+            Debounce.push
                 searchCandidateDebounceConfig
                 ( objectId, name )
                 model.searchCandidateDebounce
-            )
                 |> Tuple.mapFirst
                     (\searchCandidateDebounce ->
                         { model
@@ -912,16 +909,16 @@ update msg model =
                         msg
                         model.searchCandidateDebounce
             in
-                ( { model
-                    | searchCandidateDebounce = searchCandidateDebounce
-                  }
-                , cmd
-                )
+            ( { model
+                | searchCandidateDebounce = searchCandidateDebounce
+              }
+            , cmd
+            )
 
         GotCandidateSelection objectId people ->
             ( { model
                 | personInfo =
-                    DictUtil.addAll (.id) people model.personInfo
+                    DictUtil.addAll .id people model.personInfo
                 , candidates = List.map .id people
               }
             , Cmd.none
@@ -959,14 +956,14 @@ update msg model =
                             List.concatMap Tuple.second pairs
 
                         personInfo =
-                            DictUtil.addAll (.id) allPeople model.personInfo
+                            DictUtil.addAll .id allPeople model.personInfo
                     in
-                        ( { model
-                            | floor = Just newFloor
-                            , personInfo = personInfo
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                        , personInfo = personInfo
+                      }
+                    , saveCmd
+                    )
 
         BeforeContextMenuOnObject objectId contextmenuMsg ->
             let
@@ -984,21 +981,21 @@ update msg model =
                         |> Maybe.map (\personId -> getAndCachePersonIfNotCached personId model)
                         |> Maybe.withDefault Cmd.none
             in
-                { model
-                    | selectedObjects = selectedObjects
-                }
-                    ! [ loadPersonCmd
-                      , Task.perform identity <| Task.succeed contextmenuMsg
-                      ]
+            { model
+                | selectedObjects = selectedObjects
+            }
+                ! [ loadPersonCmd
+                  , Task.perform identity <| Task.succeed contextmenuMsg
+                  ]
 
         ContextMenuMsg msg ->
             let
                 ( contextMenu, cmd ) =
                     ContextMenu.update msg model.contextMenu
             in
-                ( { model | contextMenu = contextMenu }
-                , Cmd.map ContextMenuMsg cmd
-                )
+            ( { model | contextMenu = contextMenu }
+            , Cmd.map ContextMenuMsg cmd
+            )
 
         GoToFloor floorId requestLastEdit ->
             let
@@ -1007,20 +1004,20 @@ update msg model =
                         load =
                             performAPI FloorLoaded (loadFloor model.apiConfig requestLastEdit floorId)
                     in
-                        case model.floor of
-                            Just efloor ->
-                                if (EditingFloor.present efloor).id == floorId then
-                                    Cmd.none
-                                else
-                                    load
-
-                            Nothing ->
+                    case model.floor of
+                        Just efloor ->
+                            if (EditingFloor.present efloor).id == floorId then
+                                Cmd.none
+                            else
                                 load
+
+                        Nothing ->
+                            load
             in
-                model
-                    ! [ loadCmd
-                      , Navigation.modifyUrl (Model.encodeToUrl model)
-                      ]
+            model
+                ! [ loadCmd
+                  , Navigation.modifyUrl (Model.encodeToUrl model)
+                  ]
 
         SelectSamePost postName ->
             case model.floor of
@@ -1041,7 +1038,7 @@ update msg model =
                                     postName
                                 )
                     in
-                        ( model, cmd )
+                    ( model, cmd )
 
         SearchByPost postName ->
             searchBy ("\"" ++ postName ++ "\"") model
@@ -1079,11 +1076,11 @@ update msg model =
                                         island =
                                             ObjectsOperation.island
                                                 [ object ]
-                                                (List.filter (\e -> (Object.idOf e) /= id) (Floor.objects floor))
+                                                (List.filter (\e -> Object.idOf e /= id) (Floor.objects floor))
                                     in
-                                        { model
-                                            | selectedObjects = List.map Object.idOf island
-                                        }
+                                    { model
+                                        | selectedObjects = List.map Object.idOf island
+                                    }
                                 )
                     )
                 |> Maybe.map (flip (,) Cmd.none)
@@ -1103,14 +1100,14 @@ update msg model =
 
                                         target =
                                             List.filter
-                                                (\e -> (backgroundColorOf e) == backgroundColor)
+                                                (\e -> backgroundColorOf e == backgroundColor)
                                                 (Floor.objects floor)
                                     in
-                                        ( { model
-                                            | selectedObjects = List.map Object.idOf target
-                                          }
-                                        , Cmd.none
-                                        )
+                                    ( { model
+                                        | selectedObjects = List.map Object.idOf target
+                                      }
+                                    , Cmd.none
+                                    )
                                 )
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
@@ -1140,9 +1137,9 @@ update msg model =
                         y =
                             Scale.screenToImage model0.scale canvasPosition.y
                     in
-                        { x = floor (toFloat (x - floor (ratio * (toFloat (x - model0.offset.x)))) / ratio)
-                        , y = floor (toFloat (y - floor (ratio * (toFloat (y - model0.offset.y)))) / ratio)
-                        }
+                    { x = floor (toFloat (x - floor (ratio * toFloat (x - model0.offset.x))) / ratio)
+                    , y = floor (toFloat (y - floor (ratio * toFloat (y - model0.offset.y))) / ratio)
+                    }
 
                 newModel =
                     { model0
@@ -1150,7 +1147,7 @@ update msg model =
                         , offset = newOffset
                     }
             in
-                ( newModel, putUserState newModel )
+            ( newModel, putUserState newModel )
 
         WindowSize size ->
             ( { model | windowSize = size }
@@ -1185,38 +1182,38 @@ update msg model =
                     model.floor
                         |> Maybe.andThen (\floor -> Floor.getObject objectId (EditingFloor.present floor))
             in
-                case object of
-                    Just o ->
-                        let
-                            { width, height } =
-                                Object.sizeOf o
+            case object of
+                Just o ->
+                    let
+                        { width, height } =
+                            Object.sizeOf o
 
-                            ( newId, seed ) =
-                                IdGenerator.new model.seed
+                        ( newId, seed ) =
+                            IdGenerator.new model.seed
 
-                            newPrototypes =
-                                Prototypes.register
-                                    { id = newId
-                                    , color = colorOf o
-                                    , backgroundColor = backgroundColorOf o
-                                    , name = nameOf o
-                                    , width = width
-                                    , height = height
-                                    , fontSize = fontSizeOf o
-                                    , shape = shapeOf o
-                                    , personId = Nothing
-                                    }
-                                    model.prototypes
-                        in
-                            ( { model
-                                | seed = seed
-                                , prototypes = newPrototypes
-                              }
-                            , (savePrototypesCmd model.apiConfig) newPrototypes.data
-                            )
+                        newPrototypes =
+                            Prototypes.register
+                                { id = newId
+                                , color = colorOf o
+                                , backgroundColor = backgroundColorOf o
+                                , name = nameOf o
+                                , width = width
+                                , height = height
+                                , fontSize = fontSizeOf o
+                                , shape = shapeOf o
+                                , personId = Nothing
+                                }
+                                model.prototypes
+                    in
+                    ( { model
+                        | seed = seed
+                        , prototypes = newPrototypes
+                      }
+                    , savePrototypesCmd model.apiConfig newPrototypes.data
+                    )
 
-                    Nothing ->
-                        ( model, Cmd.none )
+                Nothing ->
+                    ( model, Cmd.none )
 
         FloorPropertyMsg message ->
             case model.floor of
@@ -1237,7 +1234,7 @@ update msg model =
                                 , floorProperty = floorProperty
                             }
                     in
-                        ( newModel, saveCmd )
+                    ( newModel, saveCmd )
 
         RotateObjects ids ->
             case model.floor of
@@ -1254,11 +1251,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         FirstNameOnly ids ->
             case model.floor of
@@ -1275,11 +1272,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         RemoveSpaces ids ->
             case model.floor of
@@ -1294,11 +1291,11 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
 
         HeaderMsg msg ->
             ( { model | header = Header.update msg model.header }, Cmd.none )
@@ -1327,15 +1324,15 @@ update msg model =
                                 floorId =
                                     (EditingFloor.present floor).id
                             in
-                                performAPI FloorLoaded (loadFloor model.apiConfig withPrivate floorId)
+                            performAPI FloorLoaded (loadFloor model.apiConfig withPrivate floorId)
 
                         Nothing ->
                             Cmd.none
             in
-                newModel
-                    ! [ loadFloorCmd
-                      , Navigation.modifyUrl (Model.encodeToUrl newModel)
-                      ]
+            newModel
+                ! [ loadFloorCmd
+                  , Navigation.modifyUrl (Model.encodeToUrl newModel)
+                  ]
 
         TogglePrintView ->
             ( { model
@@ -1349,7 +1346,7 @@ update msg model =
                 newModel =
                     { model | lang = lang }
             in
-                newModel ! [ putUserState newModel ]
+            newModel ! [ putUserState newModel ]
 
         UpdateSearchQuery searchQuery ->
             ( { model
@@ -1371,20 +1368,20 @@ update msg model =
                         _ ->
                             Nothing
             in
-                { model
-                    | searchResult = Just results
-                }
-                    |> Model.cachePeople people
-                    |> adjustOffset True
-                    |> andThen
-                        (\newModel ->
-                            maybeSelectMsg
-                                |> Maybe.map
-                                    (\msg ->
-                                        update msg newModel
-                                    )
-                                |> Maybe.withDefault ( newModel, Cmd.none )
-                        )
+            { model
+                | searchResult = Just results
+            }
+                |> Model.cachePeople people
+                |> adjustOffset True
+                |> andThen
+                    (\newModel ->
+                        maybeSelectMsg
+                            |> Maybe.map
+                                (\msg ->
+                                    update msg newModel
+                                )
+                            |> Maybe.withDefault ( newModel, Cmd.none )
+                    )
 
         SelectSearchResult objectId floorId maybePersonId ->
             let
@@ -1396,17 +1393,17 @@ update msg model =
                         |> Maybe.map (regesterPersonIfNotCached model.apiConfig model.personInfo)
                         |> Maybe.withDefault Cmd.none
             in
-                model
-                    |> update (GoToFloor floorId requestPrivateFloors)
-                    |> andThen
-                        (\model ->
-                            ( { model
-                                | selectedResult = Just objectId
-                              }
-                            , regesterPersonCmd
-                            )
+            model
+                |> update (GoToFloor floorId requestPrivateFloors)
+                |> andThen
+                    (\model ->
+                        ( { model
+                            | selectedResult = Just objectId
+                          }
+                        , regesterPersonCmd
                         )
-                    |> andThen (adjustOffset True)
+                    )
+                |> andThen (adjustOffset True)
 
         CloseSearchResult ->
             searchBy "" model
@@ -1458,11 +1455,11 @@ update msg model =
                                 saveCmd =
                                     requestSaveObjectsCmd objectsChange
                             in
-                                ( { model
-                                    | floor = Just newFloor
-                                  }
-                                , saveCmd
-                                )
+                            ( { model
+                                | floor = Just newFloor
+                              }
+                            , saveCmd
+                            )
 
                         _ ->
                             ( model, Cmd.none )
@@ -1498,7 +1495,7 @@ update msg model =
                 newModel =
                     { model | selectedResult = Nothing }
             in
-                ( newModel, Navigation.modifyUrl (Model.encodeToUrl newModel) )
+            ( newModel, Navigation.modifyUrl (Model.encodeToUrl newModel) )
 
         ShowDetailForObject objectId ->
             case model.floor of
@@ -1519,7 +1516,7 @@ update msg model =
                                             |> Maybe.map (regesterPerson model.apiConfig)
                                             |> Maybe.withDefault Cmd.none
                                 in
-                                    ( model, cmd )
+                                ( model, cmd )
                             )
 
         CreateNewFloor ->
@@ -1549,10 +1546,10 @@ update msg model =
                         , floor = Just (EditingFloor.init newFloor)
                     }
             in
-                newModel
-                    ! [ cmd
-                      , Navigation.modifyUrl (Model.encodeToUrl newModel)
-                      ]
+            newModel
+                ! [ cmd
+                  , Navigation.modifyUrl (Model.encodeToUrl newModel)
+                  ]
 
         CopyFloor floorId temporary ->
             model.floor
@@ -1599,10 +1596,10 @@ update msg model =
                                     , floor = Just newEditingFloor
                                 }
                         in
-                            newModel
-                                ! [ saveAndLoadNewFloorCmd
-                                  , Navigation.modifyUrl (Model.encodeToUrl newModel)
-                                  ]
+                        newModel
+                            ! [ saveAndLoadNewFloorCmd
+                              , Navigation.modifyUrl (Model.encodeToUrl newModel)
+                              ]
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
@@ -1631,12 +1628,12 @@ update msg model =
                 newModel =
                     { model | clickEmulator = clickEmulator }
             in
-                if event == "dblclick" then
-                    newModel |> update (StartEditObject id)
-                else if event == "unselectObject" then
-                    ( { newModel | selectedObjects = [] }, Cmd.none )
-                else
-                    ( newModel, Cmd.none )
+            if event == "dblclick" then
+                newModel |> update (StartEditObject id)
+            else if event == "unselectObject" then
+                ( { newModel | selectedObjects = [] }, Cmd.none )
+            else
+                ( newModel, Cmd.none )
 
         TokenRemoved ->
             ( { model
@@ -1659,7 +1656,7 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model | floor = Just newFloor }, saveCmd )
+                    ( { model | floor = Just newFloor }, saveCmd )
 
         Redo ->
             case model.floor of
@@ -1674,7 +1671,7 @@ update msg model =
                         saveCmd =
                             requestSaveObjectsCmd objectsChange
                     in
-                        ( { model | floor = Just newFloor }, saveCmd )
+                    ( { model | floor = Just newFloor }, saveCmd )
 
         Focused ->
             ( model, setSelectionStart {} )
@@ -1693,21 +1690,21 @@ update msg model =
                             saveCmd =
                                 requestSaveObjectsCmd objectsChange
                         in
-                            ( { model
-                                | floor = Just newFloor
-                                , seed = newSeed
-                                , selectedObjects =
-                                    case List.map Tuple.second copiedWithNewIds of
-                                        [] ->
-                                            model.selectedObjects
+                        ( { model
+                            | floor = Just newFloor
+                            , seed = newSeed
+                            , selectedObjects =
+                                case List.map Tuple.second copiedWithNewIds of
+                                    [] ->
+                                        model.selectedObjects
 
-                                        -- for pasting from spreadsheet
-                                        x ->
-                                            x
-                                , selectorRect = Nothing
-                              }
-                            , saveCmd
-                            )
+                                    -- for pasting from spreadsheet
+                                    x ->
+                                        x
+                            , selectorRect = Nothing
+                          }
+                        , saveCmd
+                        )
                     else
                         let
                             prototype =
@@ -1746,10 +1743,10 @@ update msg model =
                                     |> Task.andThen (\_ -> task)
                                     |> performAPI GotMatchingList
                         in
-                            { newModel
-                                | selectedObjects = List.map (Object.idOf) newObjects
-                            }
-                                ! [ cmd, autoMatchingCmd ]
+                        { newModel
+                            | selectedObjects = List.map Object.idOf newObjects
+                        }
+                            ! [ cmd, autoMatchingCmd ]
 
                 _ ->
                     ( model, Cmd.none )
@@ -1768,7 +1765,7 @@ update msg model =
                             loadFloor model.apiConfig requestPrivateFloors floorId
                                 |> performAPI FloorLoaded
                     in
-                        ( model, loadFloorCmd )
+                    ( model, loadFloorCmd )
 
                 _ ->
                     ( model, Cmd.none )
@@ -1794,10 +1791,10 @@ update msg model =
                     API.saveEditingImage model.apiConfig url file
                         |> performAPI (always <| ImageSaved url width height)
             in
-                ( { model | seed = newSeed }, saveImageCmd )
+            ( { model | seed = newSeed }, saveImageCmd )
 
         FloorDeleterMsg msg ->
-            (FloorDeleter.update
+            FloorDeleter.update
                 FloorDeleterMsg
                 { onDeleteFloor =
                     \floor ->
@@ -1806,7 +1803,6 @@ update msg model =
                 }
                 msg
                 model.floorDeleter
-            )
                 |> Tuple.mapFirst
                     (\floorDeleter ->
                         { model | floorDeleter = floorDeleter }
@@ -1820,13 +1816,13 @@ update msg model =
                         , information = Success ("Successfully deleted " ++ floor.name)
                     }
             in
-                newModel
-                    ! [ API.getFloorsInfo model.apiConfig
-                            |> performAPI (FloorsInfoLoaded False)
-                      , Process.sleep 3000.0
-                            |> Task.perform (\_ -> ShowInformation NoInformation)
-                      , Navigation.modifyUrl (Model.encodeToUrl newModel)
-                      ]
+            newModel
+                ! [ API.getFloorsInfo model.apiConfig
+                        |> performAPI (FloorsInfoLoaded False)
+                  , Process.sleep 3000.0
+                        |> Task.perform (\_ -> ShowInformation NoInformation)
+                  , Navigation.modifyUrl (Model.encodeToUrl newModel)
+                  ]
 
         InsertEmoji text ->
             ( model
@@ -1853,14 +1849,14 @@ update msg model =
                             saveCmd =
                                 requestSaveObjectsCmd objectsChange
                         in
-                            { model
-                                | floor = Just newFloor
-                                , selectedObjects = []
-                            }
-                                ! [ saveCmd
+                        { model
+                            | floor = Just newFloor
+                            , selectedObjects = []
+                        }
+                            ! [ saveCmd
 
-                                  {- , ClipboardData.copyObjects (Model.selectedObjects model) -}
-                                  ]
+                              {- , ClipboardData.copyObjects (Model.selectedObjects model) -}
+                              ]
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
@@ -1893,10 +1889,10 @@ update msg model =
                                     Floor.flip
                                     editingFloor
                         in
-                            { model | floor = Just newFloor }
-                                ! [ requestSaveFloorCmd rawFloor
-                                  , requestSaveObjectsCmd objectsChange
-                                  ]
+                        { model | floor = Just newFloor }
+                            ! [ requestSaveFloorCmd rawFloor
+                              , requestSaveObjectsCmd objectsChange
+                              ]
                     )
                 |> Maybe.withDefault ( model, Cmd.none )
 
@@ -1916,7 +1912,7 @@ andThen update ( model, cmd ) =
         ( newModel, newCmd ) =
             update model
     in
-        newModel ! [ cmd, newCmd ]
+    newModel ! [ cmd, newCmd ]
 
 
 adjustOffset : Bool -> Model -> ( Model, Cmd Msg )
@@ -1961,12 +1957,12 @@ submitSearch model =
             searchCmd =
                 search model.apiConfig private model.personInfo model.searchQuery
         in
-            { model
-                | mode = Mode.showSearchResult model.mode
-            }
-                ! [ searchCmd
-                  , Navigation.modifyUrl (Model.encodeToUrl model)
-                  ]
+        { model
+            | mode = Mode.showSearchResult model.mode
+        }
+            ! [ searchCmd
+              , Navigation.modifyUrl (Model.encodeToUrl model)
+              ]
 
 
 search : API.Config -> Bool -> Dict PersonId Person -> String -> Cmd Msg
@@ -2034,12 +2030,12 @@ updateOnMouseUp pos model =
                                         |> Maybe.map (\personId -> getAndCachePersonIfNotCached personId model)
                                         |> Maybe.withDefault Cmd.none
                             in
-                                { model
-                                    | seed = newSeed
-                                    , floor = Just newFloor
-                                    , searchResult = searchResult
-                                }
-                                    ! [ saveCmd, cachePersonCmd ]
+                            { model
+                                | seed = newSeed
+                                , floor = Just newFloor
+                                , searchResult = searchResult
+                            }
+                                ! [ saveCmd, cachePersonCmd ]
 
                         _ ->
                             ( model, Cmd.none )
@@ -2063,7 +2059,7 @@ updateOnMouseUp pos model =
                 | draggingContext = NoDragging
             }
     in
-        ( newModel, cmd )
+    ( newModel, cmd )
 
 
 updateOnSelectCandidate : ObjectId -> PersonId -> Model -> ( Model, Cmd Msg )
@@ -2076,12 +2072,12 @@ updateOnSelectCandidate objectId personId model =
                         (Floor.setPerson objectId personId)
                         floor
             in
-                updateOnFinishNameInput
-                    True
-                    objectId
-                    person.name
-                    { model | floor = Just newFloor }
-                    |> andThen (flip (,) (requestSaveObjectsCmd objectsChange))
+            updateOnFinishNameInput
+                True
+                objectId
+                person.name
+                { model | floor = Just newFloor }
+                |> andThen (flip (,) (requestSaveObjectsCmd objectsChange))
 
         _ ->
             ( model, Cmd.none )
@@ -2121,16 +2117,16 @@ updateOnFinishStamp_ prototypes model floor =
         saveCmd =
             requestSaveObjectsCmd objectsChange
     in
-        ( ( { model
-                | seed = newSeed
-                , floor = Just newFloor
-                , searchResult = searchResult
-                , mode = Mode.toSelectMode model.mode
-            }
-          , saveCmd
-          )
-        , newObjects
-        )
+    ( ( { model
+            | seed = newSeed
+            , floor = Just newFloor
+            , searchResult = searchResult
+            , mode = Mode.toSelectMode model.mode
+        }
+      , saveCmd
+      )
+    , newObjects
+    )
 
 
 
@@ -2155,13 +2151,14 @@ updateOnFinishStampWithoutEffects maybeObjectId prototypes model floor =
                         prototype.name
                         prototype.fontSize
                         prototype.personId
+                        32503647600
                 )
                 candidatesWithNewIds
 
         ( newFloor, objectsChange ) =
             EditingFloor.updateObjects (Floor.addObjects newObjects) floor
     in
-        ( newSeed, newFloor, newObjects, objectsChange )
+    ( newSeed, newFloor, newObjects, objectsChange )
 
 
 updateOnFinishPen : Position -> Model -> ( Model, Cmd Msg )
@@ -2182,6 +2179,7 @@ updateOnFinishPen from model =
                         name
                         Object.defaultFontSize
                         Nothing
+                        32503647600
 
                 ( newFloor, objectsChange ) =
                     EditingFloor.updateObjects
@@ -2191,12 +2189,12 @@ updateOnFinishPen from model =
                 saveCmd =
                     requestSaveObjectsCmd objectsChange
             in
-                ( { model
-                    | seed = newSeed
-                    , floor = Just newFloor
-                  }
-                , saveCmd
-                )
+            ( { model
+                | seed = newSeed
+                , floor = Just newFloor
+              }
+            , saveCmd
+            )
 
         _ ->
             ( model, Cmd.none )
@@ -2221,7 +2219,7 @@ updateOnFinishResize objectId fromScreen model =
                                 saveCmd =
                                     requestSaveObjectsCmd objectsChange
                             in
-                                ( { model | floor = Just newFloor }, saveCmd )
+                            ( { model | floor = Just newFloor }, saveCmd )
                         )
             )
         |> Maybe.withDefault ( model, Cmd.none )
@@ -2273,6 +2271,7 @@ updateOnPuttingLabel model =
                         name
                         fontSize
                         (Object.LabelFields color False "" Object.Rectangle)
+                        32503647600
 
                 ( newFloor, objectsChange ) =
                     EditingFloor.updateObjects
@@ -2289,16 +2288,16 @@ updateOnPuttingLabel model =
                         , floor = Just newFloor
                     }
             in
-                case Floor.getObject newId (EditingFloor.present newFloor) of
-                    Just e ->
-                        let
-                            newModel =
-                                Model.startEdit e model_
-                        in
-                            newModel ! [ saveCmd, focusCmd ]
+            case Floor.getObject newId (EditingFloor.present newFloor) of
+                Just e ->
+                    let
+                        newModel =
+                            Model.startEdit e model_
+                    in
+                    newModel ! [ saveCmd, focusCmd ]
 
-                    Nothing ->
-                        ( model_, saveCmd )
+                Nothing ->
+                    ( model_, saveCmd )
 
         _ ->
             ( model, Cmd.none )
@@ -2324,16 +2323,16 @@ updateOnFloorLoaded maybeFloor model =
                                     )
                                 |> Maybe.withDefault Cmd.none
                 in
-                    { model
-                        | floorsInfo = FloorInfo.mergeEditingFloor (Floor.baseOf floor) model.floorsInfo
-                        , floor = Just (EditingFloor.init floor)
-                        , floorProperty = FloorProperty.init floor.name realWidth realHeight floor.ord
-                    }
-                        |> adjustOffset True
-                        |> andThen
-                            (\model ->
-                                ( model, getUpdatePerson )
-                            )
+                { model
+                    | floorsInfo = FloorInfo.mergeEditingFloor (Floor.baseOf floor) model.floorsInfo
+                    , floor = Just (EditingFloor.init floor)
+                    , floorProperty = FloorProperty.init floor.name realWidth realHeight floor.ord
+                }
+                    |> adjustOffset True
+                    |> andThen
+                        (\model ->
+                            ( model, getUpdatePerson )
+                        )
             )
         |> Maybe.withDefault ( { model | floor = Nothing }, Cmd.none )
         |> andThen
@@ -2389,7 +2388,7 @@ updateFloorByFloorPropertyEvent apiConfig event efloor =
                     saveCmd =
                         requestSaveFloorCmd rawFloor
                 in
-                    ( newFloor, saveCmd )
+                ( newFloor, saveCmd )
             )
         |> Maybe.withDefault ( efloor, Cmd.none )
 
@@ -2482,19 +2481,19 @@ updateOnFinishNameInput continueEditing objectId name model =
                 saveCmd =
                     requestSaveObjectsCmd objectsChange
             in
-                ( { model
-                    | floor = Just newFloor
-                    , objectNameInput = objectNameInput
-                    , candidates = []
-                    , selectedObjects = selectedObjects
-                  }
-                , Cmd.batch
-                    [ requestCandidateCmd
-                    , cachePersonCmd
-                    , saveCmd
-                    , focusCmd
-                    ]
-                )
+            ( { model
+                | floor = Just newFloor
+                , objectNameInput = objectNameInput
+                , candidates = []
+                , selectedObjects = selectedObjects
+              }
+            , Cmd.batch
+                [ requestCandidateCmd
+                , cachePersonCmd
+                , saveCmd
+                , focusCmd
+                ]
+            )
 
 
 updateFloorObjectsWithInputName : Object -> String -> Floor -> Floor
@@ -2503,16 +2502,16 @@ updateFloorObjectsWithInputName object name floor =
         targetObjectId =
             Object.idOf object
     in
-        if Object.isLabel object && String.trim name == "" then
-            Floor.removeObjects [ targetObjectId ] floor
-        else
-            floor
-                |> Floor.changeObjectName [ targetObjectId ] name
-                |> (if String.trim name == "" then
-                        Floor.unsetPerson targetObjectId
-                    else
-                        identity
-                   )
+    if Object.isLabel object && String.trim name == "" then
+        Floor.removeObjects [ targetObjectId ] floor
+    else
+        floor
+            |> Floor.changeObjectName [ targetObjectId ] name
+            |> (if String.trim name == "" then
+                    Floor.unsetPerson targetObjectId
+                else
+                    identity
+               )
 
 
 {-| this logic should be used but unable on current code
@@ -2530,7 +2529,7 @@ isTotallyDifferentNames first second =
                 |> String.toList
                 |> Set.fromList
     in
-        Set.isEmpty (Set.intersect firstSet secondSet)
+    Set.isEmpty (Set.intersect firstSet secondSet)
 
 
 cachePersonIfAPersonIsNotRelatedTo : API.Config -> Object -> Cmd Msg
@@ -2550,17 +2549,17 @@ nextObjectToInput object allObjects =
         island =
             ObjectsOperation.island
                 [ object ]
-                (List.filter (\e -> (Object.idOf e) /= (idOf object)) allObjects)
+                (List.filter (\e -> Object.idOf e /= idOf object) allObjects)
     in
-        case ObjectsOperation.nearest Down object island of
-            Just e ->
-                if Object.idOf object == idOf e then
-                    Nothing
-                else
-                    Just e
-
-            _ ->
+    case ObjectsOperation.nearest Down object island of
+        Just e ->
+            if Object.idOf object == idOf e then
                 Nothing
+            else
+                Just e
+
+        _ ->
+            Nothing
 
 
 savePrototypesCmd : API.Config -> List Prototype -> Cmd Msg
@@ -2598,12 +2597,11 @@ batchSave apiConfig request =
                 |> Maybe.map (API.publishFloor apiConfig)
                 |> Maybe.map
                     (\task ->
-                        (Cmd.batch
+                        Cmd.batch
                             [ performAPI FloorPublished task
                             , Task.perform identity <|
                                 Task.succeed (ShowInformation (PublishInProgress ""))
                             ]
-                        )
                     )
                 |> Maybe.withDefault Cmd.none
 
@@ -2617,7 +2615,7 @@ batchSave apiConfig request =
             API.saveObjects apiConfig (Dict.values request.objects)
                 |> performAPI (always ObjectsSaved)
     in
-        Cmd.batch [ publishFloorCmd, saveFloorCmd, saveObjectsCmd ]
+    Cmd.batch [ publishFloorCmd, saveFloorCmd, saveObjectsCmd ]
 
 
 removeSelectedObjects : Model -> EditingFloor -> ( Model, Cmd Msg )
@@ -2629,11 +2627,11 @@ removeSelectedObjects model floor =
         saveCmd =
             requestSaveObjectsCmd objectsChange
     in
-        ( { model
-            | floor = Just newFloor
-          }
-        , saveCmd
-        )
+    ( { model
+        | floor = Just newFloor
+      }
+    , saveCmd
+    )
 
 
 moveSelecedObjectsToward : Direction -> Model -> EditingFloor -> ( Model, Cmd Msg )
@@ -2650,11 +2648,11 @@ moveSelecedObjectsToward direction model editingFloor =
         saveCmd =
             requestSaveObjectsCmd objectsChange
     in
-        ( { model
-            | floor = Just newFloor
-          }
-        , saveCmd
-        )
+    ( { model
+        | floor = Just newFloor
+      }
+    , saveCmd
+    )
 
 
 updateByMoveObjectEnd : ObjectId -> Position -> Position -> Model -> ( Model, Cmd Msg )
@@ -2672,23 +2670,23 @@ updateByMoveObjectEnd objectId start end model =
                         , y = end.y - start.y
                         }
             in
-                if ( shift.x, shift.y ) /= ( 0, 0 ) then
-                    let
-                        ( newFloor, objectsChange ) =
-                            EditingFloor.updateObjects
-                                (Floor.move model.selectedObjects model.gridSize ( shift.x, shift.y ))
-                                floor
+            if ( shift.x, shift.y ) /= ( 0, 0 ) then
+                let
+                    ( newFloor, objectsChange ) =
+                        EditingFloor.updateObjects
+                            (Floor.move model.selectedObjects model.gridSize ( shift.x, shift.y ))
+                            floor
 
-                        saveCmd =
-                            requestSaveObjectsCmd objectsChange
-                    in
-                        ( { model
-                            | floor = Just newFloor
-                          }
-                        , saveCmd
-                        )
-                else
-                    ( model, Cmd.none )
+                    saveCmd =
+                        requestSaveObjectsCmd objectsChange
+                in
+                ( { model
+                    | floor = Just newFloor
+                  }
+                , saveCmd
+                )
+            else
+                ( model, Cmd.none )
 
 
 putUserState : Model -> Cmd Msg
