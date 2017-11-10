@@ -18,6 +18,7 @@ type Object
         , name : String
         , fontSize : Float
         , extension : ObjectExtension
+        , updateAt : Float
         }
 
 
@@ -107,8 +108,8 @@ isLabel (Object object) =
             False
 
 
-initDesk : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe PersonId -> Object
-initDesk id floorId position size backgroundColor name fontSize personId =
+initDesk : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe PersonId -> Float -> Object
+initDesk id floorId position size backgroundColor name fontSize personId updateAt =
     Object
         { id = id
         , floorId = floorId
@@ -118,11 +119,12 @@ initDesk id floorId position size backgroundColor name fontSize personId =
         , name = name
         , fontSize = fontSize
         , extension = Desk personId
+        , updateAt = updateAt
         }
 
 
-initLabel : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> LabelFields -> Object
-initLabel id floorId position size backgroundColor name fontSize extension =
+initLabel : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> LabelFields -> Float -> Object
+initLabel id floorId position size backgroundColor name fontSize extension updateAt =
     Object
         { id = id
         , floorId = floorId
@@ -132,6 +134,9 @@ initLabel id floorId position size backgroundColor name fontSize extension =
         , name = name
         , fontSize = fontSize
         , extension = Label extension
+
+        -- , updateAt = 32503647600
+        , updateAt = updateAt
         }
 
 
@@ -263,6 +268,11 @@ defaultFontSize =
 fontSizeOf : Object -> Float
 fontSizeOf (Object object) =
     object.fontSize
+
+
+updateAtOf : Object -> Float
+updateAtOf (Object object) =
+    object.updateAt
 
 
 isBold : Object -> Bool
