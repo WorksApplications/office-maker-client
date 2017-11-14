@@ -310,6 +310,13 @@ decodePersonFromProfileService =
         |> optional_ "employeeId" D.string
 
 
+
+-- employeeIdDecoder : Decoder (Maybe String)
+-- employeeIdDecoder =
+--     -- D.map (\s -> Just s) D.string
+--     D.map Just D.string
+
+
 decodePeopleFromProfileServiceSearch : Decoder (List Person)
 decodePeopleFromProfileServiceSearch =
     D.field "profiles" (D.list decodePersonFromProfileService)

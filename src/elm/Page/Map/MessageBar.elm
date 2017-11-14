@@ -1,11 +1,11 @@
 module Page.Map.MessageBar exposing (view)
 
-import Http
+import API.API as API
 import Html exposing (..)
-import View.MessageBar as MessageBar
+import Http
 import Model.I18n as I18n exposing (Language)
 import Model.Information exposing (Information(..))
-import API.API as API
+import View.MessageBar as MessageBar
 
 
 view : Language -> Information -> Html msg
@@ -16,6 +16,9 @@ view lang e =
 
         Success message ->
             MessageBar.success message
+
+        DisplayLink objectId ->
+            MessageBar.success (I18n.displayingLinkToObject lang objectId)
 
         PublishInProgress floorName ->
             MessageBar.default (I18n.publishingInProgressPreaseWaitForSeconds lang floorName)

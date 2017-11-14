@@ -11,6 +11,7 @@ type Information
     | HtmlError Dom.Error
     | PasteError String
     | Success String
+    | DisplayLink String
     | PublishInProgress String
     | PublishedFloor String
     | NoInformation

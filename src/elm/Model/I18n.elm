@@ -158,6 +158,16 @@ missing lang =
 ----
 
 
+displayingLinkToObject : Language -> String -> String
+displayingLinkToObject lang objectId =
+    case lang of
+        JA ->
+            "オブジェクトへの直リンクがアドレスバーに表示されています "
+
+        EN ->
+            "A Direct link to the selected object is displayed on the address bar "
+
+
 publishingInProgressPreaseWaitForSeconds : Language -> String -> String
 publishingInProgressPreaseWaitForSeconds lang floorName =
     case lang of
