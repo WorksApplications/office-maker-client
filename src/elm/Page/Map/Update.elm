@@ -1829,9 +1829,6 @@ update msg model =
             , ObjectNameInput.insertText ObjectNameInputMsg text model.objectNameInput
             )
 
-        -- ChangeToObjectUrl objectId ->
-        --     ( model, Navigation.modifyUrl ("?object=" ++ objectId) )
-        -- ChangeToObjectUrl objectId ->
         ChangeToObjectUrl objectId ->
             ( model
             , Cmd.batch
@@ -1843,12 +1840,6 @@ update msg model =
                 ]
             )
 
-        --     ( ( model, Navigation.modifyUrl ("?object=" ++ objectId) )
-        --     , ( { model | information = DisplayLink objectId }, Cmd.none )
-        --     )
-        -- [ Process.sleep 1000 |> Task.perform (always UnlockSaveFloor) ]
-        -- ChangeToObjectUrl objectId ->
-        --     { model | information = DisplayLink objectId }
         SetTransition transition ->
             ( { model | transition = transition }, Cmd.none )
 
