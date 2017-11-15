@@ -13,17 +13,17 @@ minScale =
 
 maxScale : Int
 maxScale =
-    8
+    32
 
 
 defaultScale : Int
 defaultScale =
-    4
+    16
 
 
 step : Float
 step =
-    1.414
+    1.0883
 
 
 
