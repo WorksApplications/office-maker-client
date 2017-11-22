@@ -1,39 +1,39 @@
 module Page.Map.Model exposing (..)
 
-import Date exposing (Date)
-import Dict exposing (Dict)
-import Time exposing (Time)
-import ContextMenu exposing (ContextMenu)
-import Debounce exposing (Debounce)
-import Util.IdGenerator as IdGenerator exposing (Seed)
-import Util.DictUtil as DictUtil
-import Model.User as User exposing (User)
-import Model.Person exposing (Person)
-import Model.Object as Object exposing (Object)
-import Model.ObjectsOperation as ObjectsOperation
-import Model.Scale as Scale exposing (Scale)
-import Model.Prototype exposing (Prototype)
-import Model.Prototypes as Prototypes exposing (Prototypes, PositionedPrototype)
-import Model.Floor as Floor exposing (Floor)
-import Model.FloorInfo exposing (FloorInfo)
-import Model.Information exposing (Information(..))
-import Model.I18n exposing (Language)
-import Model.SearchResult exposing (SearchResult)
-import Model.ProfilePopupLogic as ProfilePopupLogic
-import Model.ColorPalette as ColorPalette exposing (ColorPalette)
-import Model.EditingFloor as EditingFloor exposing (EditingFloor)
-import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
-import Model.SaveRequest exposing (SaveRequest(..))
 import API.API as API
 import API.Cache as Cache exposing (Cache)
+import Component.FloorDeleter as FloorDeleter exposing (FloorDeleter)
 import Component.FloorProperty as FloorProperty exposing (FloorProperty)
 import Component.Header as Header
-import Component.FloorDeleter as FloorDeleter exposing (FloorDeleter)
-import Page.Map.ObjectNameInput as ObjectNameInput exposing (ObjectNameInput)
-import Page.Map.ContextMenuContext exposing (ContextMenuContext)
-import Page.Map.URL as URL exposing (URL)
-import Page.Map.ClipboardOptionsView as ClipboardOptionsView
+import ContextMenu exposing (ContextMenu)
 import CoreType exposing (..)
+import Date exposing (Date)
+import Debounce exposing (Debounce)
+import Dict exposing (Dict)
+import Model.ColorPalette as ColorPalette exposing (ColorPalette)
+import Model.EditingFloor as EditingFloor exposing (EditingFloor)
+import Model.Floor as Floor exposing (Floor)
+import Model.FloorInfo exposing (FloorInfo)
+import Model.I18n exposing (Language)
+import Model.Information exposing (Information(..))
+import Model.Mode as Mode exposing (EditingMode(..), Mode(..))
+import Model.Object as Object exposing (Object)
+import Model.ObjectsOperation as ObjectsOperation
+import Model.Person exposing (Person)
+import Model.ProfilePopupLogic as ProfilePopupLogic
+import Model.Prototype exposing (Prototype)
+import Model.Prototypes as Prototypes exposing (PositionedPrototype, Prototypes)
+import Model.SaveRequest exposing (SaveRequest(..))
+import Model.Scale as Scale exposing (Scale)
+import Model.SearchResult exposing (SearchResult)
+import Model.User as User exposing (User)
+import Page.Map.ClipboardOptionsView as ClipboardOptionsView
+import Page.Map.ContextMenuContext exposing (ContextMenuContext)
+import Page.Map.ObjectNameInput as ObjectNameInput exposing (ObjectNameInput)
+import Page.Map.URL as URL exposing (URL)
+import Time exposing (Time)
+import Util.DictUtil as DictUtil
+import Util.IdGenerator as IdGenerator exposing (Seed)
 
 
 type alias Model =
@@ -111,52 +111,51 @@ init apiConfig title initialSize randomSeed visitDate isEditMode query objectId 
         initialFloor =
             Floor.empty
 
+        -- 2^N
         gridSize =
             8
-
-        -- 2^N
     in
-        { apiConfig = apiConfig
-        , title = title
-        , seed = IdGenerator.init randomSeed
-        , visitDate = Date.fromTime visitDate
-        , user = User.guest
-        , mousePosition = (Position 0 0)
-        , draggingContext = NoDragging
-        , selectedObjects = []
-        , objectNameInput = ObjectNameInput.init
-        , gridSize = gridSize
-        , selectorRect = Nothing
-        , ctrl = False
-        , mapFocused = False
-        , mode = Mode.init
-        , colorPalette = ColorPalette.empty
-        , contextMenu = contextMenu
-        , floorsInfo = Dict.empty
-        , floor = Nothing
-        , windowSize = initialSize
-        , scale = scale
-        , offset = offset
-        , prototypes = Prototypes.init []
-        , clipboardOptionsForm = ClipboardOptionsView.init
-        , cellSizePerDesk = Size 1 1
-        , information = NoInformation
-        , floorProperty = FloorProperty.init initialFloor.name 0 0 0
-        , selectedResult = objectId
-        , personInfo = Dict.empty
-        , diff = Nothing
-        , candidates = []
-        , searchQuery = query
-        , searchResult = Nothing
-        , clickEmulator = []
-        , searchCandidateDebounce = Debounce.init
-        , lang = lang
-        , cache = Cache.cache
-        , header = Header.init
-        , saveFloorDebounce = Debounce.init
-        , floorDeleter = FloorDeleter.init
-        , transition = False
-        }
+    { apiConfig = apiConfig
+    , title = title
+    , seed = IdGenerator.init randomSeed
+    , visitDate = Date.fromTime visitDate
+    , user = User.guest
+    , mousePosition = Position 0 0
+    , draggingContext = NoDragging
+    , selectedObjects = []
+    , objectNameInput = ObjectNameInput.init
+    , gridSize = gridSize
+    , selectorRect = Nothing
+    , ctrl = False
+    , mapFocused = False
+    , mode = Mode.init
+    , colorPalette = ColorPalette.empty
+    , contextMenu = contextMenu
+    , floorsInfo = Dict.empty
+    , floor = Nothing
+    , windowSize = initialSize
+    , scale = scale
+    , offset = offset
+    , prototypes = Prototypes.init []
+    , clipboardOptionsForm = ClipboardOptionsView.init
+    , cellSizePerDesk = Size 1 1
+    , information = NoInformation
+    , floorProperty = FloorProperty.init initialFloor.name 0 0 0
+    , selectedResult = objectId
+    , personInfo = Dict.empty
+    , diff = Nothing
+    , candidates = []
+    , searchQuery = query
+    , searchResult = Nothing
+    , clickEmulator = []
+    , searchCandidateDebounce = Debounce.init
+    , lang = lang
+    , cache = Cache.cache
+    , header = Header.init
+    , saveFloorDebounce = Debounce.init
+    , floorDeleter = FloorDeleter.init
+    , transition = False
+    }
 
 
 headerHeight : Int
@@ -175,7 +174,7 @@ canvasPosition model =
         pos =
             model.mousePosition
     in
-        { pos | y = pos.y - headerHeight }
+    { pos | y = pos.y - headerHeight }
 
 
 isMouseInCanvas : Model -> Bool
@@ -207,7 +206,7 @@ updateSelectorRect canvasPosition model =
                         size =
                             Size (leftTop.x - pos.x) (leftTop.y - pos.y)
                     in
-                        Just ( pos, size )
+                    Just ( pos, size )
 
                 _ ->
                     model.selectorRect
@@ -230,7 +229,7 @@ syncSelectedByRect model =
                                 ( toFloat (pos.x + size.width), toFloat (pos.y + size.height) )
                                 (Floor.objects floor)
                     in
-                        List.map Object.idOf objects
+                    List.map Object.idOf objects
 
                 _ ->
                     model.selectedObjects
@@ -271,21 +270,21 @@ adjustOffset toCenter model =
                                                 windowCenter =
                                                     Position (model.windowSize.width // 2) (model.windowSize.height // 2)
                                             in
-                                                Position (windowCenter.x - objectCenter.x) (windowCenter.y - objectCenter.y)
-                                                    |> Scale.screenToImageForPosition model.scale
+                                            Position (windowCenter.x - objectCenter.x) (windowCenter.y - objectCenter.y)
+                                                |> Scale.screenToImageForPosition model.scale
                                         else
                                             let
                                                 containerSize =
                                                     Size
-                                                        (model.windowSize.width)
+                                                        model.windowSize.width
                                                         (model.windowSize.height - headerHeight - 30)
                                             in
-                                                ProfilePopupLogic.adjustOffset
-                                                    containerSize
-                                                    ProfilePopupLogic.personPopupSize
-                                                    model.scale
-                                                    model.offset
-                                                    obj
+                                            ProfilePopupLogic.adjustOffset
+                                                containerSize
+                                                ProfilePopupLogic.personPopupSize
+                                                model.scale
+                                                model.offset
+                                                obj
                                     )
                         )
             )
@@ -301,14 +300,14 @@ nextObjectToInput object allObjects =
                 [ object ]
                 (List.filter (\o -> Object.idOf o /= Object.idOf object) allObjects)
     in
-        ObjectsOperation.nearest Down object island
-            |> Maybe.andThen
-                (\o ->
-                    if Object.idOf object == Object.idOf o then
-                        Nothing
-                    else
-                        Just o
-                )
+    ObjectsOperation.nearest Down object island
+        |> Maybe.andThen
+            (\o ->
+                if Object.idOf object == Object.idOf o then
+                    Nothing
+                else
+                    Just o
+            )
 
 
 candidatesOf : Model -> List Person
@@ -389,59 +388,59 @@ getPositionedPrototype model =
         xy2 =
             screenToImageWithOffset model.scale (canvasPosition model) model.offset
     in
-        case ( Mode.isStampMode model.mode, model.draggingContext ) of
-            ( _, MoveFromSearchResult prototype _ ) ->
-                let
-                    fitted =
-                        ObjectsOperation.fitPositionToGrid
-                            model.gridSize
-                            (Position (xy2.x - prototype.width // 2) (xy2.y - prototype.height // 2))
-                in
-                    [ ( prototype, fitted ) ]
+    case ( Mode.isStampMode model.mode, model.draggingContext ) of
+        ( _, MoveFromSearchResult prototype _ ) ->
+            let
+                fitted =
+                    ObjectsOperation.fitPositionToGrid
+                        model.gridSize
+                        (Position (xy2.x - prototype.width // 2) (xy2.y - prototype.height // 2))
+            in
+            [ ( prototype, fitted ) ]
 
-            ( _, MoveExistingObjectFromSearchResult floorId prototype _ ) ->
-                let
-                    fitted =
-                        ObjectsOperation.fitPositionToGrid
-                            model.gridSize
-                            (Position (xy2.x - prototype.width // 2) (xy2.y - prototype.height // 2))
-                in
-                    [ ( prototype, fitted ) ]
+        ( _, MoveExistingObjectFromSearchResult floorId prototype _ ) ->
+            let
+                fitted =
+                    ObjectsOperation.fitPositionToGrid
+                        model.gridSize
+                        (Position (xy2.x - prototype.width // 2) (xy2.y - prototype.height // 2))
+            in
+            [ ( prototype, fitted ) ]
 
-            ( True, StampFromScreenPos start ) ->
-                let
-                    prototype =
-                        case Prototypes.selectedPrototype model.prototypes of
-                            Just p ->
-                                p
+        ( True, StampFromScreenPos start ) ->
+            let
+                prototype =
+                    case Prototypes.selectedPrototype model.prototypes of
+                        Just p ->
+                            p
 
-                            _ ->
-                                Debug.crash "unexpected empty prototypes"
+                        _ ->
+                            Debug.crash "unexpected empty prototypes"
 
-                    xy1 =
-                        screenToImageWithOffset model.scale start model.offset
-                in
-                    Prototypes.positionedPrototypesOnDragging model.gridSize prototype xy1 xy2
+                xy1 =
+                    screenToImageWithOffset model.scale start model.offset
+            in
+            Prototypes.positionedPrototypesOnDragging model.gridSize prototype xy1 xy2
 
-            ( True, _ ) ->
-                let
-                    prototype =
-                        case Prototypes.selectedPrototype model.prototypes of
-                            Just p ->
-                                p
+        ( True, _ ) ->
+            let
+                prototype =
+                    case Prototypes.selectedPrototype model.prototypes of
+                        Just p ->
+                            p
 
-                            _ ->
-                                Debug.crash "unexpected empty prototypes"
+                        _ ->
+                            Debug.crash "unexpected empty prototypes"
 
-                    fitted =
-                        ObjectsOperation.fitPositionToGrid
-                            model.gridSize
-                            (Position (xy2.x - prototype.width // 2) (xy2.y - prototype.height // 2))
-                in
-                    [ ( prototype, fitted ) ]
+                fitted =
+                    ObjectsOperation.fitPositionToGrid
+                        model.gridSize
+                        (Position (xy2.x - prototype.width // 2) (xy2.y - prototype.height // 2))
+            in
+            [ ( prototype, fitted ) ]
 
-            _ ->
-                []
+        _ ->
+            []
 
 
 temporaryPen : Model -> Position -> Maybe ( String, String, Position, Size )
@@ -465,7 +464,7 @@ temporaryPenRect model from =
             ObjectsOperation.fitPositionToGrid model.gridSize <|
                 screenToImageWithOffset model.scale (canvasPosition model) model.offset
     in
-        validateRect leftTop rightBottom
+    validateRect leftTop rightBottom
 
 
 temporaryResizeRect : Model -> Position -> Position -> Size -> Maybe ( Position, Size )
@@ -482,12 +481,11 @@ temporaryResizeRect model fromScreen objPos objSize =
 
         rightBottom =
             ObjectsOperation.fitPositionToGrid model.gridSize <|
-                (Position
+                Position
                     (objPos.x + objSize.width + Scale.screenToImage model.scale dx)
                     (objPos.y + objSize.height + Scale.screenToImage model.scale dy)
-                )
     in
-        validateRect objPos rightBottom
+    validateRect objPos rightBottom
 
 
 validateRect : Position -> Position -> Maybe ( Position, Size )
@@ -499,17 +497,17 @@ validateRect leftTop rightBottom =
         height =
             rightBottom.y - leftTop.y
     in
-        if width > 0 && height > 0 then
-            Just ( leftTop, Size width height )
-        else
-            Nothing
+    if width > 0 && height > 0 then
+        Just ( leftTop, Size width height )
+    else
+        Nothing
 
 
 cachePeople : List Person -> Model -> Model
 cachePeople people model =
     { model
         | personInfo =
-            DictUtil.addAll (.id) people model.personInfo
+            DictUtil.addAll .id people model.personInfo
     }
 
 
@@ -542,7 +540,7 @@ toUrl model =
 
 encodeToUrl : Model -> String
 encodeToUrl =
-    (URL.stringify ".") << toUrl
+    URL.stringify "." << toUrl
 
 
 
