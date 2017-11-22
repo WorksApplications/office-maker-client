@@ -162,10 +162,10 @@ displayingLinkToObject : Language -> String -> String
 displayingLinkToObject lang objectId =
     case lang of
         JA ->
-            "オブジェクトへの直リンクがアドレスバーに表示されています "
+            "アドレスバーのURLをコピーしてください "
 
         EN ->
-            "A Direct link to the selected object is displayed on the address bar "
+            "Copy object link displayed on the address bar "
 
 
 publishingInProgressPreaseWaitForSeconds : Language -> String -> String
