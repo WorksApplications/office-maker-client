@@ -1,6 +1,7 @@
 module Model.Object exposing (..)
 
 import CoreType exposing (..)
+import Time exposing (Time)
 
 
 type Shape
@@ -108,7 +109,12 @@ isLabel (Object object) =
             False
 
 
-initDesk : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe PersonId -> Float -> Object
+futureForInitialUpdateTime : Time
+futureForInitialUpdateTime =
+    32503647600
+
+
+initDesk : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> Maybe PersonId -> Maybe Time -> Object
 initDesk id floorId position size backgroundColor name fontSize personId updateAt =
     Object
         { id = id
@@ -119,11 +125,11 @@ initDesk id floorId position size backgroundColor name fontSize personId updateA
         , name = name
         , fontSize = fontSize
         , extension = Desk personId
-        , updateAt = updateAt
+        , updateAt = Maybe.withDefault futureForInitialUpdateTime updateAt
         }
 
 
-initLabel : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> LabelFields -> Float -> Object
+initLabel : ObjectId -> FloorId -> Position -> Size -> String -> String -> Float -> LabelFields -> Maybe Time -> Object
 initLabel id floorId position size backgroundColor name fontSize extension updateAt =
     Object
         { id = id
@@ -134,9 +140,7 @@ initLabel id floorId position size backgroundColor name fontSize extension updat
         , name = name
         , fontSize = fontSize
         , extension = Label extension
-
-        -- , updateAt = 32503647600
-        , updateAt = updateAt
+        , updateAt = Maybe.withDefault futureForInitialUpdateTime updateAt
         }
 
 

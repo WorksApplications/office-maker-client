@@ -62,8 +62,18 @@ fromObjects objects =
 
 toObjects : String -> List Object
 toObjects s =
-    Decode.decodeString (Decode.list Serialization.decodeObject) s
-        |> Result.withDefault []
+    case
+        Decode.decodeString (Decode.list Serialization.decodeObject) s
+    of
+        Ok objects ->
+            objects
+
+        Err message ->
+            let
+                _ =
+                    Debug.log "failed to decode pasting objects" message
+            in
+            []
 
 
 toObjectCandidates : Int -> Size -> Prototype -> Position -> String -> List PositionedPrototype

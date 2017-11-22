@@ -365,7 +365,7 @@ decodeObject =
         |> optional "bold" D.bool Defaults.bold
         |> optional "url" D.string ""
         |> optional "shape" D.string "rectangle"
-        |> required "updateAt" D.float
+        |> optional_ "updateAt" D.float
 
 
 decodeSearchResult : Decoder (Maybe SearchResult)
@@ -481,7 +481,7 @@ decodeDesk =
         |> optional "bold" D.bool Defaults.bold
         |> optional "url" D.string ""
         |> optional "shape" D.string "rectangle"
-        |> required "updateAt" D.float
+        |> optional_ "updateAt" D.float
 
 
 decodeFloor : Decoder Floor

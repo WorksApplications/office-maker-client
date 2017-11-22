@@ -2159,7 +2159,7 @@ updateOnFinishStampWithoutEffects maybeObjectId prototypes model floor =
                         prototype.name
                         prototype.fontSize
                         prototype.personId
-                        32503647600
+                        Nothing
                 )
                 candidatesWithNewIds
 
@@ -2187,7 +2187,7 @@ updateOnFinishPen from model =
                         name
                         Object.defaultFontSize
                         Nothing
-                        32503647600
+                        Nothing
 
                 ( newFloor, objectsChange ) =
                     EditingFloor.updateObjects
@@ -2279,7 +2279,7 @@ updateOnPuttingLabel model =
                         name
                         fontSize
                         (Object.LabelFields color False "" Object.Rectangle)
-                        32503647600
+                        Nothing
 
                 ( newFloor, objectsChange ) =
                     EditingFloor.updateObjects
