@@ -158,6 +158,16 @@ missing lang =
 ----
 
 
+displayingLinkToObject : Language -> String -> String
+displayingLinkToObject lang objectId =
+    case lang of
+        JA ->
+            "アドレスバーのURLをコピーしてください "
+
+        EN ->
+            "Copy object link displayed on the address bar "
+
+
 publishingInProgressPreaseWaitForSeconds : Language -> String -> String
 publishingInProgressPreaseWaitForSeconds lang floorName =
     case lang of

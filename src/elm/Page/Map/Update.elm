@@ -197,7 +197,7 @@ initCmd apiConfig needsEditMode defaultUserState selectedFloor =
 
 debug : Bool
 debug =
-    False
+    True
 
 
 debugMsg : Msg -> Msg
@@ -1830,7 +1830,15 @@ update msg model =
             )
 
         ChangeToObjectUrl objectId ->
-            ( model, Navigation.modifyUrl ("?object=" ++ objectId) )
+            ( model
+            , Cmd.batch
+                [ Navigation.modifyUrl ("?object=" ++ objectId)
+                , Process.sleep 0
+                    |> Task.perform (\_ -> ShowInformation (DisplayLink objectId))
+                , Process.sleep 3500.0
+                    |> Task.perform (\_ -> ShowInformation NoInformation)
+                ]
+            )
 
         SetTransition transition ->
             ( { model | transition = transition }, Cmd.none )

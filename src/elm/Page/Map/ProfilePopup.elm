@@ -139,6 +139,7 @@ objectLink styles objectId =
     a
         [ HtmlUtil.onPreventDefaultClick (ChangeToObjectUrl objectId)
         , href ("?object=" ++ objectId)
+        , title "Link to Here"
         , style styles
         ]
         [ Icons.link ]
