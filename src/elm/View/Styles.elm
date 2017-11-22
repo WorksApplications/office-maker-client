@@ -849,7 +849,9 @@ candidateViewPointer screenPosOfDesk screenSizeOfDesk =
 
 candidatesView : S
 candidatesView =
-    []
+    [ ( "max-height", "500px" )
+    , ( "overflow-y", "scroll" )
+    ]
 
 
 candidatesViewRelatedPerson : S

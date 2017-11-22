@@ -1,18 +1,18 @@
 port module Page.Map.ObjectNameInput exposing (..)
 
+import CoreType exposing (..)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
-import Html.Lazy as Lazy
 import Html.Keyed as Keyed
-import Json.Decode as Decode
-import Util.HtmlUtil exposing (..)
-import Model.Person exposing (Person)
-import View.Styles as Styles
+import Html.Lazy as Lazy
 import InlineHover exposing (hover)
-import CoreType exposing (..)
+import Json.Decode as Decode
+import Model.Person exposing (Person)
+import Page.Map.Msg exposing (Msg(NoOp), ObjectNameInputMsg(..))
 import Page.Map.ProfilePopup as ProfilePopup
-import Page.Map.Msg exposing (ObjectNameInputMsg(..))
+import Util.HtmlUtil exposing (..)
+import View.Styles as Styles
 
 
 type alias ObjectNameInput =
@@ -137,7 +137,7 @@ update message model =
                             | candidateIndex = -1
                         }
             in
-                ( { newModel2 | caretPosition = selectionStart }, event )
+            ( { newModel2 | caretPosition = selectionStart }, event )
 
         SelectCandidate objectId personId ->
             ( { model | editingObject = Nothing }
@@ -214,32 +214,31 @@ view_ showSuggestion objectId name maybePerson screenPosOfDesk screenSizeOfDesk 
     let
         candidates_ =
             candidates
-                |> List.take 15
                 |> List.filter (\candidate -> Just candidate /= maybePerson)
     in
-        Keyed.node "div"
-            [ onWithOptions "mousedown" { stopPropagation = True, preventDefault = False } (Decode.succeed Page.Map.Msg.NoOp)
-            , onWithOptions "mousemove" { stopPropagation = True, preventDefault = False } (Decode.succeed Page.Map.Msg.NoOp)
+    Keyed.node "div"
+        [ onWithOptions "mousedown" { stopPropagation = True, preventDefault = False } (Decode.succeed Page.Map.Msg.NoOp)
+        , onWithOptions "mousemove" { stopPropagation = True, preventDefault = False } (Decode.succeed Page.Map.Msg.NoOp)
+        ]
+        (( "nameInput" ++ objectId
+         , input
+            [ Html.Attributes.id "name-input"
+            , style (Styles.nameInputTextArea screenPosOfDesk screenSizeOfDesk)
+            , onInput_ objectId
+            , on "click" (Decode.map CaretPosition targetSelectionStart)
+            , onWithOptions "keydown" { stopPropagation = True, preventDefault = False } (Decode.map (KeydownOnNameInput candidates_) decodeKeyCodeAndSelectionStart)
+            , onWithOptions "keyup" { stopPropagation = True, preventDefault = False } (Decode.map KeyupOnNameInput decodeKeyCode)
+            , defaultValue name
             ]
-            (( "nameInput" ++ objectId
-             , input
-                [ Html.Attributes.id "name-input"
-                , style (Styles.nameInputTextArea screenPosOfDesk screenSizeOfDesk)
-                , onInput_ objectId
-                , on "click" (Decode.map CaretPosition targetSelectionStart)
-                , onWithOptions "keydown" { stopPropagation = True, preventDefault = False } (Decode.map (KeydownOnNameInput candidates_) decodeKeyCodeAndSelectionStart)
-                , onWithOptions "keyup" { stopPropagation = True, preventDefault = False } (Decode.map KeyupOnNameInput decodeKeyCode)
-                , defaultValue name
-                ]
-                []
-                |> Html.map tagger
-             )
-                :: (if showSuggestion then
-                        viewSuggestion objectId maybePerson screenPosOfDesk screenSizeOfDesk candidates_ model
-                    else
-                        []
-                   )
-            )
+            []
+            |> Html.map tagger
+         )
+            :: (if showSuggestion then
+                    viewSuggestion objectId maybePerson screenPosOfDesk screenSizeOfDesk candidates_ model
+                else
+                    []
+               )
+        )
 
 
 tagger : Page.Map.Msg.ObjectNameInputMsg -> Page.Map.Msg.Msg
@@ -270,15 +269,15 @@ viewSuggestion objectId maybePerson screenPosOfDesk screenSizeOfDesk candidates 
             else
                 text ""
     in
-        [ ( "name-input-suggestion"
-          , div
-                [ style (Styles.candidatesViewContainer screenPosOfDesk screenSizeOfDesk relatedPersonExists candidatesLength) ]
-                [ reletedpersonView_
-                , Html.map tagger (candidatesView model.candidateIndex objectId candidates)
-                ]
-          )
-        , ( "pointer", pointer )
-        ]
+    [ ( "name-input-suggestion"
+      , div
+            [ style (Styles.candidatesViewContainer screenPosOfDesk screenSizeOfDesk relatedPersonExists candidatesLength) ]
+            [ reletedpersonView_
+            , candidatesView tagger model.candidateIndex objectId candidates
+            ]
+      )
+    , ( "pointer", pointer )
+    ]
 
 
 onInput_ : String -> Attribute Msg
@@ -293,7 +292,7 @@ onInput_ objectId =
 reletedpersonView : (Msg -> Page.Map.Msg.Msg) -> ObjectId -> Person -> Html Page.Map.Msg.Msg
 reletedpersonView tagger objectId person =
     div
-        [ style (Styles.candidatesViewRelatedPerson) ]
+        [ style Styles.candidatesViewRelatedPerson ]
         (Html.map tagger (Lazy.lazy unsetButton objectId) :: ProfilePopup.personView Nothing objectId person)
 
 
@@ -307,14 +306,25 @@ unsetButton objectId =
         [ text "Unset" ]
 
 
-candidatesView : Int -> ObjectId -> List Person -> Html Msg
-candidatesView candidateIndex objectId people =
+candidatesView : (Msg -> Page.Map.Msg.Msg) -> Int -> ObjectId -> List Person -> Html Page.Map.Msg.Msg
+candidatesView tagger candidateIndex objectId people =
     if List.isEmpty people then
         text ""
     else
         Keyed.ul
-            [ style (Styles.candidatesView) ]
-            (List.indexedMap (candidatesViewEach candidateIndex objectId) people)
+            [ style Styles.candidatesView
+            , mockWheelEvent
+            ]
+            (List.indexedMap (candidatesViewEach candidateIndex objectId) people
+                |> List.map (Tuple.mapSecond (Html.map tagger))
+            )
+
+
+mockWheelEvent : Attribute Page.Map.Msg.Msg
+mockWheelEvent =
+    onWithOptions "wheel"
+        { stopPropagation = True, preventDefault = False }
+        (Decode.succeed Page.Map.Msg.NoOp)
 
 
 candidatesViewEach : Int -> ObjectId -> Int -> Person -> ( String, Html Msg )
