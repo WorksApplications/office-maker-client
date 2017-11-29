@@ -4,10 +4,11 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy exposing (..)
+import InlineHover exposing (hover)
 import Model.I18n as I18n exposing (Language)
-import View.Styles as Styles
-import Util.StyleUtil exposing (..)
 import Page.Map.Msg exposing (Msg(..))
+import Util.StyleUtil exposing (..)
+import View.Styles as Styles
 
 
 view : Language -> Bool -> Html Msg
@@ -19,24 +20,52 @@ view lang isPrintMode =
             ]
             [ div [ style (itemStyle 2245 1587) ] [ text "A2" ]
             , div [ style (itemStyle 1587 1122) ] [ text "A3" ]
-            , div [ style (itemStyle 1122 793) ] [ text "A4", lazy button lang ]
+            , div [ style (itemStyle 1122 793) ]
+                [ div [] [ text "A4" ]
+                , div
+                    [ style
+                        [ ( "display", "flex" )
+                        , ( "position", "static" )
+                        , ( "float", "right" )
+                        ]
+                    ]
+                    [ lazy printButton lang, lazy saveButton lang ]
+                ]
             ]
     else
         text ""
 
 
-button : Language -> Html Msg
-button lang =
-    div
+printButton : Language -> Html Msg
+printButton lang =
+    hover Styles.printModeHover
+        div
         [ style buttonStyle
         , onClick Print
         ]
         [ text (I18n.print lang) ]
 
 
+saveButton : Language -> Html Msg
+saveButton lang =
+    hover Styles.printModeHover
+        div
+        [ style buttonStyle
+        , onClick Print
+
+        -- , onClick Save
+        ]
+        [ text (I18n.save lang) ]
+
+
 color : String
 color =
     "rgb(200, 150, 220)"
+
+
+buttonColor : String
+buttonColor =
+    "rgb(200, 0, 220)"
 
 
 containerStyle : List ( String, String )
@@ -69,20 +98,20 @@ buttonStyle : List ( String, String )
 buttonStyle =
     [ ( "border", "2px solid " ++ color )
     , ( "color", "white" )
-    , ( "margin", "auto" )
-    , ( "position", "absolute" )
+    , ( "position", "static" )
     , ( "top", "0" )
     , ( "bottom", "0" )
     , ( "left", "0" )
     , ( "right", "0" )
-    , ( "width", "300px" )
-    , ( "height", "150px" )
-    , ( "line-height", "150px" )
+    , ( "width", "100px" )
+    , ( "height", "50px" )
+    , ( "line-height", "50px" )
     , ( "text-align", "center" )
-    , ( "font-size", "3em" )
+    , ( "font-size", "1em" )
     , ( "font-weight", "normal" )
     , ( "cursor", "pointer" )
-    , ( "background-color", color )
+    , ( "background-color", buttonColor )
     , ( "opacity", "0.4" )
     , ( "pointer-events", "all" )
+    , ( "margin-right", "5px" )
     ]

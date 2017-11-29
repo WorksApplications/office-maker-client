@@ -197,7 +197,7 @@ initCmd apiConfig needsEditMode defaultUserState selectedFloor =
 
 debug : Bool
 debug =
-    False
+    True
 
 
 debugMsg : Msg -> Msg

@@ -144,13 +144,26 @@ editingToggle =
 
 printButton : Bool -> Svg msg
 printButton printMode =
-    print
-        (if printMode then
-            defaultColor
-         else
-            headerIconColor
-        )
-        22
+    if printMode then
+        print defaultColor 22
+    else
+        print headerIconColor 22
+
+
+saveButton : Bool -> Svg msg
+saveButton printMode =
+    if printMode then
+        download defaultColor 22
+    else
+        download headerIconColor 22
+
+
+closeButton : Bool -> Svg msg
+closeButton printMode =
+    if printMode then
+        close defaultColor 22
+    else
+        close headerIconColor 22
 
 
 helpButton : Svg msg
