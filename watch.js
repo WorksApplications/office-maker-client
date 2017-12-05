@@ -1,10 +1,14 @@
+if (process.argv.length < 3) {
+    console.error('lack of 3rd argument.(connection to <prod>, <dev>, <local>)');
+    process.exit(1);
+}
+
 const cp = require('child_process');
 const watch = require('watch');
 const path = require('path');
 const minimatch = require('minimatch');
 const express = require('express');
-
-const env = 'dev';
+const env = process.argv[2];
 const rootDir = __dirname;
 const publicDir = rootDir + '/dest/public';
 
@@ -19,8 +23,8 @@ function runServer() {
     next();
   });
   app.use(express.static(publicDir));
-  app.listen(3000, _ => {
-    console.log('Example app listening on port 3000!')
+  app.listen(3030, _ => {
+    console.log('Example app listening on port 3030!')
   });
 }
 

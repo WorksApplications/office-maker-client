@@ -20,8 +20,11 @@
 			  .map(keyValue => keyValue.split('='))
 				.reduce((obj, keyValue) => { obj[keyValue[0]] = keyValue[1]; return obj; }, {});
 		console.log(dynamicOptions);
-	  if(location.host.indexOf('-dev') > 0) {
+		if(location.host.indexOf('-dev') >= 0) {
 			document.getElementById('debug-style').innerHTML = 'header { background-color: #8a6 !important; }';
+		}
+		else if(location.host.indexOf('local') >= 0) {
+			document.getElementById('debug-style').innerHTML = 'header { background-color: #c57 !important; }';
 		}
 		var lang =
 			window.navigator.language ||
