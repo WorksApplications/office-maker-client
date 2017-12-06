@@ -71,6 +71,34 @@ groupBy f list =
         list
 
 
+mergeResults : List SearchResult -> List SearchResult -> List SearchResult
+mergeResults list1 list2 =
+    let
+        dict1 =
+            makeResultDictForMergeResults list1
+
+        dict2 =
+            makeResultDictForMergeResults list2
+    in
+    Dict.union dict1 dict2
+        |> Dict.values
+
+
+makeResultDictForMergeResults : List SearchResult -> Dict String SearchResult
+makeResultDictForMergeResults list =
+    list
+        |> List.map
+            (\result ->
+                case result of
+                    Object object _ ->
+                        ( Object.idOf object, result )
+
+                    MissingPerson personId ->
+                        ( personId, result )
+            )
+        |> Dict.fromList
+
+
 reorderResults : Maybe String -> List SearchResult -> List SearchResult
 reorderResults thisFloorId results =
     let
