@@ -1,25 +1,25 @@
 module Page.Map.SearchResultView exposing (..)
 
+import CoreType exposing (..)
 import Dict exposing (Dict)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy as Lazy
-import Model.Object as Object exposing (..)
+import Model.EditingFloor as EditingFloor
 import Model.Floor exposing (FloorBase)
 import Model.FloorInfo as FloorInfo exposing (FloorInfo(..))
-import Model.Person exposing (Person)
-import Model.Mode as Mode exposing (Mode(..))
-import Model.SearchResult as SearchResult exposing (SearchResult)
-import Model.EditingFloor as EditingFloor
 import Model.I18n as I18n exposing (Language)
+import Model.Mode as Mode exposing (Mode(..))
+import Model.Object as Object exposing (..)
+import Model.Person exposing (Person)
 import Model.Prototypes as Prototypes
-import View.Icons as I
-import View.Styles as S
-import CoreType exposing (..)
-import Page.Map.Model exposing (Model, DraggingContext(..))
+import Model.SearchResult as SearchResult exposing (SearchResult)
+import Page.Map.Model exposing (DraggingContext(..), Model, SearchResultState(..))
 import Page.Map.Msg exposing (Msg(..))
 import Page.Map.SearchResultItemView as SearchResultItemView exposing (Item(..))
+import View.Icons as I
+import View.Styles as S
 
 
 type alias Id =
@@ -29,13 +29,16 @@ type alias Id =
 view : Model -> List (Html Msg)
 view model =
     case model.searchResult of
-        Nothing ->
+        NotLoaded ->
             loading
 
-        Just [] ->
+        OnceLoaded _ ->
+            loading
+
+        FullLoaded [] ->
             wrap [ text (I18n.nothingFound model.lang) ]
 
-        Just results ->
+        FullLoaded results ->
             let
                 grouped =
                     SearchResult.groupByPostAndReorder
@@ -43,7 +46,7 @@ view model =
                         model.personInfo
                         results
             in
-                wrap (List.map (viewListForOnePost model) grouped)
+            wrap (List.map (viewListForOnePost model) grouped)
 
 
 loading : List (Html Msg)
@@ -114,21 +117,21 @@ viewListForOnePost model ( maybePostName, results ) =
                                                 _ ->
                                                     NoOp
                                     in
-                                        SearchResultItemView.view
-                                            thisFloorId
-                                            onSelectResultMsg
-                                            onStartDraggingMsg
-                                            onStartDraggingExistingObjectMsg
-                                            model.lang
-                                            item
+                                    SearchResultItemView.view
+                                        thisFloorId
+                                        onSelectResultMsg
+                                        onStartDraggingMsg
+                                        onStartDraggingExistingObjectMsg
+                                        model.lang
+                                        item
                                 )
                     )
     in
-        div
-            [ style S.searchResultGroup ]
-            [ Lazy.lazy2 groupHeader model.lang maybePostName
-            , div [] children
-            ]
+    div
+        [ style S.searchResultGroup ]
+        [ Lazy.lazy2 groupHeader model.lang maybePostName
+        , div [] children
+        ]
 
 
 groupHeader : Language -> Maybe String -> Html Msg
@@ -170,14 +173,14 @@ toItemViewModel lang floorsInfo personInfo currentlyFocusedObjectId result =
                                 |> Maybe.andThen (\personId -> Dict.get personId personInfo)
                                 |> Maybe.andThen (\person -> Just ( person.id, person.name ))
                     in
-                        Just <|
-                            SearchResultItemView.Object
-                                (Object.idOf object)
-                                (Object.nameOf object)
-                                floorId
-                                info.name
-                                maybePersonIdAndName
-                                objectIsFocused
+                    Just <|
+                        SearchResultItemView.Object
+                            (Object.idOf object)
+                            (Object.nameOf object)
+                            floorId
+                            info.name
+                            maybePersonIdAndName
+                            objectIsFocused
 
                 _ ->
                     Nothing

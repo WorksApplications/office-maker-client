@@ -35,7 +35,7 @@ import Model.User as User
 import Mouse
 import Navigation exposing (Location)
 import Page.Map.KeyOperation as KeyOperation
-import Page.Map.Model as Model exposing (DraggingContext(..), Model)
+import Page.Map.Model as Model exposing (DraggingContext(..), Model, SearchResultState(..))
 import Page.Map.Msg exposing (Msg(..))
 import Page.Map.ObjectNameInput as ObjectNameInput
 import Page.Map.URL as URL
@@ -1358,6 +1358,13 @@ update msg model =
         SubmitSearch ->
             submitSearch model
 
+        StartSearch ->
+            ( { model
+                | searchResult = NotLoaded
+              }
+            , Cmd.none
+            )
+
         GotSearchResult results people ->
             let
                 maybeSelectMsg =
@@ -1369,7 +1376,16 @@ update msg model =
                             Nothing
             in
             { model
-                | searchResult = Just results
+                | searchResult =
+                    case model.searchResult of
+                        NotLoaded ->
+                            OnceLoaded results
+
+                        OnceLoaded previousResults ->
+                            FullLoaded (SearchResult.mergeResults previousResults results)
+
+                        FullLoaded _ ->
+                            Debug.crash "ありえない"
             }
                 |> Model.cachePeople people
                 |> adjustOffset True
@@ -1952,7 +1968,7 @@ submitSearch : Model -> ( Model, Cmd Msg )
 submitSearch model =
     if String.trim model.searchQuery == "" then
         ( { model
-            | searchResult = Nothing
+            | searchResult = NotLoaded
             , mode = Mode.hideSearchResult model.mode
           }
         , Navigation.modifyUrl (Model.encodeToUrl model)
@@ -1976,11 +1992,12 @@ submitSearch model =
 search : API.Config -> Bool -> Dict PersonId Person -> String -> Cmd Msg
 search apiConfig private personInfo query =
     Cmd.batch
-        [ API.search apiConfig private query
+        [ Task.succeed StartSearch
+            |> Task.perform identity
+        , API.search apiConfig private query
             |> performAPI (\( results, people ) -> GotSearchResult results people)
-
-        -- , API.searchObjects apiConfig withPrivate query
-        --     |> performAPI (\( results, people ) -> GotSearchResult results people)
+        , API.searchObjects apiConfig private query
+            |> performAPI (\( results, people ) -> GotSearchResult results people)
         ]
 
 
@@ -2027,9 +2044,17 @@ updateOnMouseUp pos model =
                                     requestSaveObjectsCmd objectsChange
 
                                 searchResult =
-                                    model.searchResult
-                                        |> Maybe.map (SearchResult.mergeObjectInfo (EditingFloor.present newFloor).id (Floor.objects <| EditingFloor.present newFloor))
-                                        |> Maybe.map (SearchResult.moveObject oldFloorId newObjects)
+                                    case model.searchResult of
+                                        FullLoaded results ->
+                                            SearchResult.mergeObjectInfo
+                                                (EditingFloor.present newFloor).id
+                                                (Floor.objects <| EditingFloor.present newFloor)
+                                                results
+                                                |> SearchResult.moveObject oldFloorId newObjects
+                                                |> FullLoaded
+
+                                        _ ->
+                                            model.searchResult
 
                                 cachePersonCmd =
                                     newObjects
@@ -2119,8 +2144,17 @@ updateOnFinishStamp_ prototypes model floor =
             updateOnFinishStampWithoutEffects Nothing prototypes model floor
 
         searchResult =
-            model.searchResult
-                |> Maybe.map (SearchResult.mergeObjectInfo (EditingFloor.present newFloor).id (Floor.objects <| EditingFloor.present newFloor))
+            case model.searchResult of
+                FullLoaded results ->
+                    FullLoaded
+                        (SearchResult.mergeObjectInfo
+                            (EditingFloor.present newFloor).id
+                            (Floor.objects <| EditingFloor.present newFloor)
+                            results
+                        )
+
+                _ ->
+                    model.searchResult
 
         saveCmd =
             requestSaveObjectsCmd objectsChange

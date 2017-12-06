@@ -64,7 +64,7 @@ type alias Model =
     , information : Information
     , floorProperty : FloorProperty
     , searchQuery : String
-    , searchResult : Maybe (List SearchResult)
+    , searchResult : SearchResultState
     , selectedResult : Maybe ObjectId
     , personInfo : Dict String Person
     , diff : Maybe ( Floor, Maybe Floor )
@@ -78,6 +78,12 @@ type alias Model =
     , floorDeleter : FloorDeleter
     , transition : Bool
     }
+
+
+type SearchResultState
+    = NotLoaded
+    | OnceLoaded (List SearchResult)
+    | FullLoaded (List SearchResult)
 
 
 type DraggingContext
@@ -146,7 +152,7 @@ init apiConfig title initialSize randomSeed visitDate isEditMode query objectId 
     , diff = Nothing
     , candidates = []
     , searchQuery = query
-    , searchResult = Nothing
+    , searchResult = NotLoaded
     , clickEmulator = []
     , searchCandidateDebounce = Debounce.init
     , lang = lang

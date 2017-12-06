@@ -1,31 +1,31 @@
 module Page.Map.Msg exposing (..)
 
-import Time exposing (Time)
-import Debounce
-import ContextMenu
-import Model.Mode exposing (Mode(..), EditingMode(..))
-import Model.User exposing (User)
-import Model.Person exposing (Person)
-import Model.Object as Object exposing (..)
-import Model.Prototype exposing (Prototype)
-import Model.Prototypes as Prototypes
-import Model.Floor exposing (Floor, FloorBase)
-import Model.FloorInfo exposing (FloorInfo)
-import Model.Information exposing (Information(..))
-import Model.I18n exposing (Language(..))
-import Model.SearchResult exposing (SearchResult)
-import Model.SaveRequest exposing (SaveRequest(..))
-import Model.ColorPalette exposing (ColorPalette)
-import Util.File exposing (File)
 import API.Cache exposing (UserState)
+import Component.FloorDeleter as FloorDeleter
 import Component.FloorProperty as FloorProperty
 import Component.Header as Header exposing (..)
 import Component.ImageLoader as ImageLoader
-import Component.FloorDeleter as FloorDeleter
-import Page.Map.URL exposing (URL)
-import Page.Map.ContextMenuContext exposing (ContextMenuContext)
-import Page.Map.ClipboardOptionsView as ClipboardOptionsView
+import ContextMenu
 import CoreType exposing (..)
+import Debounce
+import Model.ColorPalette exposing (ColorPalette)
+import Model.Floor exposing (Floor, FloorBase)
+import Model.FloorInfo exposing (FloorInfo)
+import Model.I18n exposing (Language(..))
+import Model.Information exposing (Information(..))
+import Model.Mode exposing (EditingMode(..), Mode(..))
+import Model.Object as Object exposing (..)
+import Model.Person exposing (Person)
+import Model.Prototype exposing (Prototype)
+import Model.Prototypes as Prototypes
+import Model.SaveRequest exposing (SaveRequest(..))
+import Model.SearchResult exposing (SearchResult)
+import Model.User exposing (User)
+import Page.Map.ClipboardOptionsView as ClipboardOptionsView
+import Page.Map.ContextMenuContext exposing (ContextMenuContext)
+import Page.Map.URL exposing (URL)
+import Time exposing (Time)
+import Util.File exposing (File)
 
 
 type alias Id =
@@ -101,6 +101,7 @@ type Msg
     | SelectLang Language
     | UpdateSearchQuery String
     | SubmitSearch
+    | StartSearch
     | GotSearchResult (List SearchResult) (List Person)
     | SelectSearchResult ObjectId FloorId (Maybe PersonId)
     | CloseSearchResult
