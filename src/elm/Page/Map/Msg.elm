@@ -144,6 +144,7 @@ type Msg
     | ShiftSelectionByTab
     | ExpandOrShrinkToward Direction
     | Print
+      -- | Save
     | FlipFloor
     | ShowInformation Information
     | GotNewToken (Maybe String)

@@ -470,8 +470,7 @@ editingToggleIcon =
 
 editingToggleText : S
 editingToggleText =
-    [ ( "margin-left", "5px" )
-    , ( "margin-top", "5px" )
+    [ ( "margin", "5px" )
     , ( "line-height", "30px" )
     , ( "width", "150px" )
     ]
@@ -884,6 +883,12 @@ candidateItem selected =
 
 candidateItemHover : S
 candidateItemHover =
+    [ ( "background-color", hoverBackgroundColor )
+    ]
+
+
+printModeHover : S
+printModeHover =
     [ ( "background-color", hoverBackgroundColor )
     ]
 
