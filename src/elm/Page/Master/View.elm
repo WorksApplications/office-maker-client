@@ -1,20 +1,20 @@
 module Page.Master.View exposing (..)
 
+import Component.Header as Header
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Html.Lazy as Lazy
-import Component.Header as Header
-import Model.User as User exposing (User)
 import Model.I18n exposing (Language(..))
+import Model.User as User exposing (User)
+import Page.Master.Model exposing (Model)
+import Page.Master.Msg exposing (Msg(..))
+import Page.Master.PrototypeForm as PrototypeForm exposing (PrototypeForm)
+import Page.Master.Styles as S
 import View.Common exposing (..)
+import View.CommonStyles as CS
 import View.MessageBar as MessageBar
 import View.PrototypePreviewView as PrototypePreviewView
-import View.CommonStyles as CS
-import Page.Master.Model exposing (Model)
-import Page.Master.PrototypeForm as PrototypeForm exposing (PrototypeForm)
-import Page.Master.Msg exposing (Msg(..))
-import Page.Master.Styles as S
 
 
 type alias Size =
@@ -94,8 +94,10 @@ prototypeContainerSize =
 
 prototypeMasterRow : Int -> PrototypeForm -> Html Msg
 prototypeMasterRow index prototypeForm =
-    div [ style [ ( "display", "flex" ) ] ]
-        [ case PrototypeForm.toPrototype prototypeForm of
+    div
+        [ style [ ( "display", "flex" ) ] ]
+        [ div [ style [ ( "margin-top", "10px" ) ] ] [ button [ onClick (DeletePrototype index prototypeForm) ] [ text "Delete" ] ]
+        , case PrototypeForm.toPrototype prototypeForm of
             Ok prototype ->
                 Lazy.lazy2 PrototypePreviewView.singleView prototypeContainerSize prototype
 
@@ -108,19 +110,19 @@ prototypeMasterRow index prototypeForm =
 prototypeParameters : Int -> PrototypeForm -> Html Msg
 prototypeParameters index prototypeForm =
     div
-        []
+        [ style [ ( "margin-top", "10px" ) ] ]
         [ Html.map (\backgroundColor -> UpdatePrototype index { prototypeForm | backgroundColor = backgroundColor }) <|
             prototypeParameter "Background Color" prototypeForm.backgroundColor PrototypeForm.validateBackgroundColor
         , Html.map (\color -> UpdatePrototype index { prototypeForm | color = color }) <|
             prototypeParameter "Text Color" prototypeForm.color PrototypeForm.validateColor
         , Html.map (\width -> UpdatePrototype index { prototypeForm | width = width }) <|
-            prototypeParameter "Width" (prototypeForm.width) PrototypeForm.validateWidth
+            prototypeParameter "Width" prototypeForm.width PrototypeForm.validateWidth
         , Html.map (\height -> UpdatePrototype index { prototypeForm | height = height }) <|
-            prototypeParameter "Height" (prototypeForm.height) PrototypeForm.validateHeight
+            prototypeParameter "Height" prototypeForm.height PrototypeForm.validateHeight
         , Html.map (\fontSize -> UpdatePrototype index { prototypeForm | fontSize = fontSize }) <|
-            prototypeParameter "Font Size" (prototypeForm.fontSize) PrototypeForm.validateFontSize
+            prototypeParameter "Font Size" prototypeForm.fontSize PrototypeForm.validateFontSize
         , Html.map (\name -> UpdatePrototype index { prototypeForm | name = name }) <|
-            prototypeParameter "Name" (prototypeForm.name) PrototypeForm.validateName
+            prototypeParameter "Name" prototypeForm.name PrototypeForm.validateName
         ]
 
 
@@ -140,12 +142,12 @@ prototypeParameter label value_ validate =
                 |> Maybe.map (\s -> span [ style S.validationError ] [ text s ])
                 |> Maybe.withDefault (text "")
     in
-        div
-            []
-            [ span [] [ text label ]
-            , errHtml
-            , input [ style CS.input, value value_, onInput identity ] []
-            ]
+    div
+        []
+        [ span [] [ text label ]
+        , errHtml
+        , input [ style CS.input, value value_, onInput identity ] []
+        ]
 
 
 messageBar : Model -> Html Msg

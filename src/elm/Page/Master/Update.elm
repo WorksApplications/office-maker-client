@@ -1,21 +1,21 @@
 module Page.Master.Update exposing (..)
 
-import Time exposing (second)
-import Task
-import Navigation
-import Debounce
 import API.API as API
-import API.Page as Page
 import API.Cache as Cache exposing (UserState)
+import API.Page as Page
 import Component.Header as Header
-import Model.I18n exposing (Language(..))
-import Model.User as User
-import Model.Prototype exposing (Prototype)
+import Debounce
 import Model.ColorPalette as ColorPalette exposing (ColorPalette)
-import Util.ListUtil as ListUtil
+import Model.I18n exposing (Language(..))
+import Model.Prototype exposing (Prototype)
+import Model.User as User
+import Navigation
 import Page.Master.Model exposing (Model)
 import Page.Master.Msg exposing (Msg(..))
 import Page.Master.PrototypeForm as PrototypeForm
+import Task
+import Time exposing (second)
+import Util.ListUtil as ListUtil
 
 
 type alias Flags =
@@ -47,17 +47,17 @@ init flags =
                     EN
                 )
     in
-        { apiConfig = apiConfig
-        , title = flags.title
-        , colorPalette = ColorPalette.empty
-        , prototypes = []
-        , header = Header.init
-        , lang = defaultUserState.lang
-        , saveColorDebounce = Debounce.init
-        , savePrototypeDebounce = Debounce.init
-        , error = Nothing
-        }
-            ! [ initCmd apiConfig defaultUserState ]
+    { apiConfig = apiConfig
+    , title = flags.title
+    , colorPalette = ColorPalette.empty
+    , prototypes = []
+    , header = Header.init
+    , lang = defaultUserState.lang
+    , saveColorDebounce = Debounce.init
+    , savePrototypeDebounce = Debounce.init
+    , error = Nothing
+    }
+        ! [ initCmd apiConfig defaultUserState ]
 
 
 initCmd : API.Config -> UserState -> Cmd Msg
@@ -134,7 +134,7 @@ update removeToken message model =
                         "#fff"
                         model.colorPalette
             in
-                updatePalette colorPalette model
+            updatePalette colorPalette model
 
         DeleteColor isBackground index ->
             let
@@ -147,7 +147,7 @@ update removeToken message model =
                         index
                         model.colorPalette
             in
-                updatePalette colorPalette model
+            updatePalette colorPalette model
 
         InputColor isBackground index color ->
             let
@@ -161,7 +161,7 @@ update removeToken message model =
                         color
                         model.colorPalette
             in
-                updatePalette colorPalette model
+            updatePalette colorPalette model
 
         UpdatePrototype index prototype ->
             let
@@ -179,11 +179,18 @@ update removeToken message model =
                         Err _ ->
                             model.savePrototypeDebounce ! []
             in
-                { model
-                    | prototypes = prototypes
-                    , savePrototypeDebounce = savePrototypeDebounce
-                }
-                    ! [ cmd ]
+            { model
+                | prototypes = prototypes
+                , savePrototypeDebounce = savePrototypeDebounce
+            }
+                ! [ cmd ]
+
+        DeletePrototype index prototype ->
+            let
+                prototypes =
+                    ListUtil.deleteAt index model.prototypes
+            in
+            { model | prototypes = prototypes } ! []
 
         SaveColorDebounceMsg msg ->
             let
@@ -194,7 +201,7 @@ update removeToken message model =
                         msg
                         model.saveColorDebounce
             in
-                { model | saveColorDebounce = saveColorDebounce } ! [ cmd ]
+            { model | saveColorDebounce = saveColorDebounce } ! [ cmd ]
 
         SavePrototypeDebounceMsg msg ->
             let
@@ -205,7 +212,7 @@ update removeToken message model =
                         msg
                         model.savePrototypeDebounce
             in
-                { model | savePrototypeDebounce = savePrototypeDebounce } ! [ cmd ]
+            { model | savePrototypeDebounce = savePrototypeDebounce } ! [ cmd ]
 
         NotAuthorized ->
             model ! [ Navigation.load Page.login ]
@@ -223,11 +230,11 @@ updatePalette colorPalette model =
                 colorPalette
                 model.saveColorDebounce
     in
-        { model
-            | colorPalette = colorPalette
-            , saveColorDebounce = saveColorDebounce
-        }
-            ! [ cmd ]
+    { model
+        | colorPalette = colorPalette
+        , saveColorDebounce = saveColorDebounce
+    }
+        ! [ cmd ]
 
 
 subscriptions : Model -> Sub Msg
