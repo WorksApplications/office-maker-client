@@ -66,8 +66,12 @@ colorMasterRow : Bool -> Int -> String -> Html Msg
 colorMasterRow isBackgroundColor index color =
     div [ style [ ( "height", "30px" ), ( "display", "flex" ) ] ]
         [ colorSample color
+        , input [ value color ] []
         , input [ onInput (InputColor isBackgroundColor index), value color ] []
         , button [ onClick (DeleteColor isBackgroundColor index) ] [ text "Delete" ]
+
+        -- , input [ onInput (InputColor isBackgroundColor index), value color ] []
+        -- , button [ onClick (DeleteColor isBackgroundColor index) ] [ text "Delete" ]
         ]
 
 
