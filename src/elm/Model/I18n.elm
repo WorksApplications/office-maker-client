@@ -312,16 +312,6 @@ goToManual lang =
             "Manual (PDF)"
 
 
-close : Language -> String
-close lang =
-    case lang of
-        JA ->
-            "閉じる"
-
-        EN ->
-            "Close"
-
-
 print : Language -> String
 print lang =
     case lang of
@@ -330,6 +320,26 @@ print lang =
 
         EN ->
             "Print"
+
+
+save : Language -> String
+save lang =
+    case lang of
+        JA ->
+            "保存"
+
+        EN ->
+            "Save"
+
+
+close : Language -> String
+close lang =
+    case lang of
+        JA ->
+            "閉じる"
+
+        EN ->
+            "Close"
 
 
 edit : Language -> String

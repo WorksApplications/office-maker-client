@@ -190,21 +190,63 @@ signIn onSignInClicked lang =
 
 printButtonView : msg -> Language -> Bool -> Html msg
 printButtonView onTogglePrintView lang printMode =
-    div
-        [ onClick onTogglePrintView
-        , style (S.editingToggleContainer False)
-        , class "no-print"
-        ]
-        [ div [ style S.editingToggleIcon ] [ Icons.printButton printMode ]
-        , div [ style S.editingToggleText ]
-            [ text
-                (if printMode then
-                    I18n.close lang
-                 else
-                    I18n.print lang
-                )
-            ]
-        ]
+    let
+        print =
+            if printMode then
+                div
+                    [ onClick onTogglePrintView
+                    , style (S.editingToggleContainer False)
+                    , class "no-print"
+                    ]
+                    [ div [ style S.editingToggleIcon ] [ Icons.closeButton printMode ]
+                    , div [ style S.editingToggleText ] [ text (I18n.close lang) ]
+                    ]
+            else
+                div
+                    [ onClick onTogglePrintView
+                    , style (S.editingToggleContainer False)
+                    , class "no-print"
+                    ]
+                    [ div [ style S.editingToggleIcon ] [ Icons.printButton printMode ]
+                    , div [ style S.editingToggleText ] [ text (I18n.print lang) ]
+                    ]
+
+        --
+        -- save =
+        --     if printMode then
+        --         div
+        --             [ onClick onTogglePrintView
+        --             , style (S.editingToggleContainer False)
+        --             , class "no-print"
+        --             ]
+        --             [ div [ style S.editingToggleIcon ] [ Icons.saveButton printMode ]
+        --             , div [ style S.editingToggleText ] [ text (I18n.save lang) ]
+        --             ]
+        --     else
+        --         div [] []
+        --
+        -- close =
+        --     if printMode then
+        --         div
+        --             [ onClick onTogglePrintView
+        --             , style (S.editingToggleContainer False)
+        --             , class "no-print"
+        --             ]
+        --             [ div [ style S.editingToggleIcon ] [ Icons.closeButton printMode ]
+        --             , div [ style S.editingToggleText ] [ text (I18n.close lang) ]
+        --             ]
+        --     else
+        --         div [] []
+    in
+    print
+
+
+
+-- div []
+--     [ print
+--     , save
+--     , close
+--     ]
 
 
 editingToggleView : msg -> Language -> Bool -> Html msg

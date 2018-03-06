@@ -12,6 +12,7 @@ const templateDir = rootDir + '/src/template';
 generate(config, templateDir + '/index.html', publicDir + '/index.html');
 generate(config, templateDir + '/login.html', publicDir + '/login');
 generate(config, templateDir + '/master.html', publicDir + '/master');
+generate(config, templateDir + '/info.html', publicDir + '/info');
 console.log('generated html.');
 
 function generate(config, src, dest) {
