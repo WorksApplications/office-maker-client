@@ -167,8 +167,9 @@
 	<div id="data-migration-notification" class="data-migration-notification">
 	</div>
 	<script>
-		fetch('./info.html').then(e => e.text()).then(s => {
-			if(s.indexOf('404') < 0) {
+		fetch('./info').then(e => e.text()).then(s => {
+			console.log('s: ' + s);
+			if(s.indexOf('disable') < 0) {
 				var el = document.getElementById('data-migration-notification');
 				el.innerHTML = s;
 				el.classList.add('active');
