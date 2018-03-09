@@ -168,7 +168,6 @@
 	</div>
 	<script>
 		fetch('./info').then(e => e.text()).then(s => {
-			console.log('s: ' + s);
 			if(s.indexOf('disable') < 0) {
 				var el = document.getElementById('data-migration-notification');
 				el.innerHTML = s;
