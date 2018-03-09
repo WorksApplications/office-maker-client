@@ -1,5 +1,5 @@
 if (process.argv.length < 3) {
-    console.error('lack of 3rd argument.(connection to <prod>, <dev>, <local>)');
+    console.error('lack of 3rd argument.(connection to <prod>, <stg>, or <local>)');
     process.exit(1);
 }
 
