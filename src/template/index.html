@@ -15,124 +15,167 @@
 <body>
 	<style id="debug-style"></style>
 	<input id="paste" hidden>
+
 	<script>
-		var dynamicOptions = location.search.substring(1).split('&')
-			  .map(keyValue => keyValue.split('='))
-				.reduce((obj, keyValue) => { obj[keyValue[0]] = keyValue[1]; return obj; }, {});
-		console.log(dynamicOptions);
-		if(location.host.indexOf('-stg') >= 0) {
-			document.getElementById('debug-style').innerHTML = 'header { background-color: #8a6 !important; }';
+		function getGuestToken(){
+			return new Promise((resolve, reject) => {
+				localStorage.removeItem('authToken');
+				const req = {
+					'method': 'GET',
+					'headers': {
+						'pragma': 'no-cache',
+						'cache-control': 'no-cache'
+					}
+				};
+				return fetch('<%= accountServiceStorage %>' + '/guest/token', req).then((response) => {
+					return response.json()
+				}).then((json)  => {
+					localStorage.setItem('authToken', json.accessToken)
+					resolve();
+				});
+			})
 		}
-		else if(location.host.indexOf('local') >= 0) {
-			document.getElementById('debug-style').innerHTML = 'header { background-color: #c57 !important; }';
-		}
-		var lang =
+
+		function checkGuestToken(){
+			return new Promise((resolve, reject) => {
+				const currentToken = localStorage.getItem('authToken');
+				if(!currentToken){
+					resolve(getGuestToken());
+				}else{
+					const nowTime = Math.floor(Date.now() / 1000) - (60);
+					const currentTokenPayload = decodeURIComponent(escape(window.atob(currentToken.split('.')[1])));
+					const currentTokenExp = JSON.parse(currentTokenPayload).exp;
+					console.log('nowTime: ', nowTime);
+					console.log('currentTokenExp: ', currentTokenExp);
+					if(currentTokenExp <= nowTime){
+						resolve(getGuestToken());
+					}else{
+						resolve();
+					}
+				}
+			});
+		};
+
+		checkGuestToken().then(() => {
+			var dynamicOptions = location.search.substring(1).split('&')
+			.map(keyValue => keyValue.split('='))
+			.reduce((obj, keyValue) => { obj[keyValue[0]] = keyValue[1]; return obj; }, {});
+			console.log(dynamicOptions);
+			if(location.host.indexOf('-stg') >= 0) {
+				document.getElementById('debug-style').innerHTML = 'header { background-color: #8a6 !important; }';
+			}
+			else if(location.host.indexOf('local') >= 0) {
+				document.getElementById('debug-style').innerHTML = 'header { background-color: #c57 !important; }';
+			}
+			var lang =
 			window.navigator.language ||
 			window.navigator.userLanguage ||
 			window.navigator.browserLanguage;
-		var main = Elm.Page.Map.Main.fullscreen({
-			initialSize: {
-				width: window.innerWidth,
-				height: window.innerHeight
-			},
-			randomSeed: [Math.floor(Math.random() * 0xFFFF), Math.floor(Math.random() * 0xFFFF)],
-			// TODO: Decoding large integer causes an error. Replace with below when it is fixed.
-			// [Math.floor(Math.random()*0xFFFFFFFF), Math.floor(Math.random()*0xFFFFFFFF)]
-			visitDate: new Date().getTime(),
-			apiRoot: dynamicOptions.apiRoot || '<%= apiRoot %>',
-			cacheRoot: dynamicOptions.cacheRoot || '<%= cacheRoot %>',
-			accountServiceRoot: '<%= accountServiceRoot %>',
-			profileServiceRoot: '<%= profileServiceRoot %>',
-			imageRoot: dynamicOptions.imageRoot || '<%= imageRoot %>',
-			title: ' <%= title %> ',
-			authToken: localStorage.getItem('authToken') || '',
-			lang: lang
-		});
-		main.ports.insertInput.subscribe(function(data) {
-			var id = data[0];
-			var pos = data[1];
-			var objectId = data[2];
-			var value = data[3];
-			var element = document.getElementById(id);
-			if (element.id === id) {
-				var originalValue = element.value;
-				var newValue = originalValue.substring(0, pos) + value + originalValue.substring(pos);
-				var newPos = pos + value.length;
-				element.focus();
-				element.value = newValue;
-				element.setSelectionRange(newPos, newPos);
-				main.ports.receiveInputValue.send([objectId, newValue, newPos]);
-			}
-		});
-		main.ports.setInput.subscribe(function(data) {
-			var id = data[0];
-			var str = data[1];
-			var element = document.getElementById(id);
-			if (element.id === id) {
-				element.value = str;
-			}
-		});
-		main.ports.removeToken.subscribe(function(token) {
-			localStorage.removeItem('authToken', token);
-			main.ports.tokenRemoved.send();
-		});
-		main.ports.setSelectionStart.subscribe(function() {
-			var input = document.getElementById('name-input');
-			if (input) {
-				input.blur();
-				input.setSelectionRange(9999, 9999);
-				// input.value = input.value;
-				input.focus();
-				// var a = input.dispatchEvent(new KeyboardEvent('keydown', { calcelable: false, 'bubbles': false, key: "a" }));
-				// console.log(a);
-			}
-		});
-		main.ports.focusCanvas.subscribe(function() {
-			var element = document.getElementById('paste-handler');
-			if (element) {
-				element.focus();
-			}
-		});
-		main.ports.print.subscribe(function(s) {
-			window.print();
-		});
-		main.ports.saveToken.subscribe(function(token) {
-			localStorage.setItem('authToken', token);
-		});
+			var main = Elm.Page.Map.Main.fullscreen({
+				initialSize: {
+					width: window.innerWidth,
+					height: window.innerHeight
+				},
+				randomSeed: [Math.floor(Math.random() * 0xFFFF), Math.floor(Math.random() * 0xFFFF)],
+				// TODO: Decoding large integer causes an error. Replace with below when it is fixed.
+				// [Math.floor(Math.random()*0xFFFFFFFF), Math.floor(Math.random()*0xFFFFFFFF)]
+				visitDate: new Date().getTime(),
+				apiRoot: dynamicOptions.apiRoot || '<%= apiRoot %>',
+				cacheRoot: dynamicOptions.cacheRoot || '<%= cacheRoot %>',
+				accountServiceRoot: '<%= accountServiceRoot %>',
+				profileServiceRoot: '<%= profileServiceRoot %>',
+				imageRoot: dynamicOptions.imageRoot || '<%= imageRoot %>',
+				title: ' <%= title %> ',
+				authToken: localStorage.getItem('authToken'),
+				lang: lang ,
+				accountServiceStorage: '<%= accountServiceStorage %>'
+			});
+			main.ports.insertInput.subscribe(function(data) {
+				var id = data[0];
+				var pos = data[1];
+				var objectId = data[2];
+				var value = data[3];
+				var element = document.getElementById(id);
+				if (element.id === id) {
+					var originalValue = element.value;
+					var newValue = originalValue.substring(0, pos) + value + originalValue.substring(pos);
+					var newPos = pos + value.length;
+					element.focus();
+					element.value = newValue;
+					element.setSelectionRange(newPos, newPos);
+					main.ports.receiveInputValue.send([objectId, newValue, newPos]);
+				}
+			});
+			main.ports.setInput.subscribe(function(data) {
+				var id = data[0];
+				var str = data[1];
+				var element = document.getElementById(id);
+				if (element.id === id) {
+					element.value = str;
+				}
+			});
+			main.ports.removeToken.subscribe(function(token) {
+				localStorage.removeItem('authToken', token);
+				main.ports.tokenRemoved.send();
+			});
+			main.ports.setSelectionStart.subscribe(function() {
+				var input = document.getElementById('name-input');
+				if (input) {
+					input.blur();
+					input.setSelectionRange(9999, 9999);
+					// input.value = input.value;
+					input.focus();
+					// var a = input.dispatchEvent(new KeyboardEvent('keydown', { calcelable: false, 'bubbles': false, key: "a" }));
+					// console.log(a);
+				}
+			});
+			main.ports.focusCanvas.subscribe(function() {
+				var element = document.getElementById('paste-handler');
+				if (element) {
+					element.focus();
+				}
+			});
+			main.ports.print.subscribe(function(s) {
+				window.print();
+			});
+			main.ports.saveToken.subscribe(function(token) {
+				localStorage.setItem('authToken', token);
+			});
 
-		setTimeout(function() {
-			document.getElementById('blink-style').innerHTML = '';
-		}, 1400);
+			setTimeout(function() {
+				document.getElementById('blink-style').innerHTML = '';
+			}, 1400);
 
-		var now = window.performance && (
+			var now = window.performance && (
 			performance.now ||
 			performance.mozNow ||
 			performance.msNow ||
 			performance.oNow ||
 			performance.webkitNow);
 
-		var getTime = function() {
-			return (now && now.call(performance)) || (new Date().getTime());
-		}
-		var init = getTime();
-		var start = init;
-		var arr = [];
-		(function loop() {
-			var end = getTime();
-			arr.push(end - start);
-			start = end;
-			if (end - init < 5000) {
-				requestAnimationFrame(loop);
-			} else {
-				arr.reverse();
-				var arr2 = [];
-				for (var i = 0; i < 20; i++) {
-					arr2[i] = arr[i] / 4 + arr[i + 1] / 2 + arr[i + 2] / 4
-				}
-				var s = arr2.map(n => n.toString()).join('\n');
-				console.log(s);
+			var getTime = function() {
+				return (now && now.call(performance)) || (new Date().getTime());
 			}
-		}) //();
+			var init = getTime();
+			var start = init;
+			var arr = [];
+			(function loop() {
+				var end = getTime();
+				arr.push(end - start);
+				start = end;
+				if (end - init < 5000) {
+					requestAnimationFrame(loop);
+				} else {
+					arr.reverse();
+					var arr2 = [];
+					for (var i = 0; i < 20; i++) {
+						arr2[i] = arr[i] / 4 + arr[i + 1] / 2 + arr[i + 2] / 4
+					}
+					var s = arr2.map(n => n.toString()).join('\n');
+					console.log(s);
+				}
+			}) //();
+		})
 	</script>
 	<style id="blink-style">
 		.popup-blink {
@@ -176,5 +219,4 @@
 		});
 	</script>
 </body>
-
 </html>

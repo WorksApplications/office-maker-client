@@ -37,6 +37,7 @@ init flags =
             , profileServiceRoot = ""
             , imageRoot = ""
             , token = flags.authToken
+            , accountServiceStorage = ""
             }
 
         defaultUserState =
