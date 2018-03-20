@@ -9,7 +9,6 @@ module API.API
         , getEditingFloor
         , getFloor
         , getFloorsInfo
-        , getGuestToken
         , getObject
         , getPeopleByFloorAndPost
         , getPerson
@@ -61,7 +60,6 @@ type alias Config =
     , profileServiceRoot : String
     , imageRoot : String
     , token : String
-    , accountServiceStorage : String
     }
 
 
@@ -212,10 +210,13 @@ getDiffSource config id =
 
 getAuth : Config -> Task Error User
 getAuth config =
-    getWithoutCache
-        decodeUser
-        (config.apiRoot ++ "/self")
-        [ authorization config.token ]
+    if String.trim config.token == "" then
+        Task.succeed User.guest
+    else
+        getWithoutCache
+            decodeUser
+            (config.apiRoot ++ "/self")
+            [ authorization config.token ]
 
 
 search : Config -> Bool -> String -> Task Error ( List SearchResult, List Person )
@@ -312,12 +313,3 @@ login accountServiceRoot id pass =
         (accountServiceRoot ++ "/authentication")
         []
         (Http.jsonBody <| encodeLogin id pass)
-
-
-getGuestToken : Config -> Task Error (Maybe String)
-getGuestToken config =
-    get
-        decodeAuthToken
-        (config.accountServiceStorage ++ "/guest/token")
-        []
-        |> recover404

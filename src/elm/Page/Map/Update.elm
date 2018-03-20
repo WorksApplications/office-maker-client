@@ -80,7 +80,6 @@ type alias Flags =
     , randomSeed : ( Int, Int )
     , visitDate : Float
     , lang : String
-    , accountServiceStorage : String
     }
 
 
@@ -134,15 +133,7 @@ init flags location =
             , cacheRoot = flags.cacheRoot
             , imageRoot = flags.imageRoot
             , token = flags.authToken
-            , accountServiceStorage = flags.accountServiceStorage
             }
-
-        loadGuestToken =
-            API.getGuestToken apiConfig
-                |> performAPI
-                    (\maybeToken ->
-                        GotNewToken maybeToken
-                    )
 
         -- TODO
         userState =
@@ -254,9 +245,6 @@ update msg model =
             let
                 apiConfig =
                     model.apiConfig
-
-                -- _ =
-                --     Debug.log "【LOG_token】" token
             in
             ( { model
                 | apiConfig =
@@ -392,13 +380,6 @@ update msg model =
                 loadFloorInfoCmd =
                     API.getFloorsInfo model.apiConfig
                         |> performAPI (FloorsInfoLoaded (selectedFloor /= Nothing || model.selectedResult /= Nothing))
-
-                -- loadGuestToken =
-                --     API.getGuestToken model.apiConfig
-                --         |> performAPI
-                --             (\maybeToken ->
-                --                 GotNewToken maybeToken
-                --             )
             in
             { model
                 | scale = userState.scale
@@ -410,8 +391,6 @@ update msg model =
                   , searchCmd
                   , loadFloorInfoCmd
                   , loadFloorCmd
-
-                  -- , loadGuestToken
                   ]
 
         ColorsLoaded colorPalette ->
