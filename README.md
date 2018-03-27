@@ -24,10 +24,10 @@ Client implementation for Office Maker.
 ```
 $ elm-package install
 $ npm install
-$ cp op/config-template.json config.dev.json
+$ cp op/config-template.json config.stg.json
 ```
 
-`config.${env}.json` is configuration for `dev` environment.
+`config.${env}.json` is configuration for `stg` environment.
 
 ## Build
 
@@ -46,7 +46,7 @@ $ sh build.sh ${env}
 $ node watch
 ```
 
-This automatically runs `sh build.sh dev` if any file is changed. It also run static server on `http://localhost:3030`.
+This automatically runs `sh build.sh stg` if any file is changed. It also run static server on `http://localhost:3030`.
 
 **Note:** You might need to disable CORS if server returns specific `Access-Control-Allow-Origin`.
 
@@ -90,5 +90,3 @@ Edit `config.${env}.json`. Bold properties are essential to work with various en
 ## License
 
 [Apache License 2.0](LICENSE)
-
-
