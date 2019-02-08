@@ -50,6 +50,7 @@ fs.readdirSync(publicDir).map(file => {
   } else {
     contentEncoding = undefined;
   }
+
   return {
     Bucket: config.s3Bucket,
     Key: file,
