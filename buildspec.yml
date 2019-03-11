@@ -10,7 +10,7 @@ phases:
   install:
     commands:
       - npm i -g elm@0.18
-      - elm-package install
+      - elm-package install -y
       - npm install
       - echo ${config_json} >> config.${stage}.json
   build:
