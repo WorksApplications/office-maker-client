@@ -2,12 +2,17 @@ version: 0.2
 
 env:
   variables:
-    stage: prod
+    stage: "prod"
+  parameter-store:
+    config_json: "office-maker-client-config-prod"
 
 phases:
   install:
     commands:
       - npm i -g elm@0.18
+      - elm-package install
+      - npm install
+      - echo ${config_json} >> config.${stage}.json
   build:
     commands:
       - sh ./build.sh ${stage}
