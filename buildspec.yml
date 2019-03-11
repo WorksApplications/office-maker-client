@@ -1,0 +1,17 @@
+version: 0.2
+
+env:
+  variables:
+    stage: prod
+
+phases:
+  install:
+    commands:
+      - npm i -g elm@0.18
+  build:
+    commands:
+      - sh ./build.sh ${stage}
+  post_build:
+    commands:
+      - sh ./deploy.sh ${stage}
+
