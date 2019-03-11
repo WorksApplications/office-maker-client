@@ -17,6 +17,8 @@ phases:
     commands:
       - sh ./build.sh ${stage}
   post_build:
-    commands:
-      - sh ./deploy.sh ${stage}
+    commands: |
+      if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
+        sh ./deploy.sh ${stage}
+      fi;
 
