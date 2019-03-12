@@ -10,13 +10,16 @@ phases:
   install:
     commands:
       - npm i -g elm@0.18
-      - elm-package install
+      - elm-package install -y
       - npm install
       - echo ${config_json} >> config.${stage}.json
   build:
     commands:
+      - aws s3 sync s3://office-maker-client-artifacts/doc doc
       - sh ./build.sh ${stage}
   post_build:
-    commands:
-      - sh ./deploy.sh ${stage}
+    commands: |
+      if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
+        sh ./deploy.sh ${stage}
+      fi;
 
