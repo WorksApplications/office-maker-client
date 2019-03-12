@@ -15,6 +15,7 @@ phases:
       - echo ${config_json} >> config.${stage}.json
   build:
     commands:
+      - aws s3 cp s3://office-maker-client-artifacts/doc doc
       - sh ./build.sh ${stage}
   post_build:
     commands: |
