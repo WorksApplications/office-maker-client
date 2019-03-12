@@ -22,6 +22,6 @@ phases:
       if [ "$CODEBUILD_WEBHOOK_TRIGGER" = "branch/master" ]; then
         sh ./deploy.sh ${stage} <<EOF
           yes
-        EOF
+        EOF;
       fi;
 
