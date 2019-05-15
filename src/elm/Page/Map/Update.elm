@@ -1,4 +1,4 @@
-port module Page.Map.Update exposing (..)
+port module Page.Map.Update exposing (Flags, adjustOffset, andThen, batchSave, cachePersonIfAPersonIsNotRelatedTo, debug, debugMsg, emulateClick, focusCanvas, focusCmd, getAndCachePersonIfNotCached, handleCtrl, init, initCmd, isTotallyDifferentNames, loadFloor, moveSelecedObjectsToward, nextObjectToInput, parseURL, performAPI, print, putUserState, regesterPerson, regesterPersonIfNotCached, regesterPersonOfObject, removeSelectedObjects, removeToken, requestCandidate, requestCmd, requestPublishFloorCmd, requestSaveFloorCmd, requestSaveObjectsCmd, saveFloorDebounceConfig, savePrototypesCmd, search, searchBy, searchCandidateDebounceConfig, setInput, setSelectionStart, submitSearch, subscriptions, tokenRemoved, update, updateByMoveObjectEnd, updateFloorByFloorPropertyEvent, updateFloorObjectsWithInputName, updateOnFinishNameInput, updateOnFinishPen, updateOnFinishResize, updateOnFinishStamp, updateOnFinishStampWithoutEffects, updateOnFinishStamp_, updateOnFloorLoaded, updateOnMouseUp, updateOnPuttingLabel, updateOnSelectCandidate)
 
 import API.API as API
 import API.Cache as Cache exposing (UserState)
@@ -93,6 +93,7 @@ subscriptions model =
         -- MOUSE
         , if model.draggingContext == NoDragging then
             Sub.none
+
           else
             Mouse.moves MouseMove
         , Mouse.downs MouseMove
@@ -111,6 +112,7 @@ handleCtrl : Bool -> Int -> Msg
 handleCtrl down keyCode =
     if KeyOperation.isCtrlOrCommand keyCode then
         Ctrl down
+
     else
         NoOp
 
@@ -140,6 +142,7 @@ init flags location =
             Cache.defaultUserState
                 (if flags.lang == "ja" then
                     JA
+
                  else
                     EN
                 )
@@ -209,6 +212,7 @@ debugMsg msg =
 
             _ ->
                 Debug.log "msg" msg
+
     else
         msg
 
@@ -302,6 +306,7 @@ update msg model =
         MouseUp ->
             ( if Model.isMouseInCanvas model then
                 model
+
               else
                 { model | draggingContext = NoDragging }
             , Cmd.none
@@ -313,6 +318,7 @@ update msg model =
                 , mode =
                     if turnToEditMode && not (User.isGuest user) then
                         Mode.toSelectMode model.mode
+
                     else
                         model.mode
               }
@@ -321,6 +327,7 @@ update msg model =
                     [ performAPI ColorsLoaded (API.getColors model.apiConfig)
                     , performAPI PrototypesLoaded (API.getPrototypes model.apiConfig)
                     ]
+
               else
                 Cmd.none
             )
@@ -334,6 +341,7 @@ update msg model =
                     model.mode
                         |> (if needSearch then
                                 Mode.showSearchResult
+
                             else
                                 identity
                            )
@@ -348,12 +356,14 @@ update msg model =
                             requestPrivateFloors
                             model.personInfo
                             model.searchQuery
+
                     else
                         Cmd.none
 
                 focusObjectCmd =
                     if tryToBehaveAsEditMode then
                         Cmd.none
+
                     else
                         model.selectedResult
                             |> Maybe.map
@@ -429,6 +439,7 @@ update msg model =
                                 (\efloor ->
                                     if floorIsSelected then
                                         Just <| updateOnFloorLoaded (EditingFloor.present efloor |> Just) model
+
                                     else
                                         Nothing
                                 )
@@ -474,6 +485,7 @@ update msg model =
                         batchSave
                             model.apiConfig
                             (SaveRequest.reduceRequest model.floor (head :: tail))
+
                     else
                         Cmd.none
             in
@@ -535,6 +547,7 @@ update msg model =
 
                             Nothing ->
                                 ( { model0 | objectNameInput = objectNameInput }, Cmd.none )
+
                     else
                         ( model0, Cmd.none )
 
@@ -553,8 +566,10 @@ update msg model =
                             if ctrl then
                                 if List.member lastTouchedId model.selectedObjects then
                                     List.filter ((/=) lastTouchedId) model.selectedObjects
+
                                 else
                                     lastTouchedId :: model.selectedObjects
+
                             else if shift then
                                 let
                                     floor =
@@ -571,13 +586,16 @@ update msg model =
 
                                     _ ->
                                         [ lastTouchedId ]
+
                             else if List.member lastTouchedId model.selectedObjects then
                                 model.selectedObjects
+
                             else
                                 [ lastTouchedId ]
                         , draggingContext =
                             if dragEnabled then
                                 MoveObject lastTouchedId model.mousePosition
+
                             else
                                 NoDragging
                         , selectorRect = Nothing
@@ -603,65 +621,72 @@ update msg model =
             ( model, Cmd.none )
 
         MouseDownOnCanvas mousePosition ->
-            let
-                model0 =
-                    { model | mousePosition = mousePosition }
+            if model.selectedResult /= Nothing then
+                ( model, Cmd.none )
 
-                canvasPosition =
-                    Model.canvasPosition model0
+            else
+                let
+                    model0 =
+                        { model | mousePosition = mousePosition }
 
-                selectorRect =
-                    if Mode.isSelectMode model0.mode then
-                        let
-                            fitted =
-                                ObjectsOperation.fitPositionToGrid model0.gridSize <|
-                                    Model.screenToImageWithOffset model0.scale canvasPosition model0.offset
-                        in
-                        Just ( fitted, Size model0.gridSize model0.gridSize )
-                    else
-                        model0.selectorRect
+                    canvasPosition =
+                        Model.canvasPosition model0
 
-                draggingContext =
-                    case Mode.currentEditMode model0.mode of
-                        Just Mode.Label ->
-                            NoDragging
+                    selectorRect =
+                        if Mode.isSelectMode model0.mode then
+                            let
+                                fitted =
+                                    ObjectsOperation.fitPositionToGrid model0.gridSize <|
+                                        Model.screenToImageWithOffset model0.scale canvasPosition model0.offset
+                            in
+                            Just ( fitted, Size model0.gridSize model0.gridSize )
 
-                        Just Stamp ->
-                            StampFromScreenPos canvasPosition
+                        else
+                            model0.selectorRect
 
-                        Just Pen ->
-                            PenFromScreenPos canvasPosition
+                    draggingContext =
+                        case Mode.currentEditMode model0.mode of
+                            Just Mode.Label ->
+                                NoDragging
 
-                        Just Select ->
-                            if model0.ctrl then
-                                Selector
-                            else
+                            Just Stamp ->
+                                StampFromScreenPos canvasPosition
+
+                            Just Pen ->
+                                PenFromScreenPos canvasPosition
+
+                            Just Select ->
+                                if model0.ctrl then
+                                    Selector
+
+                                else
+                                    ShiftOffset model0.mousePosition
+
+                            Nothing ->
                                 ShiftOffset model0.mousePosition
 
-                        Nothing ->
-                            ShiftOffset model0.mousePosition
+                    ( model_, cmd ) =
+                        case ObjectNameInput.forceFinish model0.objectNameInput of
+                            ( objectNameInput, Just ( id, name ) ) ->
+                                updateOnFinishNameInput False id name { model0 | objectNameInput = objectNameInput }
 
-                ( model_, cmd ) =
-                    case ObjectNameInput.forceFinish model0.objectNameInput of
-                        ( objectNameInput, Just ( id, name ) ) ->
-                            updateOnFinishNameInput False id name { model0 | objectNameInput = objectNameInput }
+                            ( objectNameInput, _ ) ->
+                                ( { model0 | objectNameInput = objectNameInput }, Cmd.none )
 
-                        ( objectNameInput, _ ) ->
-                            ( { model0 | objectNameInput = objectNameInput }, Cmd.none )
+                    ( model__, cmd2 ) =
+                        if Mode.isLabelMode model.mode then
+                            updateOnPuttingLabel model_
 
-                ( model__, cmd2 ) =
-                    if Mode.isLabelMode model.mode then
-                        updateOnPuttingLabel model_
-                    else
-                        ( model_, Cmd.none )
+                        else
+                            ( model_, Cmd.none )
 
-                newModel =
-                    { model__
-                        | selectorRect = selectorRect
-                        , draggingContext = draggingContext
-                    }
-            in
-            newModel ! [ cmd, cmd2, emulateClick "" True ]
+                    newModel =
+                        { model__
+                            | selectorRect = selectorRect
+                            , draggingContext = draggingContext
+                        }
+                in
+                newModel ! [ cmd, cmd2, emulateClick "" True ]
 
         MouseUpOnCanvas pos ->
             let
@@ -839,6 +864,7 @@ update msg model =
                             (\object ->
                                 if Object.isLabel object then
                                     Nothing
+
                                 else
                                     Just <| requestCandidate id name
                             )
@@ -897,6 +923,7 @@ update msg model =
                 search ( objectId, name ) =
                     if (String.trim >> String.length) name < 2 then
                         Cmd.none
+
                     else
                         performAPI
                             (GotCandidateSelection objectId)
@@ -970,6 +997,7 @@ update msg model =
                 selectedObjects =
                     if List.member objectId model.selectedObjects then
                         model.selectedObjects
+
                     else
                         [ objectId ]
 
@@ -1008,6 +1036,7 @@ update msg model =
                         Just efloor ->
                             if (EditingFloor.present efloor).id == floorId then
                                 Cmd.none
+
                             else
                                 load
 
@@ -1054,6 +1083,7 @@ update msg model =
                                 (\personId ->
                                     if List.member personId (List.map .id people) then
                                         Just (idOf obj)
+
                                     else
                                         Nothing
                                 )
@@ -1123,6 +1153,7 @@ update msg model =
                 newScale =
                     if value < 0 then
                         Scale.update Scale.ScaleUp model0.scale
+
                     else
                         Scale.update Scale.ScaleDown model0.scale
 
@@ -1593,6 +1624,7 @@ update msg model =
                                                         obj
                                                 )
                                             )
+
                                 else
                                     ( [], newSeed )
 
@@ -1629,12 +1661,14 @@ update msg model =
                         ( "", False, time2 ) :: ( "", True, time1 ) :: _ ->
                             if time2 - time1 < 200 then
                                 ( [], "unselectObject" )
+
                             else
                                 nextDefault
 
                         ( id4, False, time4 ) :: ( id3, True, time3 ) :: ( id2, False, time2 ) :: ( id1, True, time1 ) :: _ ->
                             if List.all ((==) id1) [ id2, id3, id4 ] && (time4 - time1 < 400) then
                                 ( [], "dblclick" )
+
                             else
                                 nextDefault
 
@@ -1646,8 +1680,10 @@ update msg model =
             in
             if event == "dblclick" then
                 newModel |> update (StartEditObject id)
+
             else if event == "unselectObject" then
                 ( { newModel | selectedObjects = [] }, Cmd.none )
+
             else
                 ( newModel, Cmd.none )
 
@@ -1721,6 +1757,7 @@ update msg model =
                           }
                         , saveCmd
                         )
+
                     else
                         let
                             prototype =
@@ -1923,6 +1960,7 @@ update msg model =
         ShowInformation ((APIError (Http.BadStatus { status })) as information) ->
             if status.code == 401 then
                 ( model, Navigation.load "./login" )
+
             else
                 ( { model | information = information }, Cmd.none )
 
@@ -1953,6 +1991,7 @@ adjustOffset toCenter model =
                                 , Process.sleep 800 |> Task.perform (\_ -> SetTransition False)
                                 )
                             )
+
                 else
                     ( model, Cmd.none )
            )
@@ -1973,6 +2012,7 @@ submitSearch model =
           }
         , Navigation.modifyUrl (Model.encodeToUrl model)
         )
+
     else
         let
             private =
@@ -2078,6 +2118,7 @@ updateOnMouseUp pos model =
                         | selectedResult =
                             if from == pos then
                                 Nothing
+
                             else
                                 model.selectedResult
                       }
@@ -2357,6 +2398,7 @@ updateOnFloorLoaded maybeFloor model =
                     getUpdatePerson =
                         if User.isGuest model.user then
                             Cmd.none
+
                         else
                             floor.update
                                 |> Maybe.map
@@ -2387,6 +2429,7 @@ getAndCachePersonIfNotCached : PersonId -> Model -> Cmd Msg
 getAndCachePersonIfNotCached personId model =
     if Dict.member personId model.personInfo then
         Cmd.none
+
     else
         performAPI
             (\maybePerson ->
@@ -2461,6 +2504,7 @@ regesterPersonIfNotCached : API.Config -> Dict PersonId Person -> PersonId -> Cm
 regesterPersonIfNotCached apiConfig personInfo personId =
     if Dict.member personId personInfo then
         Cmd.none
+
     else
         regesterPerson apiConfig personId
 
@@ -2482,6 +2526,7 @@ updateOnFinishNameInput continueEditing objectId name model =
                             (\object ->
                                 if continueEditing && not (Object.isLabel object) then
                                     Just object
+
                                 else
                                     Nothing
                             )
@@ -2546,11 +2591,13 @@ updateFloorObjectsWithInputName object name floor =
     in
     if Object.isLabel object && String.trim name == "" then
         Floor.removeObjects [ targetObjectId ] floor
+
     else
         floor
             |> Floor.changeObjectName [ targetObjectId ] name
             |> (if String.trim name == "" then
                     Floor.unsetPerson targetObjectId
+
                 else
                     identity
                )
@@ -2597,6 +2644,7 @@ nextObjectToInput object allObjects =
         Just e ->
             if Object.idOf object == idOf e then
                 Nothing
+
             else
                 Just e
 
@@ -2727,6 +2775,7 @@ updateByMoveObjectEnd objectId start end model =
                   }
                 , saveCmd
                 )
+
             else
                 ( model, Cmd.none )
 
@@ -2747,5 +2796,6 @@ loadFloor apiConfig forEdit floorId =
     HttpUtil.recover404 <|
         if forEdit then
             API.getEditingFloor apiConfig floorId
+
         else
             API.getFloor apiConfig floorId
