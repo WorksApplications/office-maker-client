@@ -2,9 +2,9 @@ version: 0.2
 
 env:
   variables:
-    stage: "prod"
+    stage: "stg"
   parameter-store:
-    config_json: "office-maker-client-config-prod"
+    config_json: "office-maker-client-config-stg"
 
 phases:
   install:
