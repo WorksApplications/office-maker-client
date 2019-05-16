@@ -9,11 +9,32 @@ import Svg exposing (Svg)
 
 createIcon : Icon -> Color -> Int -> Html msg
 createIcon icon color size =
+    let
+        c =
+            Color.toRgb color
+
+        r =
+            toString c.red
+
+        g =
+            toString c.green
+
+        b =
+            toString c.blue
+
+        a =
+            toString c.alpha
+    in
     iconWithOptions
         icon
         Solid
         []
-        [ style [ ( "color", toString color ), ( "font-size", toString size ++ "px" ) ]
+        [ style
+            [ ( "color"
+              , "rgba(" ++ r ++ "," ++ g ++ "," ++ b ++ "," ++ a ++ ")"
+              )
+            , ( "font-size", toString size ++ "px" )
+            ]
         ]
 
 
