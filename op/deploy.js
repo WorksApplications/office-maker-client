@@ -1,12 +1,12 @@
 const fs = require('fs');
 const path = require('path');
 const AWS = require('aws-sdk');
-const gzip = require('gzip-js');
+const zlib = require('zlib');
 
 const env = process.argv[2];
-const rootDir = __dirname + '/..';
-const publicDir = rootDir + '/dest/public';
-const configJsonPath = rootDir + `/config.${env}.json`;
+const rootDir = path.resolve(__dirname, '..');
+const publicDir = path.relative(rootDir, 'dest/public');
+const configJsonPath = path.resolve(rootDir, `config.${env}.json`);
 const config = JSON.parse(fs.readFileSync(configJsonPath, 'utf8'));
 
 var s3 = new AWS.S3({
@@ -22,11 +22,11 @@ fs.readdirSync(publicDir).map(file => {
   };
   var body = fs.readFileSync(publicDir + '/' + file);
   if (!file.endsWith('.pdf')) {
-    body = gzip.zip(body, options);
+    body = zlib.gzipSync(body, options);
   }
   return {
     file: file,
-    body: new Buffer(body)
+    body: Buffer.from(body)
   };
 }).map(result => {
   var file = result.file;
@@ -77,7 +77,7 @@ function fixContentTypeToHtml(bucket, key) {
       Key: key,
       MetadataDirective: "REPLACE",
       ContentType: "text/html"
-    }, function(e) {
+    }, function (e) {
       if (e) {
         reject(e);
       } else {
@@ -89,7 +89,7 @@ function fixContentTypeToHtml(bucket, key) {
 
 function upload(options) {
   return new Promise((resolve, reject) => {
-    s3.upload(options, function(e) {
+    s3.upload(options, function (e) {
       if (e) {
         reject(e);
       } else {
