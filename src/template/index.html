@@ -7,9 +7,11 @@
 		<%= title %>
 	</title>
 	<script src="./index.js"></script>
-	<link rel="stylesheet" href="./style.css"></link>
+	<link rel="stylesheet" href="./style.css">
+	</link>
 	<link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
 	<script src="//twemoji.maxcdn.com/2/twemoji.min.js?2.2.3"></script>
+	<script defer src="https://use.fontawesome.com/releases/v5.0.3/js/all.js"></script>
 </head>
 
 <body>
@@ -17,13 +19,13 @@
 	<input id="paste" hidden>
 	<script>
 		var dynamicOptions = location.search.substring(1).split('&')
-			  .map(keyValue => keyValue.split('='))
-				.reduce((obj, keyValue) => { obj[keyValue[0]] = keyValue[1]; return obj; }, {});
+			.map(keyValue => keyValue.split('='))
+			.reduce((obj, keyValue) => { obj[keyValue[0]] = keyValue[1]; return obj; }, {});
 		console.log(dynamicOptions);
-		if(location.host.indexOf('-stg') >= 0) {
+		if (location.host.indexOf('-stg') >= 0) {
 			document.getElementById('debug-style').innerHTML = 'header { background-color: #8a6 !important; }';
 		}
-		else if(location.host.indexOf('local') >= 0) {
+		else if (location.host.indexOf('local') >= 0) {
 			document.getElementById('debug-style').innerHTML = 'header { background-color: #c57 !important; }';
 		}
 		var lang =
@@ -48,7 +50,7 @@
 			authToken: localStorage.getItem('authToken') || '',
 			lang: lang
 		});
-		main.ports.insertInput.subscribe(function(data) {
+		main.ports.insertInput.subscribe(function (data) {
 			var id = data[0];
 			var pos = data[1];
 			var objectId = data[2];
@@ -64,7 +66,7 @@
 				main.ports.receiveInputValue.send([objectId, newValue, newPos]);
 			}
 		});
-		main.ports.setInput.subscribe(function(data) {
+		main.ports.setInput.subscribe(function (data) {
 			var id = data[0];
 			var str = data[1];
 			var element = document.getElementById(id);
@@ -72,11 +74,11 @@
 				element.value = str;
 			}
 		});
-		main.ports.removeToken.subscribe(function(token) {
+		main.ports.removeToken.subscribe(function (token) {
 			localStorage.removeItem('authToken', token);
 			main.ports.tokenRemoved.send();
 		});
-		main.ports.setSelectionStart.subscribe(function() {
+		main.ports.setSelectionStart.subscribe(function () {
 			var input = document.getElementById('name-input');
 			if (input) {
 				input.blur();
@@ -87,20 +89,20 @@
 				// console.log(a);
 			}
 		});
-		main.ports.focusCanvas.subscribe(function() {
+		main.ports.focusCanvas.subscribe(function () {
 			var element = document.getElementById('paste-handler');
 			if (element) {
 				element.focus();
 			}
 		});
-		main.ports.print.subscribe(function(s) {
+		main.ports.print.subscribe(function (s) {
 			window.print();
 		});
-		main.ports.saveToken.subscribe(function(token) {
+		main.ports.saveToken.subscribe(function (token) {
 			localStorage.setItem('authToken', token);
 		});
 
-		setTimeout(function() {
+		setTimeout(function () {
 			document.getElementById('blink-style').innerHTML = '';
 		}, 1400);
 
@@ -111,7 +113,7 @@
 			performance.oNow ||
 			performance.webkitNow);
 
-		var getTime = function() {
+		var getTime = function () {
 			return (now && now.call(performance)) || (new Date().getTime());
 		}
 		var init = getTime();
@@ -147,28 +149,29 @@
 		}
 	</style>
 	<style>
-	.data-migration-notification {
-	  position: fixed;
-	  border-radius: 5px;
-	  border: solid 1px #733;
-	  margin-left: 30px;
-	  margin-right: 30px;
-	  margin-bottom: 35px;
-	  bottom: 0;
-	  padding: 10px;
-	  background-color: #fee;
-	  z-index: 999999;
-		display: none;
-	}
-	.data-migration-notification.active {
-		display: block;
-	}
+		.data-migration-notification {
+			position: fixed;
+			border-radius: 5px;
+			border: solid 1px #733;
+			margin-left: 30px;
+			margin-right: 30px;
+			margin-bottom: 35px;
+			bottom: 0;
+			padding: 10px;
+			background-color: #fee;
+			z-index: 999999;
+			display: none;
+		}
+
+		.data-migration-notification.active {
+			display: block;
+		}
 	</style>
 	<div id="data-migration-notification" class="data-migration-notification">
 	</div>
 	<script>
 		fetch('./info').then(e => e.text()).then(s => {
-			if(s.trim()) {
+			if (s.trim()) {
 				var el = document.getElementById('data-migration-notification');
 				el.innerHTML = s;
 				el.classList.add('active');
