@@ -191,6 +191,19 @@ view model =
                 , onMouseWheel MouseWheel
                 ]
                 [ canvasView model floor
+                , if model.selectedResult /= Nothing then
+                    div
+                        [ onWithOptions "click" { stopPropagation = True, preventDefault = True } (Decode.succeed ClosePopup)
+                        , style
+                            [ ( "height", "100%" )
+                            , ( "z-index", "549" )
+                            , ( "position", "relative" )
+                            ]
+                        ]
+                        []
+
+                  else
+                    text ""
                 , {- if Mode.isEditMode model.mode then text "" else -} profilePopupView model floor
                 ]
 
