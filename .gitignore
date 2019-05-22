@@ -20,3 +20,5 @@ test.sh
 
 # doc
 doc
+
+test/__image_snapshots__/

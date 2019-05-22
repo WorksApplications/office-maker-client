@@ -4,11 +4,17 @@
   "description": "Client implementation for Office Maker",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "WorksApplications CO.,LTD.",
   "license": "Apache 2.0",
   "devDependencies": {
+    "@types/expect-puppeteer": "^3.3.1",
+    "@types/express": "^4.16.1",
+    "@types/jest": "^24.0.13",
+    "@types/jest-environment-puppeteer": "^4.0.0",
+    "@types/node": "^12.0.2",
+    "@types/puppeteer": "^1.12.4",
     "aws-sdk": "^2.95.0",
     "ejs": "^2.5.1",
     "express": "^4.15.4",
@@ -19,6 +25,8 @@
     "minimatch": "^3.0.0",
     "puppeteer": "^1.16.0",
     "s3-diff": "^1.1.0",
+    "ts-jest": "^24.0.2",
+    "typescript": "^3.4.5",
     "watch": "^0.17.1"
   },
   "dependencies": {}
