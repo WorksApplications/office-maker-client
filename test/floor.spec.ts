@@ -1,4 +1,3 @@
-import './create-test-server';
 import { createServer } from './create-test-server';
 import { Server } from 'http';
 
@@ -16,12 +15,17 @@ expect.extend({ toMatchImageSnapshot });
 let app: Server;
 
 beforeAll(async () => {
-  app = await createServer();
+  app = await createServer(30300);
+  await page.setCacheEnabled(false);
+});
+
+afterAll(async () => {
+  app.close();
 });
 
 describe('Open floor page', () => {
   beforeEach(async () => {
-    await page.goto('http://localhost:3030');
+    await page.goto('http://localhost:30300');
     await page.waitForNavigation();
   });
 
@@ -33,8 +37,4 @@ describe('Open floor page', () => {
   it('should display "Office Maker (test)" text on page', async () => {
     await expect(page).toMatch('Office Maker (test)');
   });
-});
-
-afterAll(async () => {
-  app.close();
 });
