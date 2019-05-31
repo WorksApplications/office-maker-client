@@ -1,4 +1,4 @@
-module Component.FloorDeleter exposing (..)
+module Component.FloorDeleter exposing (Config, FloorDeleter, Msg(..), button, dialog, init, update)
 
 import Component.Dialog as Dialog exposing (Dialog)
 import Dict
@@ -55,6 +55,7 @@ update transform config message model =
             ( model
             , if ok then
                 config.onDeleteFloor floor
+
               else
                 Cmd.none
             )
@@ -62,7 +63,7 @@ update transform config message model =
 
 button : Language -> User -> Floor -> Html Msg
 button lang user floor =
-    if User.isAdmin user && Dict.isEmpty floor.objects then
+    if User.isAdmin user && (Dict.isEmpty floor.objects || floor.temporary) then
         hover S.deleteFloorButtonHover
             Html.button
             [ HtmlUtil.onClick_ SelectDeleteFloor
@@ -70,6 +71,7 @@ button lang user floor =
             ]
             [ text (I18n.deleteFloor lang)
             ]
+
     else
         text ""
 
