@@ -1,41 +1,8 @@
-module View.Icons exposing (backgroundColorPropLabel, closeButton, colorPropLabel, defaultColor, editingToggle, fontSizePropLabel, headerIconColor, helpButton, labelMode, link, mode, modeColor, penMode, personDetailPopupPersonEmployeeId, personDetailPopupPersonMail, personDetailPopupPersonTel, personMatched, personNotMatched, popupClose, printButton, proplabelColor, saveButton, searchResultClose, searchResultItemPerson, searchResultItemPost, selectMode, shapeEllipse, shapePropLabel, shapeRectangle, stampMode, userMenuToggle)
+module View.Icons exposing (..)
 
 import Color exposing (Color, white)
 import FontAwesome exposing (..)
-import Html exposing (Html)
-import Html.Attributes exposing (style)
 import Svg exposing (Svg)
-
-
-createIcon : Icon -> Color -> Int -> Html msg
-createIcon icon color size =
-    let
-        c =
-            Color.toRgb color
-
-        r =
-            toString c.red
-
-        g =
-            toString c.green
-
-        b =
-            toString c.blue
-
-        a =
-            toString c.alpha
-    in
-    iconWithOptions
-        icon
-        Solid
-        []
-        [ style
-            [ ( "color"
-              , "rgba(" ++ r ++ "," ++ g ++ "," ++ b ++ "," ++ a ++ ")"
-              )
-            , ( "font-size", toString size ++ "px" )
-            ]
-        ]
 
 
 defaultColor : Color
@@ -50,7 +17,7 @@ modeColor =
 
 link : Svg msg
 link =
-    createIcon FontAwesome.link defaultColor 16
+    FontAwesome.link defaultColor 16
 
 
 mode : (Color -> Int -> Svg msg) -> (Bool -> Svg msg)
@@ -59,7 +26,6 @@ mode f =
         f
             (if selected then
                 white
-
              else
                 modeColor
             )
@@ -68,42 +34,42 @@ mode f =
 
 selectMode : Bool -> Svg msg
 selectMode =
-    mode (createIcon mousePointer)
+    mode mouse_pointer
 
 
 penMode : Bool -> Svg msg
 penMode =
-    mode (createIcon pencil)
+    mode pencil
 
 
 stampMode : Bool -> Svg msg
 stampMode =
-    mode (createIcon thLarge)
+    mode th_large
 
 
 labelMode : Bool -> Svg msg
 labelMode =
-    mode (createIcon font)
+    mode font
 
 
 personMatched : Float -> Svg msg
 personMatched ratio =
-    createIcon check white (Basics.floor (18 * ratio))
+    check white (Basics.floor (18 * ratio))
 
 
 personNotMatched : Float -> Svg msg
 personNotMatched ratio =
-    createIcon question white (Basics.floor (18 * ratio))
+    question white (Basics.floor (18 * ratio))
 
 
 popupClose : Svg msg
 popupClose =
-    createIcon times defaultColor 18
+    close defaultColor 18
 
 
 searchResultClose : Svg msg
 searchResultClose =
-    createIcon times defaultColor 18
+    close defaultColor 18
 
 
 proplabelColor : Color
@@ -113,57 +79,57 @@ proplabelColor =
 
 backgroundColorPropLabel : Svg msg
 backgroundColorPropLabel =
-    createIcon thLarge proplabelColor 12
+    th_large proplabelColor 12
 
 
 colorPropLabel : Svg msg
 colorPropLabel =
-    createIcon font proplabelColor 12
+    font proplabelColor 12
 
 
 shapePropLabel : Svg msg
 shapePropLabel =
-    createIcon star proplabelColor 12
+    star_o proplabelColor 12
 
 
 fontSizePropLabel : Svg msg
 fontSizePropLabel =
-    createIcon font proplabelColor 12
+    font proplabelColor 12
 
 
 shapeRectangle : Svg msg
 shapeRectangle =
-    createIcon square defaultColor 20
+    square defaultColor 20
 
 
 shapeEllipse : Svg msg
 shapeEllipse =
-    createIcon circle defaultColor 20
+    circle defaultColor 20
 
 
 searchResultItemPerson : Svg msg
 searchResultItemPerson =
-    createIcon user defaultColor 20
+    user defaultColor 20
 
 
 searchResultItemPost : Svg msg
 searchResultItemPost =
-    createIcon user defaultColor 20
+    user defaultColor 20
 
 
 personDetailPopupPersonTel : Svg msg
 personDetailPopupPersonTel =
-    createIcon phone defaultColor 16
+    phone defaultColor 16
 
 
 personDetailPopupPersonEmployeeId : Svg msg
 personDetailPopupPersonEmployeeId =
-    createIcon creditCard defaultColor 16
+    credit_card defaultColor 16
 
 
 personDetailPopupPersonMail : Svg msg
 personDetailPopupPersonMail =
-    createIcon envelope defaultColor 16
+    envelope defaultColor 16
 
 
 headerIconColor : Color
@@ -173,49 +139,44 @@ headerIconColor =
 
 editingToggle : Svg msg
 editingToggle =
-    createIcon pencil headerIconColor 22
+    pencil headerIconColor 22
 
 
 printButton : Bool -> Svg msg
 printButton printMode =
     if printMode then
-        createIcon print defaultColor 22
-
+        print defaultColor 22
     else
-        createIcon print headerIconColor 22
+        print headerIconColor 22
 
 
 saveButton : Bool -> Svg msg
 saveButton printMode =
     if printMode then
-        createIcon download defaultColor 22
-
+        download defaultColor 22
     else
-        createIcon download headerIconColor 22
+        download headerIconColor 22
 
 
 closeButton : Bool -> Svg msg
 closeButton printMode =
     if printMode then
-        createIcon times defaultColor 22
-
+        close defaultColor 22
     else
-        createIcon times headerIconColor 22
+        close headerIconColor 22
 
 
 helpButton : Svg msg
 helpButton =
-    createIcon questionCircle headerIconColor 22
+    question_circle headerIconColor 22
 
 
 userMenuToggle : Bool -> Svg msg
 userMenuToggle open =
-    createIcon
-        (if open then
-            caretUp
-
-         else
-            caretDown
-        )
+    (if open then
+        caret_up
+     else
+        caret_down
+    )
         white
         16
