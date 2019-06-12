@@ -1415,8 +1415,10 @@ update msg model =
                         OnceLoaded previousResults ->
                             FullLoaded (SearchResult.mergeResults previousResults results)
 
-                        FullLoaded _ ->
-                            Debug.crash "ありえない"
+                        -- Ignore the newly searched result if one already have it.
+                        -- This branch will be executed when performing multiple search actions in a short time.
+                        FullLoaded results ->
+                            FullLoaded results
             }
                 |> Model.cachePeople people
                 |> adjustOffset True
