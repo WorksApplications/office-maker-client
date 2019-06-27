@@ -1,33 +1,33 @@
-module API.API
-    exposing
-        ( Config
-        , Error
-        , deleteEditingFloor
-        , getAuth
-        , getColors
-        , getDiffSource
-        , getEditingFloor
-        , getFloor
-        , getFloorsInfo
-        , getObject
-        , getPeopleByFloorAndPost
-        , getPerson
-        , getPersonMaybe
-        , getPrototypes
-        , login
-        , personCandidate
-        , publishFloor
-        , saveColors
-        , saveEditingFloor
-        , saveEditingImage
-        , saveObjects
-        , savePrototype
-        , savePrototypes
-        , search
-        , searchObjects
-        , sustainToken
-        )
+module API.API exposing
+    ( Config
+    , Error
+    , deleteEditingFloor
+    , getAuth
+    , getColors
+    , getDiffSource
+    , getEditingFloor
+    , getFloor
+    , getFloorsInfo
+    , getObject
+    , getPeopleByFloorAndPost
+    , getPerson
+    , getPersonMaybe
+    , getPrototypes
+    , login
+    , personCandidate
+    , publishFloor
+    , saveColors
+    , saveEditingFloor
+    , saveEditingImage
+    , saveObjects
+    , savePrototype
+    , savePrototypes
+    , search
+    , searchObjects
+    , sustainToken
+    )
 
+import API.AuthToken
 import API.Serialization exposing (..)
 import CoreType exposing (..)
 import Http
@@ -212,11 +212,21 @@ getAuth : Config -> Task Error User
 getAuth config =
     if String.trim config.token == "" then
         Task.succeed User.guest
+
     else
-        getWithoutCache
-            decodeUser
-            (config.apiRoot ++ "/self")
-            [ authorization config.token ]
+        let
+            payload =
+                API.AuthToken.decodePayload config.token
+        in
+        getPerson config payload.userId
+            |> Task.map
+                (\person ->
+                    if payload.role == "admin" then
+                        User.admin person
+
+                    else
+                        User.general person
+                )
 
 
 search : Config -> Bool -> String -> Task Error ( List SearchResult, List Person )
@@ -227,6 +237,7 @@ search config withPrivate query =
                 (config.apiRoot ++ "/search/" ++ Http.encodeUri query)
                 (if withPrivate then
                     [ ( "all", "true" ) ]
+
                  else
                     []
                 )
@@ -245,6 +256,7 @@ searchObjects config withPrivate query =
                 (config.apiRoot ++ "/search/Objects/" ++ Http.encodeUri query)
                 (if withPrivate then
                     [ ( "all", "true" ) ]
+
                  else
                     []
                 )
@@ -259,6 +271,7 @@ personCandidate : Config -> String -> Task Error (List Person)
 personCandidate config name =
     if String.isEmpty name then
         Task.succeed []
+
     else
         HttpUtil.get
             decodePeopleFromProfileServiceSearch
