@@ -3,6 +3,7 @@ port module Page.Map.Update exposing (Flags, adjustOffset, andThen, batchSave, c
 import API.API as API
 import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
+import API.GraphQL as GraphQL
 import API.Page as Page
 import Component.FloorDeleter as FloorDeleter
 import Component.FloorProperty as FloorProperty
@@ -70,6 +71,8 @@ port print : {} -> Cmd msg
 
 type alias Flags =
     { apiRoot : String
+    , apiGraphQLRoot : String
+    , apiGraphQLKey : String
     , cacheRoot : String
     , accountServiceRoot : String
     , profileServiceRoot : String
@@ -130,6 +133,8 @@ init flags location =
 
         apiConfig =
             { apiRoot = flags.apiRoot
+            , apiGraphQLRoot = flags.apiGraphQLRoot
+            , apiGraphQLKey = flags.apiGraphQLKey
             , accountServiceRoot = flags.accountServiceRoot
             , profileServiceRoot = flags.profileServiceRoot
             , cacheRoot = flags.cacheRoot
