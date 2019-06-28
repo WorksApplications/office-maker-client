@@ -3,7 +3,6 @@ port module Page.Map.Update exposing (Flags, adjustOffset, andThen, batchSave, c
 import API.API as API
 import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
-import API.GraphQL as GraphQL
 import API.Page as Page
 import Component.FloorDeleter as FloorDeleter
 import Component.FloorProperty as FloorProperty
