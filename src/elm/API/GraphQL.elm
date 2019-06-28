@@ -1,4 +1,4 @@
-module API.GraphQL exposing (EditObject, buildSimpleQuery, listEditObjectsOnFloor)
+module API.GraphQL exposing (buildSimpleQuery, listEditObjectsOnFloor)
 
 {-| This module provides GraphQL client for AppSync (see `schema.graphql`)
 There is also a library called `elm-graphql`, you might want to use it instead. (I could not install it in 0.18)
@@ -16,25 +16,6 @@ type alias Config =
     { apiGraphQLRoot : String
     , apiKey : String
     , token : String
-    }
-
-
-type alias EditObject =
-    { backgroundColor : Maybe String
-    , changed : Maybe Bool
-    , deleted : Maybe Bool
-    , floorId : String
-    , height : Maybe Int
-    , id : String
-    , updateAt : Maybe Int
-    , width : Maybe Int
-    , x : Maybe Int
-    , y : Maybe Int
-    , name : Maybe String
-    , personId : Maybe String
-    , fontSize : Maybe Int
-    , typeOf : Maybe String
-    , url : Maybe String
     }
 
 
