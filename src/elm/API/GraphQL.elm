@@ -1,4 +1,4 @@
-module API.GraphQL exposing (buildSimpleQuery, listEditObjectsOnFloor)
+module API.GraphQL exposing (buildSimpleQuery, listEditObjectsOnFloor, loadParameterJson)
 
 {-| This module provides GraphQL client for AppSync (see `schema.graphql`)
 There is also a library called `elm-graphql`, you might want to use it instead. (I could not install it in 0.18)
@@ -8,6 +8,7 @@ import API.Serialization
 import Dict exposing (Dict)
 import Http
 import Json.Decode
+import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode
 import Model.Object exposing (Object)
 
@@ -17,6 +18,21 @@ type alias Config =
     , apiKey : String
     , token : String
     }
+
+
+type alias Info =
+    { url : String
+    , key : String
+    }
+
+
+loadParameterJson : String -> Http.Request Info
+loadParameterJson url =
+    Http.get url
+        (decode Info
+            |> required "url" Json.Decode.string
+            |> required "key" Json.Decode.string
+        )
 
 
 {-| Build a simple query, can be used for mutation
