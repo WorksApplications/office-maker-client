@@ -138,12 +138,14 @@ getEditingFloor config floorId =
         graphqlConfig =
             { apiGraphQLRoot = config.apiGraphQLRoot
             , apiKey = config.apiGraphQLKey
+            , apiGraphQLParameter = config.apiGraphQLParameter
             , token = config.token
             }
     in
     Task.map2 Floor.addObjects
-        (API.GraphQL.listEditObjectsOnFloor graphqlConfig floorId
-            |> Http.toTask
+        (API.GraphQL.runListEditObjectsOnFloor
+            graphqlConfig
+            floorId
         )
         (getWithoutCache
             decodeFloor
