@@ -58,6 +58,7 @@ type alias Config =
     { apiRoot : String
     , apiGraphQLRoot : String
     , apiGraphQLKey : String
+    , apiGraphQLParameter : String
     , cacheRoot : String
     , accountServiceRoot : String
     , profileServiceRoot : String

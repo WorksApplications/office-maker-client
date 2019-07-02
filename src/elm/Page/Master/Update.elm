@@ -36,6 +36,7 @@ init flags =
             { apiRoot = flags.apiRoot
             , apiGraphQLRoot = flags.apiGraphQLRoot
             , apiGraphQLKey = flags.apiGraphQLKey
+            , apiGraphQLParameter = "" -- We don't use GraphQL API for master page
             , cacheRoot = ""
             , accountServiceRoot = flags.accountServiceRoot
             , profileServiceRoot = ""

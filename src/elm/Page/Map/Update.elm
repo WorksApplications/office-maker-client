@@ -72,6 +72,7 @@ type alias Flags =
     { apiRoot : String
     , apiGraphQLRoot : String
     , apiGraphQLKey : String
+    , apiGraphQLParameter : String
     , cacheRoot : String
     , accountServiceRoot : String
     , profileServiceRoot : String
@@ -134,6 +135,7 @@ init flags location =
             { apiRoot = flags.apiRoot
             , apiGraphQLRoot = flags.apiGraphQLRoot
             , apiGraphQLKey = flags.apiGraphQLKey
+            , apiGraphQLParameter = flags.apiGraphQLParameter
             , accountServiceRoot = flags.accountServiceRoot
             , profileServiceRoot = flags.profileServiceRoot
             , cacheRoot = flags.cacheRoot
