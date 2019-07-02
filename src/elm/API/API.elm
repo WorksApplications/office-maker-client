@@ -28,11 +28,12 @@ module API.API exposing
     )
 
 import API.AuthToken
+import API.GraphQL
 import API.Serialization exposing (..)
 import CoreType exposing (..)
 import Http
 import Model.ColorPalette exposing (ColorPalette)
-import Model.Floor exposing (Floor, FloorBase)
+import Model.Floor as Floor exposing (Floor, FloorBase)
 import Model.FloorInfo exposing (FloorInfo)
 import Model.Object exposing (..)
 import Model.ObjectsChange exposing (ObjectChange)
@@ -55,6 +56,9 @@ type alias Error =
 
 type alias Config =
     { apiRoot : String
+    , apiGraphQLRoot : String
+    , apiGraphQLKey : String
+    , apiGraphQLParameter : String
     , cacheRoot : String
     , accountServiceRoot : String
     , profileServiceRoot : String
@@ -130,10 +134,24 @@ deleteEditingFloor config floorId =
 
 getEditingFloor : Config -> FloorId -> Task Error Floor
 getEditingFloor config floorId =
-    getWithoutCache
-        decodeFloor
-        (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/edit") [])
-        [ authorization config.token ]
+    let
+        graphqlConfig =
+            { apiGraphQLRoot = config.apiGraphQLRoot
+            , apiKey = config.apiGraphQLKey
+            , apiGraphQLParameter = config.apiGraphQLParameter
+            , token = config.token
+            }
+    in
+    Task.map2 Floor.addObjects
+        (API.GraphQL.runListEditObjectsOnFloor
+            graphqlConfig
+            floorId
+        )
+        (getWithoutCache
+            decodeFloor
+            (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/edit") [])
+            [ authorization config.token ]
+        )
 
 
 getFloor : Config -> FloorId -> Task Error Floor

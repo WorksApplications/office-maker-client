@@ -3,6 +3,7 @@ port module Page.Map.Update exposing (Flags, adjustOffset, andThen, batchSave, c
 import API.API as API
 import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
+import API.GraphQL as GraphQL
 import API.Page as Page
 import Component.FloorDeleter as FloorDeleter
 import Component.FloorProperty as FloorProperty
@@ -70,6 +71,9 @@ port print : {} -> Cmd msg
 
 type alias Flags =
     { apiRoot : String
+    , apiGraphQLRoot : String
+    , apiGraphQLKey : String
+    , apiGraphQLParameter : String
     , cacheRoot : String
     , accountServiceRoot : String
     , profileServiceRoot : String
@@ -130,6 +134,9 @@ init flags location =
 
         apiConfig =
             { apiRoot = flags.apiRoot
+            , apiGraphQLRoot = flags.apiGraphQLRoot
+            , apiGraphQLKey = flags.apiGraphQLKey
+            , apiGraphQLParameter = flags.apiGraphQLParameter
             , accountServiceRoot = flags.accountServiceRoot
             , profileServiceRoot = flags.profileServiceRoot
             , cacheRoot = flags.cacheRoot
@@ -195,6 +202,7 @@ initCmd apiConfig needsEditMode defaultUserState selectedFloor =
             |> performAPI (\userState -> Initialize needsEditMode selectedFloor userState)
         , API.sustainToken apiConfig
             |> performAPI GotNewToken
+        , performAPI LoadGraphQLInfo (Http.toTask <| GraphQL.loadParameterJson apiConfig.apiGraphQLParameter)
         ]
 
 
@@ -1968,6 +1976,16 @@ update msg model =
 
         ShowInformation information ->
             ( { model | information = information }, Cmd.none )
+
+        LoadGraphQLInfo info ->
+            let
+                oldApiConfig =
+                    model.apiConfig
+
+                newApiConfig =
+                    { oldApiConfig | apiGraphQLRoot = info.url, apiGraphQLKey = info.key }
+            in
+            ( { model | apiConfig = newApiConfig }, Cmd.none )
 
 
 andThen : (Model -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )

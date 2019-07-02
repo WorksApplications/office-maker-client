@@ -40,6 +40,9 @@
 			// [Math.floor(Math.random()*0xFFFFFFFF), Math.floor(Math.random()*0xFFFFFFFF)]
 			visitDate: new Date().getTime(),
 			apiRoot: dynamicOptions.apiRoot || '<%= apiRoot %>',
+			apiGraphQLParameter: dynamicOptions.apiGraphQLParameter || '<%= apiGraphQLParameter %>',
+			apiGraphQLRoot: '',
+			apiGraphQLKey: '',
 			cacheRoot: dynamicOptions.cacheRoot || '<%= cacheRoot %>',
 			accountServiceRoot: '<%= accountServiceRoot %>',
 			profileServiceRoot: '<%= profileServiceRoot %>',
