@@ -235,15 +235,31 @@ getAuth config =
         let
             payload =
                 API.AuthToken.decodePayload config.token
+
+            makeUser person =
+                if payload.role == "admin" then
+                    User.admin person
+
+                else
+                    User.general person
         in
         getPerson config payload.userId
-            |> Task.map
-                (\person ->
-                    if payload.role == "admin" then
-                        User.admin person
-
-                    else
-                        User.general person
+            |> Task.map makeUser
+            |> Task.onError
+                (\err ->
+                    -- If there is an error, proceed with some unknown user
+                    Debug.log (toString err) <|
+                        Task.succeed <|
+                            makeUser
+                                { id = ""
+                                , name = "unknown"
+                                , post = "unknown"
+                                , mail = Nothing
+                                , tel1 = Nothing
+                                , tel2 = Nothing
+                                , image = Nothing
+                                , employeeId = Nothing
+                                }
                 )
 
 

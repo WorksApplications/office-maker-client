@@ -20,8 +20,6 @@ import Util.ListUtil as ListUtil
 
 type alias Flags =
     { apiRoot : String
-    , apiGraphQLRoot : String
-    , apiGraphQLKey : String
     , accountServiceRoot : String
     , authToken : String
     , title : String
@@ -34,9 +32,9 @@ init flags =
     let
         apiConfig =
             { apiRoot = flags.apiRoot
-            , apiGraphQLRoot = flags.apiGraphQLRoot
-            , apiGraphQLKey = flags.apiGraphQLKey
-            , apiGraphQLParameter = "" -- We don't use GraphQL API for master page
+            , apiGraphQLRoot = ""
+            , apiGraphQLKey = ""
+            , apiGraphQLParameter = ""
             , cacheRoot = ""
             , accountServiceRoot = flags.accountServiceRoot
             , profileServiceRoot = ""
