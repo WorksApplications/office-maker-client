@@ -1,38 +1,39 @@
-module API.API
-    exposing
-        ( Config
-        , Error
-        , deleteEditingFloor
-        , getAuth
-        , getColors
-        , getDiffSource
-        , getEditingFloor
-        , getFloor
-        , getFloorsInfo
-        , getObject
-        , getPeopleByFloorAndPost
-        , getPerson
-        , getPersonMaybe
-        , getPrototypes
-        , login
-        , personCandidate
-        , publishFloor
-        , saveColors
-        , saveEditingFloor
-        , saveEditingImage
-        , saveObjects
-        , savePrototype
-        , savePrototypes
-        , search
-        , searchObjects
-        , sustainToken
-        )
+module API.API exposing
+    ( Config
+    , Error
+    , deleteEditingFloor
+    , getAuth
+    , getColors
+    , getDiffSource
+    , getEditingFloor
+    , getFloor
+    , getFloorsInfo
+    , getObject
+    , getPeopleByFloorAndPost
+    , getPerson
+    , getPersonMaybe
+    , getPrototypes
+    , login
+    , personCandidate
+    , publishFloor
+    , saveColors
+    , saveEditingFloor
+    , saveEditingImage
+    , saveObjects
+    , savePrototype
+    , savePrototypes
+    , search
+    , searchObjects
+    , sustainToken
+    )
 
+import API.AuthToken
+import API.GraphQL
 import API.Serialization exposing (..)
 import CoreType exposing (..)
 import Http
 import Model.ColorPalette exposing (ColorPalette)
-import Model.Floor exposing (Floor, FloorBase)
+import Model.Floor as Floor exposing (Floor, FloorBase)
 import Model.FloorInfo exposing (FloorInfo)
 import Model.Object exposing (..)
 import Model.ObjectsChange exposing (ObjectChange)
@@ -55,6 +56,9 @@ type alias Error =
 
 type alias Config =
     { apiRoot : String
+    , apiGraphQLRoot : String
+    , apiGraphQLKey : String
+    , apiGraphQLParameter : String
     , cacheRoot : String
     , accountServiceRoot : String
     , profileServiceRoot : String
@@ -130,10 +134,24 @@ deleteEditingFloor config floorId =
 
 getEditingFloor : Config -> FloorId -> Task Error Floor
 getEditingFloor config floorId =
-    getWithoutCache
-        decodeFloor
-        (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/edit") [])
-        [ authorization config.token ]
+    let
+        graphqlConfig =
+            { apiGraphQLRoot = config.apiGraphQLRoot
+            , apiKey = config.apiGraphQLKey
+            , apiGraphQLParameter = config.apiGraphQLParameter
+            , token = config.token
+            }
+    in
+    Task.map2 Floor.addObjects
+        (API.GraphQL.runListEditObjectsOnFloor
+            graphqlConfig
+            floorId
+        )
+        (getWithoutCache
+            decodeFloor
+            (makeUrl (config.apiRoot ++ "/floors/" ++ floorId ++ "/edit") [])
+            [ authorization config.token ]
+        )
 
 
 getFloor : Config -> FloorId -> Task Error Floor
@@ -212,11 +230,37 @@ getAuth : Config -> Task Error User
 getAuth config =
     if String.trim config.token == "" then
         Task.succeed User.guest
+
     else
-        getWithoutCache
-            decodeUser
-            (config.apiRoot ++ "/self")
-            [ authorization config.token ]
+        let
+            payload =
+                API.AuthToken.decodePayload config.token
+
+            makeUser person =
+                if payload.role == "admin" then
+                    User.admin person
+
+                else
+                    User.general person
+        in
+        getPerson config payload.userId
+            |> Task.map makeUser
+            |> Task.onError
+                (\err ->
+                    -- If there is an error, proceed with some unknown user
+                    Debug.log (toString err) <|
+                        Task.succeed <|
+                            makeUser
+                                { id = ""
+                                , name = "unknown"
+                                , post = "unknown"
+                                , mail = Nothing
+                                , tel1 = Nothing
+                                , tel2 = Nothing
+                                , image = Nothing
+                                , employeeId = Nothing
+                                }
+                )
 
 
 search : Config -> Bool -> String -> Task Error ( List SearchResult, List Person )
@@ -227,6 +271,7 @@ search config withPrivate query =
                 (config.apiRoot ++ "/search/" ++ Http.encodeUri query)
                 (if withPrivate then
                     [ ( "all", "true" ) ]
+
                  else
                     []
                 )
@@ -245,6 +290,7 @@ searchObjects config withPrivate query =
                 (config.apiRoot ++ "/search/Objects/" ++ Http.encodeUri query)
                 (if withPrivate then
                     [ ( "all", "true" ) ]
+
                  else
                     []
                 )
@@ -259,6 +305,7 @@ personCandidate : Config -> String -> Task Error (List Person)
 personCandidate config name =
     if String.isEmpty name then
         Task.succeed []
+
     else
         HttpUtil.get
             decodePeopleFromProfileServiceSearch

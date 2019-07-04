@@ -1,4 +1,4 @@
-module Page.Master.Update exposing (..)
+module Page.Master.Update exposing (Flags, init, initCmd, performAPI, saveColorDebounceConfig, saveColorPalette, savePrototype, savePrototypeDebounceConfig, subscriptions, update, updatePalette)
 
 import API.API as API
 import API.Cache as Cache exposing (UserState)
@@ -32,6 +32,9 @@ init flags =
     let
         apiConfig =
             { apiRoot = flags.apiRoot
+            , apiGraphQLRoot = ""
+            , apiGraphQLKey = ""
+            , apiGraphQLParameter = ""
             , cacheRoot = ""
             , accountServiceRoot = flags.accountServiceRoot
             , profileServiceRoot = ""
@@ -43,6 +46,7 @@ init flags =
             Cache.defaultUserState
                 (if flags.lang == "ja" then
                     JA
+
                  else
                     EN
                 )
@@ -67,6 +71,7 @@ initCmd apiConfig defaultUserState =
             (\user ->
                 if not (User.isAdmin user) then
                     Task.succeed NotAuthorized
+
                 else
                     Cache.getWithDefault Cache.cache defaultUserState
                         |> Task.andThen
@@ -128,6 +133,7 @@ update removeToken message model =
                 colorPalette =
                     (if isBackground then
                         ColorPalette.addBackgroundColorToLast
+
                      else
                         ColorPalette.addTextColorToLast
                     )
@@ -141,6 +147,7 @@ update removeToken message model =
                 colorPalette =
                     (if isBackground then
                         ColorPalette.deleteBackgroundColorAt
+
                      else
                         ColorPalette.deleteTextColorAt
                     )
@@ -154,6 +161,7 @@ update removeToken message model =
                 colorPalette =
                     (if isBackground then
                         ColorPalette.setBackgroundColorAt
+
                      else
                         ColorPalette.setTextColorAt
                     )

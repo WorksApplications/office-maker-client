@@ -1,4 +1,4 @@
-module Page.Map.Msg exposing (..)
+module Page.Map.Msg exposing (Id, Msg(..), ObjectNameInputMsg(..))
 
 import API.Cache exposing (UserState)
 import Component.FloorDeleter as FloorDeleter
@@ -148,3 +148,4 @@ type Msg
     | FlipFloor
     | ShowInformation Information
     | GotNewToken (Maybe String)
+    | LoadGraphQLInfo { url : String, key : String }
