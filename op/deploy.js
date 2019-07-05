@@ -56,7 +56,8 @@ fs.readdirSync(publicDir).map(file => {
     Key: file,
     Body: body,
     ContentType: contentType,
-    ContentEncoding: contentEncoding
+    ContentEncoding: contentEncoding,
+    CacheControl: file.startsWith('info') ? 'max-age=7200' : 'max-age=43200'
   };
 }).map(options => {
   return upload(options);
