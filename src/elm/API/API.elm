@@ -240,8 +240,7 @@ getAuth config =
         API.AuthToken.decodeValidPayload config.token
             |> Task.mapError
                 (\err ->
-                    -- `decodeValidPayload` could be failed in Task.fail, if JWT is expired, for example.
-                    -- getAuth itself returns Http.Error so change the error message to Http.Error here
+                    -- Convert error type to match the type below
                     Http.BadStatus
                         { url = ""
                         , status = { code = 400, message = err }
@@ -261,6 +260,11 @@ getAuth config =
                     in
                     getPerson config payload.userId
                         |> Task.map makeUser
+                )
+            |> Task.onError
+                (\err ->
+                    -- If something happened, fall back into guest user
+                    Debug.log (toString err) <| Task.succeed User.guest
                 )
 
 
