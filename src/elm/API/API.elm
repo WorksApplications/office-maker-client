@@ -31,6 +31,7 @@ import API.AuthToken
 import API.GraphQL
 import API.Serialization exposing (..)
 import CoreType exposing (..)
+import Dict
 import Http
 import Model.ColorPalette exposing (ColorPalette)
 import Model.Floor as Floor exposing (Floor, FloorBase)
@@ -235,31 +236,31 @@ getAuth config =
         let
             payload =
                 API.AuthToken.decodePayload config.token
-
-            makeUser person =
-                if payload.role == "admin" then
-                    User.admin person
-
-                else
-                    User.general person
         in
-        getPerson config payload.userId
-            |> Task.map makeUser
-            |> Task.onError
+        API.AuthToken.decodeValidPayload config.token
+            |> Task.mapError
                 (\err ->
-                    -- If there is an error, proceed with some unknown user
-                    Debug.log (toString err) <|
-                        Task.succeed <|
-                            makeUser
-                                { id = ""
-                                , name = "unknown"
-                                , post = "unknown"
-                                , mail = Nothing
-                                , tel1 = Nothing
-                                , tel2 = Nothing
-                                , image = Nothing
-                                , employeeId = Nothing
-                                }
+                    -- `decodeValidPayload` could be failed in Task.fail, if JWT is expired, for example.
+                    -- getAuth itself returns Http.Error so change the error message to Http.Error here
+                    Http.BadStatus
+                        { url = ""
+                        , status = { code = 400, message = err }
+                        , headers = Dict.empty
+                        , body = err
+                        }
+                )
+            |> Task.andThen
+                (\payload ->
+                    let
+                        makeUser person =
+                            if payload.role == "admin" then
+                                User.admin person
+
+                            else
+                                User.general person
+                    in
+                    getPerson config payload.userId
+                        |> Task.map makeUser
                 )
 
 
