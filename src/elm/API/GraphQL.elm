@@ -83,27 +83,34 @@ executeAppSyncQuery config request =
         |> Task.andThen (\config -> Http.toTask request)
 
 
+{-| Querying all fields in EditObject
+-}
+editObjectSubFields : String
+editObjectSubFields =
+    String.join " "
+        [ "backgroundColor"
+        , "changed"
+        , "deleted"
+        , "floorId"
+        , "height"
+        , "id"
+        , "updateAt"
+        , "width"
+        , "x"
+        , "y"
+        , "name"
+        , "personId"
+        , "fontSize"
+        , "type"
+        , "url"
+        ]
+
+
 listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
 listEditObjectsOnFloor config floorId =
     createAppSyncRequest config
         ("""query Q {
-            listEditObjectsOnFloor(floorId: """ ++ Json.Encode.encode 0 (Json.Encode.string floorId) ++ """) {
-                backgroundColor
-                changed
-                deleted
-                floorId
-                height
-                id
-                updateAt
-                width
-                x
-                y
-                name
-                personId
-                fontSize
-                type
-                url
-            }
+            listEditObjectsOnFloor(floorId: """ ++ Json.Encode.encode 0 (Json.Encode.string floorId) ++ """) {""" ++ editObjectSubFields ++ """}
         }""")
         (Http.expectJson <|
             Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
@@ -119,23 +126,7 @@ patchObjects config objects =
                 updatedFloorId
                 objects {
                     flag
-                    object {
-                        backgroundColor
-                        changed
-                        deleted
-                        floorId
-                        height
-                        id
-                        updateAt
-                        width
-                        x
-                        y
-                        name
-                        personId
-                        fontSize
-                        type
-                        url
-                    }
+                    object {""" ++ editObjectSubFields ++ """}
                     result
                 }
             }
