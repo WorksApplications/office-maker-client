@@ -77,6 +77,31 @@ createAppSyncRequest config query expect =
         }
 
 
+{-| (Ugly) workaround for direct reloading.
+Currently, GraphQL Parameter will be loaded once when one opens the map page.
+In this case, opening an edit page and reloading will cause an error in map page
+(since loading edit floor and loading parameter will be both immediately executed when opening the page)
+so if the GraphQL Parameter is not loaded yet, load it instantly.
+
+If `Map.Update.update` could wait until the GraphQL parameter will be loaded or could perform some lazy loading,
+that should be better.
+
+This function also not modifying the model so this won't set the loaded parameter.
+This may cause an inefficient many-time API calls.
+
+-}
+executeAppSyncQuery : Config -> Http.Request a -> Task Http.Error a
+executeAppSyncQuery config request =
+    (if config.apiGraphQLRoot == "" then
+        Http.toTask (loadParameterJson config.apiGraphQLParameter)
+            |> Task.map (\info -> { config | apiGraphQLRoot = info.url, apiKey = info.key })
+
+     else
+        Task.succeed config
+    )
+        |> Task.andThen (\config -> Http.toTask request)
+
+
 listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
 listEditObjectsOnFloor config floorId =
     createAppSyncRequest config
@@ -105,26 +130,45 @@ listEditObjectsOnFloor config floorId =
         )
 
 
-{-| (Ugly) workaround for direct reloading.
-Currently, GraphQL Parameter will be loaded once when one opens the map page.
-In this case, opening an edit page and reloading will cause an error in map page
-(since loading edit floor and loading parameter will be both immediately executed when opening the page)
-so if the GraphQL Parameter is not loaded yet, load it instantly.
+patchObjects : Config -> List ObjectChange -> Http.Request Json.Decode.Value
+patchObjects config objects =
+    createAppSyncRequest config
+        ("""mutation M {
+            patchObjects(objects: """ ++ Json.Encode.encode 0 (API.Serialization.encodeObjectsChange objects) ++ """) {
+                updatedFloorId
+                objects {
+                    flag
+                    object {
+                        backgroundColor
+                        changed
+                        deleted
+                        floorId
+                        height
+                        id
+                        updateAt
+                        width
+                        x
+                        y
+                        name
+                        personId
+                        fontSize
+                        type
+                        url
+                    }
+                    result
+                }
+            }
+        }""")
+        (Http.expectJson <|
+            Json.Decode.at [ "data", "patchObjects", "objects" ] Json.Decode.value
+        )
 
-If `Map.Update.update` could wait until the GraphQL parameter will be loaded or could perform some lazy loading,
-that should be better.
 
-This function also not modifying the model so this won't set the loaded parameter.
-This may cause an inefficient many-time API calls.
-
--}
 runListEditObjectsOnFloor : Config -> String -> Task Http.Error (List Object)
 runListEditObjectsOnFloor config floorId =
-    (if config.apiGraphQLRoot == "" then
-        Http.toTask (loadParameterJson config.apiGraphQLParameter)
-            |> Task.map (\info -> { config | apiGraphQLRoot = info.url, apiKey = info.key })
+    executeAppSyncQuery config (listEditObjectsOnFloor config floorId)
 
-     else
-        Task.succeed config
-    )
-        |> Task.andThen (\config -> Http.toTask (listEditObjectsOnFloor config floorId))
+
+runPatchObjects : Config -> List ObjectChange -> Task Http.Error Json.Decode.Value
+runPatchObjects config objects =
+    executeAppSyncQuery config (patchObjects config objects)
