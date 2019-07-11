@@ -31,6 +31,7 @@ import API.AuthToken
 import API.GraphQL
 import API.Serialization exposing (..)
 import CoreType exposing (..)
+import Dict
 import Http
 import Model.ColorPalette exposing (ColorPalette)
 import Model.Floor as Floor exposing (Floor, FloorBase)
@@ -232,34 +233,52 @@ getAuth config =
         Task.succeed User.guest
 
     else
-        let
-            payload =
-                API.AuthToken.decodePayload config.token
+        API.AuthToken.decodeValidPayload config.token
+            |> Task.mapError
+                (\err ->
+                    -- Convert error type to match the type below
+                    Http.BadStatus
+                        { url = ""
+                        , status = { code = 400, message = err }
+                        , headers = Dict.empty
+                        , body = err
+                        }
+                )
+            |> Task.andThen
+                (\payload ->
+                    let
+                        makeUser person =
+                            if payload.role == "admin" then
+                                User.admin person
 
-            makeUser person =
-                if payload.role == "admin" then
-                    User.admin person
-
-                else
-                    User.general person
-        in
-        getPerson config payload.userId
-            |> Task.map makeUser
+                            else
+                                User.general person
+                    in
+                    getPerson config payload.userId
+                        |> Task.map makeUser
+                        |> Task.onError
+                            (\err ->
+                                -- Ignore the error in profiles service
+                                -- This is required in master page
+                                Debug.log (toString err) <|
+                                    Task.succeed
+                                        (makeUser
+                                            { id = ""
+                                            , name = "unknown"
+                                            , post = "unknown"
+                                            , mail = Nothing
+                                            , tel1 = Nothing
+                                            , tel2 = Nothing
+                                            , image = Nothing
+                                            , employeeId = Nothing
+                                            }
+                                        )
+                            )
+                )
             |> Task.onError
                 (\err ->
-                    -- If there is an error, proceed with some unknown user
-                    Debug.log (toString err) <|
-                        Task.succeed <|
-                            makeUser
-                                { id = ""
-                                , name = "unknown"
-                                , post = "unknown"
-                                , mail = Nothing
-                                , tel1 = Nothing
-                                , tel2 = Nothing
-                                , image = Nothing
-                                , employeeId = Nothing
-                                }
+                    -- If something happened, fall back into guest user
+                    Debug.log (toString err) <| Task.succeed User.guest
                 )
 
 
