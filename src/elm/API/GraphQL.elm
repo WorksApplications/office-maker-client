@@ -1,6 +1,5 @@
 module API.GraphQL exposing
-    ( buildSimpleQuery
-    , listEditObjectsOnFloor
+    ( listEditObjectsOnFloor
     , loadParameterJson
     , runListEditObjectsOnFloor
     )
@@ -10,7 +9,6 @@ There is also a library called `elm-graphql`, you might want to use it instead. 
 -}
 
 import API.Serialization
-import Dict exposing (Dict)
 import Http
 import Json.Decode
 import Json.Decode.Pipeline exposing (decode, optional, required)
@@ -41,23 +39,6 @@ loadParameterJson url =
             |> required "url" Json.Decode.string
             |> required "key" Json.Decode.string
         )
-
-
-{-| Build a simple query, can be used for mutation
-
-    buildSimpleQuery q {a -> xxx, b -> yyy} [id,updatedAt] = { q(a: "xxx", b: "yyy") { id updatedAt } }
-
--}
-buildSimpleQuery : String -> Dict String String -> List String -> String
-buildSimpleQuery query vars picks =
-    let
-        parameter =
-            List.map (\( k, v ) -> k ++ ": \"" ++ v ++ "\"") (Dict.toList vars) |> String.concat
-
-        response =
-            List.foldl (\label acc -> label ++ " " ++ acc) "" picks
-    in
-    "{ " ++ query ++ "(" ++ parameter ++ ") { " ++ response ++ " } }"
 
 
 createAppSyncRequest : Config -> String -> Http.Expect a -> Http.Request a
@@ -105,25 +86,25 @@ executeAppSyncQuery config request =
 listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
 listEditObjectsOnFloor config floorId =
     createAppSyncRequest config
-        (buildSimpleQuery "listEditObjectsOnFloor"
-            (Dict.singleton "floorId" floorId)
-            [ "backgroundColor"
-            , "changed"
-            , "deleted"
-            , "floorId"
-            , "height"
-            , "id"
-            , "updateAt"
-            , "width"
-            , "x"
-            , "y"
-            , "name"
-            , "personId"
-            , "fontSize"
-            , "type"
-            , "url"
-            ]
-        )
+        ("""query Q {
+            listEditObjectsOnFloor(floorId: """ ++ Json.Encode.encode 0 (Json.Encode.string floorId) ++ """) {
+                backgroundColor
+                changed
+                deleted
+                floorId
+                height
+                id
+                updateAt
+                width
+                x
+                y
+                name
+                personId
+                fontSize
+                type
+                url
+            }
+        }""")
         (Http.expectJson <|
             Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
                 Json.Decode.list API.Serialization.decodeObject
