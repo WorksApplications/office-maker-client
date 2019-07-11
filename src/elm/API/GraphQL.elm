@@ -16,6 +16,7 @@ import Json.Decode
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode
 import Model.Object exposing (Object)
+import Model.ObjectsChange exposing (ObjectChange)
 import Task exposing (Task)
 
 
@@ -59,8 +60,8 @@ buildSimpleQuery query vars picks =
     "{ " ++ query ++ "(" ++ parameter ++ ") { " ++ response ++ " } }"
 
 
-listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
-listEditObjectsOnFloor config floorId =
+createAppSyncRequest : Config -> String -> Http.Expect a -> Http.Request a
+createAppSyncRequest config query expect =
     Http.request
         { method = "POST"
         , headers =
@@ -69,35 +70,39 @@ listEditObjectsOnFloor config floorId =
             , Http.header "Content-Type" "application/graphql"
             ]
         , url = config.apiGraphQLRoot
-        , body =
-            Http.jsonBody <|
-                Json.Encode.object <|
-                    (\value -> [ ( "query", Json.Encode.string value ) ]) <|
-                        buildSimpleQuery "listEditObjectsOnFloor"
-                            (Dict.singleton "floorId" floorId)
-                            [ "backgroundColor"
-                            , "changed"
-                            , "deleted"
-                            , "floorId"
-                            , "height"
-                            , "id"
-                            , "updateAt"
-                            , "width"
-                            , "x"
-                            , "y"
-                            , "name"
-                            , "personId"
-                            , "fontSize"
-                            , "type"
-                            , "url"
-                            ]
-        , expect =
-            Http.expectJson <|
-                Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
-                    Json.Decode.list API.Serialization.decodeObject
+        , body = Http.jsonBody <| Json.Encode.object [ ( "query", Json.Encode.string query ) ]
+        , expect = expect
         , timeout = Nothing
         , withCredentials = False
         }
+
+
+listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
+listEditObjectsOnFloor config floorId =
+    createAppSyncRequest config
+        (buildSimpleQuery "listEditObjectsOnFloor"
+            (Dict.singleton "floorId" floorId)
+            [ "backgroundColor"
+            , "changed"
+            , "deleted"
+            , "floorId"
+            , "height"
+            , "id"
+            , "updateAt"
+            , "width"
+            , "x"
+            , "y"
+            , "name"
+            , "personId"
+            , "fontSize"
+            , "type"
+            , "url"
+            ]
+        )
+        (Http.expectJson <|
+            Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
+                Json.Decode.list API.Serialization.decodeObject
+        )
 
 
 {-| (Ugly) workaround for direct reloading.
