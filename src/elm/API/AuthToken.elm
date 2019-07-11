@@ -26,10 +26,9 @@ decodeValidPayload jwt =
             decodePayload jwt
     in
     Date.now
-        |> Task.map Date.second
         |> Task.andThen
             (\now ->
-                if payload.exp < now then
+                if payload.exp > floor (Date.toTime now / 1000) then
                     Task.succeed payload
 
                 else
