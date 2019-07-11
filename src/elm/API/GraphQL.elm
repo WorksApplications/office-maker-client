@@ -42,8 +42,8 @@ loadParameterJson url =
         )
 
 
-createAppSyncRequest : Config -> String -> Json.Encode.Value -> Http.Expect a -> Http.Request a
-createAppSyncRequest config query vars expect =
+createAppSyncRequest : String -> Json.Encode.Value -> Http.Expect a -> Config -> Http.Request a
+createAppSyncRequest query vars expect config =
     Http.request
         { method = "POST"
         , headers =
@@ -77,16 +77,18 @@ This function also not modifying the model so this won't set the loaded paramete
 This may cause an inefficient many-time API calls.
 
 -}
-executeAppSyncQuery : Config -> Http.Request a -> Task Http.Error a
+executeAppSyncQuery : Config -> (Config -> Http.Request a) -> Task Http.Error a
 executeAppSyncQuery config request =
-    (if config.apiGraphQLRoot == "" then
-        Http.toTask (loadParameterJson config.apiGraphQLParameter)
-            |> Task.map (\info -> { config | apiGraphQLRoot = info.url, apiKey = info.key })
+    Debug.log (toString config) <|
+        ((if config.apiGraphQLRoot == "" then
+            Http.toTask (loadParameterJson config.apiGraphQLParameter)
+                |> Task.map (\info -> { config | apiGraphQLRoot = info.url, apiKey = info.key })
 
-     else
-        Task.succeed config
-    )
-        |> Task.andThen (\config -> Http.toTask request)
+          else
+            Task.succeed config
+         )
+            |> Task.andThen (\config -> request config |> Http.toTask)
+        )
 
 
 {-| Querying all fields in EditObject
@@ -112,9 +114,9 @@ editObjectSubFields =
         ]
 
 
-listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
-listEditObjectsOnFloor config floorId =
-    createAppSyncRequest config
+listEditObjectsOnFloor : String -> Config -> Http.Request (List Object)
+listEditObjectsOnFloor floorId =
+    createAppSyncRequest
         ("""query ListEditObjectsOnFloor($floorId: String!) {
             listEditObjectsOnFloor(floorId: $floorId) {""" ++ editObjectSubFields ++ """}
         }""")
@@ -125,9 +127,9 @@ listEditObjectsOnFloor config floorId =
         )
 
 
-patchObjects : Config -> List ObjectChange -> Http.Request Json.Decode.Value
-patchObjects config objects =
-    createAppSyncRequest config
+patchObjects : List ObjectChange -> Config -> Http.Request Json.Decode.Value
+patchObjects objects =
+    createAppSyncRequest
         ("""mutation PatchObjects($objects: [PatchObjectInput!]!) {
             patchObjects(objects: $objects) {
                 updatedFloorId
@@ -146,9 +148,9 @@ patchObjects config objects =
 
 runListEditObjectsOnFloor : Config -> String -> Task Http.Error (List Object)
 runListEditObjectsOnFloor config floorId =
-    executeAppSyncQuery config (listEditObjectsOnFloor config floorId)
+    executeAppSyncQuery config (listEditObjectsOnFloor floorId)
 
 
 runPatchObjects : Config -> List ObjectChange -> Task Http.Error Json.Decode.Value
 runPatchObjects config objects =
-    executeAppSyncQuery config (patchObjects config objects)
+    executeAppSyncQuery config (patchObjects objects)
