@@ -79,16 +79,14 @@ This may cause an inefficient many-time API calls.
 -}
 executeAppSyncQuery : Config -> (Config -> Http.Request a) -> Task Http.Error a
 executeAppSyncQuery config request =
-    Debug.log (toString config) <|
-        ((if config.apiGraphQLRoot == "" then
-            Http.toTask (loadParameterJson config.apiGraphQLParameter)
-                |> Task.map (\info -> { config | apiGraphQLRoot = info.url, apiKey = info.key })
+    (if config.apiGraphQLRoot == "" then
+        Http.toTask (loadParameterJson config.apiGraphQLParameter)
+            |> Task.map (\info -> { config | apiGraphQLRoot = info.url, apiKey = info.key })
 
-          else
-            Task.succeed config
-         )
-            |> Task.andThen (\config -> request config |> Http.toTask)
-        )
+     else
+        Task.succeed config
+    )
+        |> Task.andThen (\config -> request config |> Http.toTask)
 
 
 {-| Querying all fields in EditObject
