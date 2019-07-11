@@ -233,10 +233,6 @@ getAuth config =
         Task.succeed User.guest
 
     else
-        let
-            payload =
-                API.AuthToken.decodePayload config.token
-        in
         API.AuthToken.decodeValidPayload config.token
             |> Task.mapError
                 (\err ->
