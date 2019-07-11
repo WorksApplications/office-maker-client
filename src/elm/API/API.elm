@@ -101,10 +101,16 @@ getObject config objectId =
 
 saveObjects : Config -> List ObjectChange -> Task Error ()
 saveObjects config changes =
-    patchJsonNoResponse
-        (config.apiRoot ++ "/objects")
-        [ authorization config.token ]
-        (Http.jsonBody <| encodeObjectsChange changes)
+    let
+        graphqlConfig =
+            { apiGraphQLRoot = config.apiGraphQLRoot
+            , apiKey = config.apiGraphQLKey
+            , apiGraphQLParameter = config.apiGraphQLParameter
+            , token = config.token
+            }
+    in
+    API.GraphQL.runPatchObjects graphqlConfig changes
+        |> Task.map (\_ -> ())
 
 
 saveEditingFloor : Config -> Floor -> Task Error FloorBase

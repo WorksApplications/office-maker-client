@@ -2,6 +2,7 @@ module API.GraphQL exposing
     ( listEditObjectsOnFloor
     , loadParameterJson
     , runListEditObjectsOnFloor
+    , runPatchObjects
     )
 
 {-| This module provides GraphQL client for AppSync (see `schema.graphql`)
@@ -41,8 +42,8 @@ loadParameterJson url =
         )
 
 
-createAppSyncRequest : Config -> String -> Http.Expect a -> Http.Request a
-createAppSyncRequest config query expect =
+createAppSyncRequest : Config -> String -> Json.Encode.Value -> Http.Expect a -> Http.Request a
+createAppSyncRequest config query vars expect =
     Http.request
         { method = "POST"
         , headers =
@@ -51,7 +52,12 @@ createAppSyncRequest config query expect =
             , Http.header "Content-Type" "application/graphql"
             ]
         , url = config.apiGraphQLRoot
-        , body = Http.jsonBody <| Json.Encode.object [ ( "query", Json.Encode.string query ) ]
+        , body =
+            Http.jsonBody <|
+                Json.Encode.object
+                    [ ( "query", Json.Encode.string query )
+                    , ( "variables", vars )
+                    ]
         , expect = expect
         , timeout = Nothing
         , withCredentials = False
@@ -109,9 +115,10 @@ editObjectSubFields =
 listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
 listEditObjectsOnFloor config floorId =
     createAppSyncRequest config
-        ("""query Q {
-            listEditObjectsOnFloor(floorId: """ ++ Json.Encode.encode 0 (Json.Encode.string floorId) ++ """) {""" ++ editObjectSubFields ++ """}
+        ("""query ListEditObjectsOnFloor($floorId: String!) {
+            listEditObjectsOnFloor(floorId: $floorId) {""" ++ editObjectSubFields ++ """}
         }""")
+        (Json.Encode.object [ ( "floorId", Json.Encode.string floorId ) ])
         (Http.expectJson <|
             Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
                 Json.Decode.list API.Serialization.decodeObject
@@ -121,8 +128,8 @@ listEditObjectsOnFloor config floorId =
 patchObjects : Config -> List ObjectChange -> Http.Request Json.Decode.Value
 patchObjects config objects =
     createAppSyncRequest config
-        ("""mutation M {
-            patchObjects(objects: """ ++ Json.Encode.encode 0 (API.Serialization.encodeObjectsChange objects) ++ """) {
+        ("""mutation PatchObjects($objects: [PatchObjectInput!]!) {
+            patchObjects(objects: $objects) {
                 updatedFloorId
                 objects {
                     flag
@@ -131,6 +138,7 @@ patchObjects config objects =
                 }
             }
         }""")
+        (Json.Encode.object [ ( "objects", API.Serialization.encodeObjectsChange objects ) ])
         (Http.expectJson <|
             Json.Decode.at [ "data", "patchObjects", "objects" ] Json.Decode.value
         )
