@@ -260,6 +260,24 @@ getAuth config =
                     in
                     getPerson config payload.userId
                         |> Task.map makeUser
+                        |> Task.onError
+                            (\err ->
+                                -- Ignore the error in profiles service
+                                -- This is required in master page
+                                Debug.log (toString err) <|
+                                    Task.succeed
+                                        (makeUser
+                                            { id = ""
+                                            , name = "unknown"
+                                            , post = "unknown"
+                                            , mail = Nothing
+                                            , tel1 = Nothing
+                                            , tel2 = Nothing
+                                            , image = Nothing
+                                            , employeeId = Nothing
+                                            }
+                                        )
+                            )
                 )
             |> Task.onError
                 (\err ->
