@@ -242,7 +242,8 @@ getAuth config =
         API.AuthToken.decodeValidPayload config.token
             |> Task.mapError
                 (\err ->
-                    -- Convert error type to match the type below
+                    -- 401 error will be recovered and force the user to be redirected to login page
+                    -- See Page.Map.Update, ShowInformation branch in update function
                     Http.BadStatus
                         { url = ""
                         , status = { code = 401, message = err }
