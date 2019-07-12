@@ -126,6 +126,9 @@ port focusCanvas : {} -> Cmd msg
 port print : {} -> Cmd msg
 
 
+port startEditSubscription : { config : API.Config, floorId : String } -> Cmd msg
+
+
 type alias Flags =
     { apiRoot : String
     , apiGraphQLRoot : String
@@ -2871,10 +2874,17 @@ putUserState model =
 
 performFloorLoad : API.Config -> Bool -> String -> Cmd Msg
 performFloorLoad apiConfig forEdit floorId =
-    performAPI FloorLoaded <|
-        HttpUtil.recover404 <|
-            if forEdit then
-                API.getEditingFloor apiConfig floorId
+    Cmd.batch
+        [ performAPI FloorLoaded <|
+            HttpUtil.recover404 <|
+                if forEdit then
+                    API.getEditingFloor apiConfig floorId
 
-            else
-                API.getFloor apiConfig floorId
+                else
+                    API.getFloor apiConfig floorId
+        , if forEdit then
+            startEditSubscription { config = apiConfig, floorId = floorId }
+
+          else
+            Cmd.none
+        ]
