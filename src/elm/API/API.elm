@@ -245,7 +245,7 @@ getAuth config =
                     -- Convert error type to match the type below
                     Http.BadStatus
                         { url = ""
-                        , status = { code = 400, message = err }
+                        , status = { code = 401, message = err }
                         , headers = Dict.empty
                         , body = err
                         }
@@ -280,11 +280,6 @@ getAuth config =
                                             }
                                         )
                             )
-                )
-            |> Task.onError
-                (\err ->
-                    -- If something happened, fall back into guest user
-                    Debug.log (toString err) <| Task.succeed User.guest
                 )
 
 

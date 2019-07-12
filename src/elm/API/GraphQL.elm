@@ -120,8 +120,11 @@ listEditObjectsOnFloor floorId =
         }""")
         (Json.Encode.object [ ( "floorId", Json.Encode.string floorId ) ])
         (Http.expectJson <|
-            Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
-                Json.Decode.list API.Serialization.decodeObject
+            Json.Decode.oneOf
+                [ Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
+                    Json.Decode.list API.Serialization.decodeObject
+                , Json.Decode.succeed []
+                ]
         )
 
 
