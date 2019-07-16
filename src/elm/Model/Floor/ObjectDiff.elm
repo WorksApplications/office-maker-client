@@ -80,7 +80,7 @@ collect diffs =
                     { acc | modified = diff.object :: acc.modified }
 
                 "deleted" ->
-                    { acc | modified = diff.object :: acc.deleted }
+                    { acc | deleted = diff.object :: acc.deleted }
 
                 _ ->
                     Debug.log ("Unsupported flag in ObjectDiff: " ++ diff.flag) acc
