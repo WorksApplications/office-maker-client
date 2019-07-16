@@ -1,4 +1,56 @@
-module Model.Floor exposing (..)
+module Model.Floor exposing
+    ( Detailed
+    , Floor
+    , FloorBase
+    , addObjects
+    , baseOf
+    , changeId
+    , changeName
+    , changeObjectBackgroundColor
+    , changeObjectColor
+    , changeObjectFontSize
+    , changeObjectName
+    , changeObjectShape
+    , changeObjectUrl
+    , changeObjectsByChanges
+    , changeOrd
+    , changeRealSize
+    , copy
+    , empty
+    , filterObjectsInFloor
+    , flip
+    , fullyChangeObjects
+    , getObject
+    , getObjects
+    , height
+    , init
+    , initWithOrder
+    , modifyObjects
+    , move
+    , moveObjects
+    , name
+    , objects
+    , objectsDictFromList
+    , partiallyChangeObjects
+    , paste
+    , pixelToReal
+    , realSize
+    , realToPixel
+    , removeObjects
+    , removeSpaces
+    , resizeObject
+    , rotateObjects
+    , setImage
+    , setObjects
+    , setPeople
+    , setPerson
+    , size
+    , src
+    , toFirstNameOnly
+    , unsetPerson
+    , whiteSpaces
+    , width
+    )
 
 import CoreType exposing (..)
 import Date exposing (Date)
@@ -171,6 +223,7 @@ copy id temporary floor =
         , name =
             if temporary then
                 "Temporary from " ++ floor.name
+
             else
                 "Copy of " ++ floor.name
         , update = Nothing
@@ -317,7 +370,7 @@ removeSpaces ids floor =
 
 whiteSpaces : Regex
 whiteSpaces =
-    Regex.regex "[ \x0D\n\x3000]"
+    Regex.regex "[ \\x0D\n\\x3000]"
 
 
 resizeObject : ObjectId -> Size -> Floor -> Floor
