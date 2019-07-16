@@ -2542,7 +2542,19 @@ updateOnFloorLoaded maybeFloor model =
         |> Maybe.withDefault ( { model | floor = Nothing }, Cmd.none )
         |> andThen
             (\model ->
-                ( model, Navigation.modifyUrl (Model.encodeToUrl model) )
+                model
+                    ! [ Navigation.modifyUrl (Model.encodeToUrl model)
+                      , Maybe.withDefault Cmd.none
+                            (model.floor
+                                |> Maybe.map
+                                    (\editingFloor ->
+                                        startEditSubscription
+                                            { config = model.apiConfig
+                                            , floorId = (EditingFloor.present editingFloor).id
+                                            }
+                                    )
+                            )
+                      ]
             )
 
 
@@ -2914,17 +2926,10 @@ putUserState model =
 
 performFloorLoad : API.Config -> Bool -> String -> Cmd Msg
 performFloorLoad apiConfig forEdit floorId =
-    Cmd.batch
-        [ performAPI FloorLoaded <|
-            HttpUtil.recover404 <|
-                if forEdit then
-                    API.getEditingFloor apiConfig floorId
+    performAPI FloorLoaded <|
+        HttpUtil.recover404 <|
+            if forEdit then
+                API.getEditingFloor apiConfig floorId
 
-                else
-                    API.getFloor apiConfig floorId
-        , if forEdit then
-            startEditSubscription { config = apiConfig, floorId = floorId }
-
-          else
-            Cmd.none
-        ]
+            else
+                API.getFloor apiConfig floorId
