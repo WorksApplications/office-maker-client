@@ -62,6 +62,7 @@ import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
 import API.GraphQL as GraphQL
 import API.Page as Page
+import API.Serialization
 import Component.FloorDeleter as FloorDeleter
 import Component.FloorProperty as FloorProperty
 import Component.Header as Header
@@ -72,6 +73,8 @@ import Debounce
 import Dict exposing (Dict)
 import Dom
 import Http
+import Json.Decode
+import Json.Encode
 import Keyboard
 import Model.ClipboardData as ClipboardData
 import Model.EditingFloor as EditingFloor exposing (EditingFloor)
@@ -129,6 +132,9 @@ port print : {} -> Cmd msg
 port startEditSubscription : { config : API.Config, floorId : String } -> Cmd msg
 
 
+port listenEditObjectChanges : (Json.Encode.Value -> msg) -> Sub msg
+
+
 type alias Flags =
     { apiRoot : String
     , apiGraphQLRoot : String
@@ -169,6 +175,21 @@ subscriptions model =
         , Sub.map ContextMenuMsg (ContextMenu.subscriptions model.contextMenu)
         , Sub.map HeaderMsg Header.subscriptions
         , ObjectNameInput.subscriptions ObjectNameInputMsg
+
+        -- AppSync subscription
+        , listenEditObjectChanges
+            (\value ->
+                case Json.Decode.decodeValue API.Serialization.decodeListObjectChange value of
+                    Err err ->
+                        Debug.log ("Error in deserializing ObjectsChange: " ++ toString value) NoOp
+
+                    Ok objects ->
+                        UpdateFloorObjects
+                            (objects
+                                |> List.map (\object -> ( ObjectsChange.getObjectId object, object ))
+                                |> ObjectsChange.fromList
+                            )
+            )
         ]
 
 
@@ -2047,6 +2068,22 @@ update msg model =
                     { oldApiConfig | apiGraphQLRoot = info.url, apiGraphQLKey = info.key }
             in
             ( { model | apiConfig = newApiConfig }, Cmd.none )
+
+        UpdateFloorObjects changes ->
+            let
+                newModel =
+                    model.floor
+                        |> Maybe.map
+                            (\editingFloor ->
+                                let
+                                    ( newFloor, objectsChange ) =
+                                        EditingFloor.updateObjects (Floor.changeObjectsByChanges changes) editingFloor
+                                in
+                                { model | floor = Just newFloor }
+                            )
+                        |> Maybe.withDefault model
+            in
+            ( newModel, Cmd.none )
 
 
 andThen : (Model -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )

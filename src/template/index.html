@@ -138,6 +138,8 @@
 			client = new Paho.Client(sub.wssURL, sub.client);
 			client.onMessageArrived = message => {
 				console.log(JSON.parse(message.payloadString).data.patchedObjects.objects);
+
+				main.ports.listenEditObjectChanges.send(JSON.parse(message.payloadString).data.patchedObjects.objects);
 			};
 			client.connect({
 				onSuccess: ctx => {

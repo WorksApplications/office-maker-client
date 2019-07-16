@@ -1,4 +1,53 @@
-module API.Serialization exposing (..)
+module API.Serialization exposing
+    ( ColorEntity
+    , addedFlag
+    , decodeAuthToken
+    , decodeColorEntity
+    , decodeColors
+    , decodeDesk
+    , decodeFloor
+    , decodeFloorBase
+    , decodeFloorInfo
+    , decodeFloorInfoList
+    , decodeFloors
+    , decodeListObjectChange
+    , decodeNewToken
+    , decodeObject
+    , decodeObjectChange
+    , decodePeople
+    , decodePeopleFromProfileServiceSearch
+    , decodePerson
+    , decodePersonFromProfileService
+    , decodePersonWithObjects
+    , decodePrototype
+    , decodePrototypes
+    , decodeSearchResult
+    , decodeSearchedObjects
+    , decodeSearchedObjectsAsSearchResults
+    , decodeSearchedPeopleWithObjects
+    , decodeSearchedPeopleWithObjectsAsSearchResults
+    , decodeUser
+    , decodeUsers
+    , deletedFlag
+    , encodeColorEntities
+    , encodeColorEntitity
+    , encodeColorPalette
+    , encodeFloor
+    , encodeLogin
+    , encodeObject
+    , encodeObjectChange
+    , encodeObjectModification
+    , encodeObjectPropertyChange
+    , encodeObjectPropertyChangeProperty
+    , encodeObjectsChange
+    , encodePrototype
+    , encodePrototypes
+    , encodeShape
+    , makeColorEntities
+    , makeColorEntity
+    , makeColorPalette
+    , modifiedFlag
+    )
 
 import API.Defaults as Defaults
 import CoreType exposing (..)
@@ -69,6 +118,7 @@ encodeObject object =
             , [ ( "floorId", E.string (Object.floorIdOf object) ) ]
             , if Object.isDesk object then
                 []
+
               else
                 [ ( "type", E.string "label" ) ]
             , [ ( "x", E.int x ) ]
@@ -78,10 +128,12 @@ encodeObject object =
             , [ ( "backgroundColor", E.string (Object.backgroundColorOf object) ) ]
             , if Object.colorOf object == Defaults.color then
                 []
+
               else
                 [ ( "color", E.string (Object.colorOf object) ) ]
             , if Object.isBold object then
                 [ ( "bold", E.bool True ) ]
+
               else
                 []
             , [ ( "url", E.string (Object.urlOf object) ) ]
@@ -89,6 +141,7 @@ encodeObject object =
             , [ ( "name", E.string (Object.nameOf object) ) ]
             , if Object.fontSizeOf object == Defaults.fontSize then
                 []
+
               else
                 [ ( "fontSize", E.float (Object.fontSizeOf object) ) ]
             , case Object.relatedPerson object of
@@ -132,6 +185,34 @@ encodeFloor floor =
         , ( "image", Maybe.withDefault E.null <| Maybe.map E.string floor.image )
         , ( "flipImage", E.bool floor.flipImage )
         ]
+
+
+decodeListObjectChange : Decoder (List ObjectChange)
+decodeListObjectChange =
+    D.list decodeObjectChange
+
+
+decodeObjectChange : Decoder ObjectChange
+decodeObjectChange =
+    decode
+        (\flag object ->
+            case flag of
+                "added" ->
+                    Added object
+
+                "modified" ->
+                    Added object
+
+                "deleted" ->
+                    Deleted object
+
+                _ ->
+                    Debug.crash <|
+                        "Unsupported object change flag: "
+                            ++ toString flag
+        )
+        |> required "flag" D.string
+        |> required "object" decodeObject
 
 
 encodeObjectsChange : List ObjectChange -> Value
@@ -215,24 +296,28 @@ encodeObjectPropertyChangeProperty change =
         Object.ChangeBold new _ ->
             if new then
                 [ ( "bold", E.bool True ) ]
+
             else
                 []
 
         Object.ChangeUrl new _ ->
             if new == "" then
                 []
+
             else
                 [ ( "url", E.string new ) ]
 
         Object.ChangeShape new _ ->
             if new == Ellipse then
                 [ ( "shape", E.string "ellipse" ) ]
+
             else
                 []
 
         Object.ChangePerson new old ->
             if new == old then
                 []
+
             else
                 [ ( "personId"
                   , case new of
@@ -260,6 +345,7 @@ decodeUser =
             (\role person ->
                 if role == "admin" then
                     User.admin person
+
                 else
                     User.general person
             )
@@ -328,6 +414,7 @@ decodeObject =
         (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape updateAt ->
             if tipe == "desk" then
                 Object.initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize personId updateAt
+
             else
                 Object.initLabel id
                     floorId
@@ -341,6 +428,7 @@ decodeObject =
                         url
                         (if shape == "rectangle" then
                             Object.Rectangle
+
                          else
                             Object.Ellipse
                         )
@@ -460,6 +548,7 @@ decodeDesk =
                     fontSize
                     personId
                     updateAt
+
             else
                 Debug.crash "got non-desk object."
         )
@@ -551,6 +640,7 @@ decodePrototype =
             , shape =
                 if shape == "ellipse" then
                     Ellipse
+
                 else
                     Rectangle
             , personId = Nothing
@@ -573,6 +663,7 @@ encodePrototype { id, color, backgroundColor, name, width, height, fontSize, sha
         , ( "color"
           , if color == Defaults.color then
                 E.null
+
             else
                 E.string color
           )
@@ -583,6 +674,7 @@ encodePrototype { id, color, backgroundColor, name, width, height, fontSize, sha
         , ( "fontSize"
           , if fontSize == Defaults.fontSize then
                 E.null
+
             else
                 E.float fontSize
           )
@@ -632,6 +724,7 @@ makeColorPalette entities =
                 (\e ->
                     if e.type_ == "backgroundColor" then
                         Just e.color
+
                     else
                         Nothing
                 )
@@ -642,6 +735,7 @@ makeColorPalette entities =
                 (\e ->
                     if e.type_ == "color" then
                         Just e.color
+
                     else
                         Nothing
                 )

@@ -1,4 +1,17 @@
-module Model.ObjectsChange exposing (..)
+module Model.ObjectsChange exposing
+    ( ObjectChange(..)
+    , ObjectModification
+    , ObjectsChange
+    , added
+    , empty
+    , fromList
+    , getObjectId
+    , isEmpty
+    , merge
+    , modified
+    , separate
+    , toList
+    )
 
 import CoreType exposing (..)
 import Dict exposing (Dict)
@@ -17,6 +30,20 @@ type ObjectChange
 
 type alias ObjectsChange =
     Dict ObjectId ObjectChange
+
+
+getObjectId : ObjectChange -> ObjectId
+getObjectId change =
+    case change of
+        Added object ->
+            Object.idOf object
+
+        -- Assuming that the objectId never changes during object modification
+        Modified modification ->
+            Object.idOf modification.new
+
+        Deleted object ->
+            Object.idOf object
 
 
 added : List Object -> ObjectsChange
