@@ -15,7 +15,6 @@ import Model.I18n exposing (Language(..))
 import Model.Information exposing (Information(..))
 import Model.Mode exposing (EditingMode(..), Mode(..))
 import Model.Object as Object exposing (..)
-import Model.ObjectsChange exposing (ObjectsChange)
 import Model.Person exposing (Person)
 import Model.Prototype exposing (Prototype)
 import Model.Prototypes as Prototypes
@@ -150,4 +149,4 @@ type Msg
     | ShowInformation Information
     | GotNewToken (Maybe String)
     | LoadGraphQLInfo { url : String, key : String }
-    | UpdateFloorObjects ObjectsChange
+    | PatchEditObjects (List Model.Floor.ObjectDiff)

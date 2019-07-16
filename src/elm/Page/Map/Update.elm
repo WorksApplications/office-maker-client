@@ -60,9 +60,9 @@ port module Page.Map.Update exposing
 import API.API as API
 import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
+import API.Defaults as Defaults
 import API.GraphQL as GraphQL
 import API.Page as Page
-import API.Serialization
 import Component.FloorDeleter as FloorDeleter
 import Component.FloorProperty as FloorProperty
 import Component.Header as Header
@@ -179,16 +179,12 @@ subscriptions model =
         -- AppSync subscription
         , listenEditObjectChanges
             (\value ->
-                case Json.Decode.decodeValue API.Serialization.decodeListObjectChange value of
+                case Json.Decode.decodeValue (Json.Decode.list Floor.decodeObjectDiff) value of
                     Err err ->
                         Debug.log ("Error in deserializing ObjectsChange: " ++ toString value) NoOp
 
                     Ok objects ->
-                        UpdateFloorObjects
-                            (objects
-                                |> List.map (\object -> ( ObjectsChange.getObjectId object, object ))
-                                |> ObjectsChange.fromList
-                            )
+                        PatchEditObjects objects
             )
         ]
 
@@ -2069,7 +2065,7 @@ update msg model =
             in
             ( { model | apiConfig = newApiConfig }, Cmd.none )
 
-        UpdateFloorObjects changes ->
+        PatchEditObjects diffs ->
             let
                 newModel =
                     model.floor
@@ -2077,7 +2073,14 @@ update msg model =
                             (\editingFloor ->
                                 let
                                     ( newFloor, objectsChange ) =
-                                        EditingFloor.updateObjects (Floor.changeObjectsByChanges changes) editingFloor
+                                        EditingFloor.updateObjects
+                                            (Floor.patchObjectsByDiffs
+                                                { color = Defaults.color
+                                                , bold = Defaults.bold
+                                                }
+                                                diffs
+                                            )
+                                            editingFloor
                                 in
                                 { model | floor = Just newFloor }
                             )

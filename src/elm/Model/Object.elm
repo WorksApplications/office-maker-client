@@ -1,7 +1,65 @@
-module Model.Object exposing (..)
+module Model.Object exposing
+    ( LabelFields
+    , Object(..)
+    , ObjectDecoderDefault
+    , ObjectExtension(..)
+    , ObjectPropertyChange(..)
+    , Shape(..)
+    , backgroundColorEditable
+    , backgroundColorOf
+    , bottom
+    , changeBackgroundColor
+    , changeBold
+    , changeColor
+    , changeFloorId
+    , changeFontSize
+    , changeId
+    , changeName
+    , changePosition
+    , changeShape
+    , changeSize
+    , changeUrl
+    , colorEditable
+    , colorOf
+    , decodeObjectWithDefault
+    , defaultFontSize
+    , floorIdOf
+    , fontSizeEditable
+    , fontSizeOf
+    , futureForInitialUpdateTime
+    , idOf
+    , initDesk
+    , initLabel
+    , isBold
+    , isDesk
+    , isLabel
+    , left
+    , mayDeskBoldOf
+    , mayDeskColorOf
+    , mayDeskShapeOf
+    , mayDeskUrlOf
+    , modify
+    , modifyAll
+    , nameOf
+    , positionOf
+    , relatedPerson
+    , right
+    , rotate
+    , setPerson
+    , shapeEditable
+    , shapeOf
+    , sizeOf
+    , top
+    , updateAtOf
+    , urlEditable
+    , urlOf
+    )
 
 import CoreType exposing (..)
+import Json.Decode as D exposing (Decoder)
+import Json.Decode.Pipeline exposing (decode, optional, required)
 import Time exposing (Time)
+import Util.DecodeUtil exposing (optional_)
 
 
 type Shape
@@ -264,6 +322,16 @@ colorOf (Object object) =
             color
 
 
+mayDeskColorOf : Object -> Maybe String
+mayDeskColorOf (Object object) =
+    case object.extension of
+        Desk _ ->
+            Nothing
+
+        Label { color } ->
+            Just color
+
+
 defaultFontSize : Float
 defaultFontSize =
     20
@@ -289,6 +357,16 @@ isBold (Object object) =
             bold
 
 
+mayDeskBoldOf : Object -> Maybe Bool
+mayDeskBoldOf (Object object) =
+    case object.extension of
+        Desk _ ->
+            Nothing
+
+        Label { bold } ->
+            Just bold
+
+
 urlOf : Object -> String
 urlOf (Object object) =
     case object.extension of
@@ -299,6 +377,16 @@ urlOf (Object object) =
             url
 
 
+mayDeskUrlOf : Object -> Maybe String
+mayDeskUrlOf (Object object) =
+    case object.extension of
+        Desk _ ->
+            Nothing
+
+        Label { url } ->
+            Just url
+
+
 shapeOf : Object -> Shape
 shapeOf (Object object) =
     case object.extension of
@@ -307,6 +395,16 @@ shapeOf (Object object) =
 
         Label { shape } ->
             shape
+
+
+mayDeskShapeOf : Object -> Maybe Shape
+mayDeskShapeOf (Object object) =
+    case object.extension of
+        Desk _ ->
+            Nothing
+
+        Label { shape } ->
+            Just shape
 
 
 sizeOf : Object -> Size
@@ -376,3 +474,57 @@ urlEditable =
 
 
 --
+
+
+type alias ObjectDecoderDefault =
+    { color : String, bold : Bool }
+
+
+{-| Decoder for Object with given default values
+-}
+decodeObjectWithDefault : ObjectDecoderDefault -> Decoder Object
+decodeObjectWithDefault def =
+    decode
+        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape updateAt ->
+            if tipe == "desk" then
+                initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize personId updateAt
+
+            else
+                initLabel id
+                    floorId
+                    (Position x y)
+                    (Size width height)
+                    backgroundColor
+                    name
+                    fontSize
+                    (LabelFields color
+                        bold
+                        url
+                        (if shape == "rectangle" then
+                            Rectangle
+
+                         else
+                            Ellipse
+                        )
+                    )
+                    updateAt
+        )
+        |> required "id" D.string
+        |> required "floorId" D.string
+        |> optional "type" D.string "desk"
+        |> required "x" D.int
+        |> required "y" D.int
+        -- TODO server should retrun
+        |> optional "width" D.int 100
+        -- TODO server should retrun
+        |> optional "height" D.int 100
+        -- TODO server should retrun
+        |> optional "backgroundColor" D.string "#fff"
+        |> optional "name" D.string ""
+        |> optional_ "personId" D.string
+        |> optional "fontSize" D.float defaultFontSize
+        |> optional "color" D.string def.color
+        |> optional "bold" D.bool def.bold
+        |> optional "url" D.string ""
+        |> optional "shape" D.string "rectangle"
+        |> optional_ "updateAt" D.float

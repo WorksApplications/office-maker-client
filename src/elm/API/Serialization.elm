@@ -410,50 +410,7 @@ decodePeopleFromProfileServiceSearch =
 
 decodeObject : Decoder Object
 decodeObject =
-    decode
-        (\id floorId tipe x y width height backgroundColor name personId fontSize color bold url shape updateAt ->
-            if tipe == "desk" then
-                Object.initDesk id floorId (Position x y) (Size width height) backgroundColor name fontSize personId updateAt
-
-            else
-                Object.initLabel id
-                    floorId
-                    (Position x y)
-                    (Size width height)
-                    backgroundColor
-                    name
-                    fontSize
-                    (Object.LabelFields color
-                        bold
-                        url
-                        (if shape == "rectangle" then
-                            Object.Rectangle
-
-                         else
-                            Object.Ellipse
-                        )
-                    )
-                    updateAt
-        )
-        |> required "id" D.string
-        |> required "floorId" D.string
-        |> optional "type" D.string "desk"
-        |> required "x" D.int
-        |> required "y" D.int
-        -- TODO server should retrun
-        |> optional "width" D.int 100
-        -- TODO server should retrun
-        |> optional "height" D.int 100
-        -- TODO server should retrun
-        |> optional "backgroundColor" D.string "#fff"
-        |> optional "name" D.string ""
-        |> optional_ "personId" D.string
-        |> optional "fontSize" D.float Object.defaultFontSize
-        |> optional "color" D.string Defaults.color
-        |> optional "bold" D.bool Defaults.bold
-        |> optional "url" D.string ""
-        |> optional "shape" D.string "rectangle"
-        |> optional_ "updateAt" D.float
+    Object.decodeObjectWithDefault { color = Defaults.color, bold = Defaults.bold }
 
 
 decodeSearchResult : Decoder (Maybe SearchResult)
