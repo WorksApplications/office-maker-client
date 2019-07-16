@@ -2544,16 +2544,20 @@ updateOnFloorLoaded maybeFloor model =
             (\model ->
                 model
                     ! [ Navigation.modifyUrl (Model.encodeToUrl model)
-                      , Maybe.withDefault Cmd.none
-                            (model.floor
-                                |> Maybe.map
-                                    (\editingFloor ->
-                                        startEditSubscription
-                                            { config = model.apiConfig
-                                            , floorId = (EditingFloor.present editingFloor).id
-                                            }
-                                    )
-                            )
+                      , if Mode.isEditMode model.mode then
+                            Maybe.withDefault Cmd.none
+                                (model.floor
+                                    |> Maybe.map
+                                        (\editingFloor ->
+                                            startEditSubscription
+                                                { config = model.apiConfig
+                                                , floorId = (EditingFloor.present editingFloor).id
+                                                }
+                                        )
+                                )
+
+                        else
+                            Cmd.none
                       ]
             )
 
