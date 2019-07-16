@@ -521,6 +521,14 @@ patchObjectsByDiffs def diffs floor =
                         Nothing ->
                             Nothing
 
+        {- This function will construct an "updated" object from ObjectDiffProps.
+           It is needed since the received data from subscription is only the difference,
+           not the whole object itself. But to update the floor object, we need to convert it to
+           a complete (not partial) object. To make things worse, ObjectDiffProps has flatten structure,
+           which is different from ObjectChange (ObjectChange has its own structure) so we cannot just
+           apply the diff to the existing object. Here is the part to recover the structure and
+           patch the diff to the existing one.
+        -}
         patchObject : Object -> ObjectDiff.ObjectDiffProps -> Object
         patchObject object diff =
             let
@@ -593,6 +601,8 @@ patchObjectsByDiffs def diffs floor =
                             |> Result.toMaybe
                     )
             )
+        -- Since we constructed the whole (complete) object data, we only need to insert/override them
+        -- `addObjects` works as `putObjects`
         |> addObjects
             (collected.modified
                 |> List.filterMap
