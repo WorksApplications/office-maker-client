@@ -101,10 +101,16 @@ getObject config objectId =
 
 saveObjects : Config -> List ObjectChange -> Task Error ()
 saveObjects config changes =
-    patchJsonNoResponse
-        (config.apiRoot ++ "/objects")
-        [ authorization config.token ]
-        (Http.jsonBody <| encodeObjectsChange changes)
+    let
+        graphqlConfig =
+            { apiGraphQLRoot = config.apiGraphQLRoot
+            , apiKey = config.apiGraphQLKey
+            , apiGraphQLParameter = config.apiGraphQLParameter
+            , token = config.token
+            }
+    in
+    API.GraphQL.runPatchObjects graphqlConfig changes
+        |> Task.map (\_ -> ())
 
 
 saveEditingFloor : Config -> Floor -> Task Error FloorBase
@@ -236,10 +242,11 @@ getAuth config =
         API.AuthToken.decodeValidPayload config.token
             |> Task.mapError
                 (\err ->
-                    -- Convert error type to match the type below
+                    -- 401 error will be recovered and force the user to be redirected to login page
+                    -- See Page.Map.Update, ShowInformation branch in update function
                     Http.BadStatus
                         { url = ""
-                        , status = { code = 400, message = err }
+                        , status = { code = 401, message = err }
                         , headers = Dict.empty
                         , body = err
                         }
@@ -274,11 +281,6 @@ getAuth config =
                                             }
                                         )
                             )
-                )
-            |> Task.onError
-                (\err ->
-                    -- If something happened, fall back into guest user
-                    Debug.log (toString err) <| Task.succeed User.guest
                 )
 
 

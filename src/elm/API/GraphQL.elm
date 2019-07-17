@@ -1,8 +1,8 @@
 module API.GraphQL exposing
-    ( buildSimpleQuery
-    , listEditObjectsOnFloor
+    ( listEditObjectsOnFloor
     , loadParameterJson
     , runListEditObjectsOnFloor
+    , runPatchObjects
     )
 
 {-| This module provides GraphQL client for AppSync (see `schema.graphql`)
@@ -10,12 +10,12 @@ There is also a library called `elm-graphql`, you might want to use it instead. 
 -}
 
 import API.Serialization
-import Dict exposing (Dict)
 import Http
 import Json.Decode
 import Json.Decode.Pipeline exposing (decode, optional, required)
 import Json.Encode
 import Model.Object exposing (Object)
+import Model.ObjectsChange exposing (ObjectChange)
 import Task exposing (Task)
 
 
@@ -42,25 +42,8 @@ loadParameterJson url =
         )
 
 
-{-| Build a simple query, can be used for mutation
-
-    buildSimpleQuery q {a -> xxx, b -> yyy} [id,updatedAt] = { q(a: "xxx", b: "yyy") { id updatedAt } }
-
--}
-buildSimpleQuery : String -> Dict String String -> List String -> String
-buildSimpleQuery query vars picks =
-    let
-        parameter =
-            List.map (\( k, v ) -> k ++ ": \"" ++ v ++ "\"") (Dict.toList vars) |> String.concat
-
-        response =
-            List.foldl (\label acc -> label ++ " " ++ acc) "" picks
-    in
-    "{ " ++ query ++ "(" ++ parameter ++ ") { " ++ response ++ " } }"
-
-
-listEditObjectsOnFloor : Config -> String -> Http.Request (List Object)
-listEditObjectsOnFloor config floorId =
+createAppSyncRequest : String -> Json.Encode.Value -> Http.Expect a -> Config -> Http.Request a
+createAppSyncRequest query vars expect config =
     Http.request
         { method = "POST"
         , headers =
@@ -71,30 +54,11 @@ listEditObjectsOnFloor config floorId =
         , url = config.apiGraphQLRoot
         , body =
             Http.jsonBody <|
-                Json.Encode.object <|
-                    (\value -> [ ( "query", Json.Encode.string value ) ]) <|
-                        buildSimpleQuery "listEditObjectsOnFloor"
-                            (Dict.singleton "floorId" floorId)
-                            [ "backgroundColor"
-                            , "changed"
-                            , "deleted"
-                            , "floorId"
-                            , "height"
-                            , "id"
-                            , "updateAt"
-                            , "width"
-                            , "x"
-                            , "y"
-                            , "name"
-                            , "personId"
-                            , "fontSize"
-                            , "type"
-                            , "url"
-                            ]
-        , expect =
-            Http.expectJson <|
-                Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
-                    Json.Decode.list API.Serialization.decodeObject
+                Json.Encode.object
+                    [ ( "query", Json.Encode.string query )
+                    , ( "variables", vars )
+                    ]
+        , expect = expect
         , timeout = Nothing
         , withCredentials = False
         }
@@ -113,8 +77,8 @@ This function also not modifying the model so this won't set the loaded paramete
 This may cause an inefficient many-time API calls.
 
 -}
-runListEditObjectsOnFloor : Config -> String -> Task Http.Error (List Object)
-runListEditObjectsOnFloor config floorId =
+executeAppSyncQuery : Config -> (Config -> Http.Request a) -> Task Http.Error a
+executeAppSyncQuery config request =
     (if config.apiGraphQLRoot == "" then
         Http.toTask (loadParameterJson config.apiGraphQLParameter)
             |> Task.map (\info -> { config | apiGraphQLRoot = info.url, apiKey = info.key })
@@ -122,4 +86,75 @@ runListEditObjectsOnFloor config floorId =
      else
         Task.succeed config
     )
-        |> Task.andThen (\config -> Http.toTask (listEditObjectsOnFloor config floorId))
+        |> Task.andThen (\config -> request config |> Http.toTask)
+
+
+{-| Querying all fields in EditObject
+-}
+editObjectSubFields : String
+editObjectSubFields =
+    String.join " "
+        [ "id"
+        , "floorId"
+        , "type"
+        , "x"
+        , "y"
+        , "width"
+        , "height"
+        , "backgroundColor"
+        , "color"
+        , "bold"
+        , "url"
+        , "shape"
+        , "name"
+        , "fontSize"
+        , "personId"
+        , "changed"
+        , "deleted"
+        , "updateAt"
+        ]
+
+
+listEditObjectsOnFloor : String -> Config -> Http.Request (List Object)
+listEditObjectsOnFloor floorId =
+    createAppSyncRequest
+        ("""query ListEditObjectsOnFloor($floorId: String!) {
+            listEditObjectsOnFloor(floorId: $floorId) {""" ++ editObjectSubFields ++ """}
+        }""")
+        (Json.Encode.object [ ( "floorId", Json.Encode.string floorId ) ])
+        (Http.expectJson <|
+            Json.Decode.oneOf
+                [ Json.Decode.at [ "data", "listEditObjectsOnFloor" ] <|
+                    Json.Decode.list API.Serialization.decodeObject
+                , Json.Decode.succeed []
+                ]
+        )
+
+
+patchObjects : List ObjectChange -> Config -> Http.Request Json.Decode.Value
+patchObjects objects =
+    createAppSyncRequest
+        ("""mutation PatchObjects($objects: [PatchObjectInput!]!) {
+            patchObjects(objects: $objects) {
+                updatedFloorId
+                objects {
+                    flag
+                    object {""" ++ editObjectSubFields ++ """}
+                    result
+                }
+            }
+        }""")
+        (Json.Encode.object [ ( "objects", API.Serialization.encodeObjectsChange objects ) ])
+        (Http.expectJson <|
+            Json.Decode.at [ "data", "patchObjects", "objects" ] Json.Decode.value
+        )
+
+
+runListEditObjectsOnFloor : Config -> String -> Task Http.Error (List Object)
+runListEditObjectsOnFloor config floorId =
+    executeAppSyncQuery config (listEditObjectsOnFloor floorId)
+
+
+runPatchObjects : Config -> List ObjectChange -> Task Http.Error Json.Decode.Value
+runPatchObjects config objects =
+    executeAppSyncQuery config (patchObjects objects)
