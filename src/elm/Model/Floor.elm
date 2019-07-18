@@ -1,12 +1,86 @@
-module Model.Floor exposing (..)
+module Model.Floor exposing
+    ( Detailed
+    , Floor
+    , FloorBase
+    , ObjectDiff
+    , addObjects
+    , baseOf
+    , changeId
+    , changeName
+    , changeObjectBackgroundColor
+    , changeObjectColor
+    , changeObjectFontSize
+    , changeObjectName
+    , changeObjectShape
+    , changeObjectUrl
+    , changeObjectsByChanges
+    , changeOrd
+    , changeRealSize
+    , copy
+    , decodeObjectDiff
+    , empty
+    , filterObjectsInFloor
+    , flip
+    , fullyChangeObjects
+    , getObject
+    , getObjects
+    , height
+    , init
+    , initWithOrder
+    , modifyObjects
+    , move
+    , moveObjects
+    , name
+    , objects
+    , objectsDictFromList
+    , partiallyChangeObjects
+    , paste
+    , patchObjectsByDiffs
+    , pixelToReal
+    , realSize
+    , realToPixel
+    , removeObjects
+    , removeSpaces
+    , resizeObject
+    , rotateObjects
+    , setImage
+    , setObjects
+    , setPeople
+    , setPerson
+    , size
+    , src
+    , toFirstNameOnly
+    , unsetPerson
+    , whiteSpaces
+    , width
+    )
 
 import CoreType exposing (..)
 import Date exposing (Date)
 import Dict exposing (Dict)
+import Json.Decode as D
+import Model.Floor.ObjectDiff as ObjectDiff exposing (ObjectDiff)
 import Model.Object as Object exposing (Object)
 import Model.ObjectsChange as ObjectsChange exposing (ObjectModification, ObjectsChange)
 import Model.ObjectsOperation as ObjectsOperation
 import Regex exposing (Regex)
+
+
+
+-- Re-exports of ObjectDiff
+
+
+type alias ObjectDiff =
+    ObjectDiff.ObjectDiff
+
+
+decodeObjectDiff : D.Decoder ObjectDiff
+decodeObjectDiff =
+    ObjectDiff.decoder
+
+
+
+--
 
 
 type alias FloorBase =
@@ -171,6 +245,7 @@ copy id temporary floor =
         , name =
             if temporary then
                 "Temporary from " ++ floor.name
+
             else
                 "Copy of " ++ floor.name
         , update = Nothing
@@ -317,7 +392,7 @@ removeSpaces ids floor =
 
 whiteSpaces : Regex
 whiteSpaces =
-    Regex.regex "[ \x0D\n\x3000]"
+    Regex.regex "[ \\x0D\n\\x3000]"
 
 
 resizeObject : ObjectId -> Size -> Floor -> Floor
@@ -420,3 +495,120 @@ filterObjectsInFloor : FloorId -> List Object -> List Object
 filterObjectsInFloor floorId objects =
     objects
         |> List.filter (\object -> Object.floorIdOf object == floorId)
+
+
+{-| Patch objects using ObjectDiff list
+-}
+patchObjectsByDiffs : Object.ObjectDecoderDefault -> List ObjectDiff -> Floor -> Floor
+patchObjectsByDiffs def diffs floor =
+    let
+        collected =
+            ObjectDiff.collect diffs
+
+        objectDict =
+            floor.objects
+
+        maybeOr x y =
+            case x of
+                Just xval ->
+                    Just xval
+
+                Nothing ->
+                    case y of
+                        Just yval ->
+                            Just yval
+
+                        Nothing ->
+                            Nothing
+
+        {- This function will construct an "updated" object from ObjectDiffProps.
+           It is needed since the received data from subscription is only the difference,
+           not the whole object itself. But to update the floor object, we need to convert it to
+           a complete (not partial) object. To make things worse, ObjectDiffProps has flatten structure,
+           which is different from ObjectChange (ObjectChange has its own structure) so we cannot just
+           apply the diff to the existing object. Here is the part to recover the structure and
+           patch the diff to the existing one.
+        -}
+        patchObject : Object -> ObjectDiff.ObjectDiffProps -> Object
+        patchObject object diff =
+            let
+                oldPosition =
+                    Object.positionOf object
+
+                newPosition =
+                    { oldPosition
+                        | x = Maybe.withDefault oldPosition.x (ObjectDiff.at diff "x" D.int)
+                        , y = Maybe.withDefault oldPosition.y (ObjectDiff.at diff "y" D.int)
+                    }
+
+                oldSize =
+                    Object.sizeOf object
+
+                newSize =
+                    { oldSize
+                        | width = Maybe.withDefault oldSize.width (ObjectDiff.at diff "width" D.int)
+                        , height = Maybe.withDefault oldSize.height (ObjectDiff.at diff "height" D.int)
+                    }
+
+                oldExtension =
+                    case object of
+                        Object.Object object ->
+                            object.extension
+
+                newExtension =
+                    (ObjectDiff.at diff "personId" D.string
+                        |> Maybe.map (\personId -> Object.Desk (Just personId))
+                    )
+                        |> maybeOr
+                            (Maybe.map4 (\color bold url shape -> Object.Label { color = color, bold = bold, url = url, shape = shape })
+                                (maybeOr (Object.mayDeskColorOf object) (ObjectDiff.at diff "color" D.string))
+                                (maybeOr (Object.mayDeskBoldOf object) (ObjectDiff.at diff "bold" D.bool))
+                                (maybeOr (Object.mayDeskColorOf object) (ObjectDiff.at diff "url" D.string))
+                                (maybeOr (Object.mayDeskShapeOf object)
+                                    (ObjectDiff.at diff "shape" D.string
+                                        |> Maybe.map
+                                            (\shape ->
+                                                if shape == "rectangle" then
+                                                    Object.Rectangle
+
+                                                else
+                                                    Object.Ellipse
+                                            )
+                                    )
+                                )
+                            )
+                        |> Maybe.withDefault oldExtension
+            in
+            Object.Object
+                { id = Object.idOf object
+                , floorId = Object.floorIdOf object
+                , position = newPosition
+                , size = newSize
+                , backgroundColor = Maybe.withDefault (Object.backgroundColorOf object) <| ObjectDiff.at diff "backgroundColor" D.string
+                , name = Maybe.withDefault (Object.nameOf object) <| ObjectDiff.at diff "name" D.string
+                , fontSize = Maybe.withDefault (Object.fontSizeOf object) <| ObjectDiff.at diff "fontSize" D.float
+                , extension = newExtension
+                , updateAt = Object.updateAtOf object
+                }
+    in
+    floor
+        |> addObjects
+            (collected.added
+                |> List.filterMap
+                    (\props ->
+                        ObjectDiff.extractJson props
+                            |> D.decodeValue (Object.decodeObjectWithDefault def)
+                            |> Result.toMaybe
+                    )
+            )
+        -- Since we constructed the whole (complete) object data, we only need to insert/override them
+        -- `addObjects` works as `putObjects`
+        |> addObjects
+            (collected.modified
+                |> List.filterMap
+                    (\props ->
+                        Dict.get props.id objectDict
+                            |> Maybe.map (\targetObject -> patchObject targetObject props)
+                    )
+            )
+        |> removeObjects (collected.deleted |> List.map (\props -> props.id))

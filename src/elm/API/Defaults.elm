@@ -1,4 +1,4 @@
-module API.Defaults exposing (..)
+module API.Defaults exposing (bold, color, fontSize, shape, tipe)
 
 import Model.Object exposing (Shape)
 
