@@ -103,8 +103,10 @@
 		main.ports.saveToken.subscribe(function(token) {
 			localStorage.setItem('authToken', token);
 		});
-		main.ports.startEditSubscription.subscribe(async function({ config, floorId }) {
-			const response = await fetch(config.apiGraphQLRoot, {
+		main.ports.startEditSubscription.subscribe(function({ config, floorId }) {
+			// Writing promise, not async/await because IE does not support async function
+			// Options: (a) Stop supporting IE (b) Use transpiler (e.g. babel)
+			fetch(config.apiGraphQLRoot, {
 				method: 'POST',
 				headers: {
 					Authorization: `Bearer ${config.token}`,
@@ -126,31 +128,32 @@
 						updatedFloorId: floorId
 					}
 				})
-			});
-			const json = await response.json();
+			}).then(response => {
+				response.json().then(json => {
+					const sub = {
+						wssURL: json.extensions.subscription.mqttConnections[0].url,
+						client: json.extensions.subscription.mqttConnections[0].client,
+						topics: json.extensions.subscription.mqttConnections[0].topics[0]
+					};
 
-			const sub = {
-				wssURL: json.extensions.subscription.mqttConnections[0].url,
-				client: json.extensions.subscription.mqttConnections[0].client,
-				topics: json.extensions.subscription.mqttConnections[0].topics[0]
-			};
+					client = new Paho.Client(sub.wssURL, sub.client);
+					client.onMessageArrived = message => {
+						console.log(JSON.parse(message.payloadString).data.patchedObjects.objects);
 
-			client = new Paho.Client(sub.wssURL, sub.client);
-			client.onMessageArrived = message => {
-				console.log(JSON.parse(message.payloadString).data.patchedObjects.objects);
-
-				main.ports.listenEditObjectChanges.send(JSON.parse(message.payloadString).data.patchedObjects.objects);
-			};
-			client.connect({
-				onSuccess: ctx => {
-					client.subscribe(sub.topics);
-				},
-				useSSL: true,
-				timeout: 3,
-				mqttVersion: 4,
-				onFailure: err => {
-					throw err;
-				}
+						main.ports.listenEditObjectChanges.send(JSON.parse(message.payloadString).data.patchedObjects.objects);
+					};
+					client.connect({
+						onSuccess: ctx => {
+							client.subscribe(sub.topics);
+						},
+						useSSL: true,
+						timeout: 3,
+						mqttVersion: 4,
+						onFailure: err => {
+							throw err;
+						}
+					});
+				})
 			});
 		});
 
