@@ -200,8 +200,12 @@ initCmd apiConfig needsEditMode defaultUserState selectedFloor =
             |> performAPI (UserLoaded needsEditMode)
         , Cache.getWithDefault Cache.cache defaultUserState
             |> performAPI (\userState -> Initialize needsEditMode selectedFloor userState)
-        , API.sustainToken apiConfig
-            |> performAPI GotNewToken
+
+        {- Comment out calling /sustain for now
+           This should be implemneted correctly (maybe in account side?)
+        -}
+        --        , API.sustainToken apiConfig
+        --            |> performAPI GotNewToken
         , performAPI LoadGraphQLInfo (Http.toTask <| GraphQL.loadParameterJson apiConfig.apiGraphQLParameter)
         ]
 

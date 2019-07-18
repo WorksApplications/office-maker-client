@@ -31,6 +31,7 @@ import API.AuthToken
 import API.GraphQL
 import API.Serialization exposing (..)
 import CoreType exposing (..)
+import Dict
 import Http
 import Model.ColorPalette exposing (ColorPalette)
 import Model.Floor as Floor exposing (Floor, FloorBase)
@@ -100,10 +101,16 @@ getObject config objectId =
 
 saveObjects : Config -> List ObjectChange -> Task Error ()
 saveObjects config changes =
-    patchJsonNoResponse
-        (config.apiRoot ++ "/objects")
-        [ authorization config.token ]
-        (Http.jsonBody <| encodeObjectsChange changes)
+    let
+        graphqlConfig =
+            { apiGraphQLRoot = config.apiGraphQLRoot
+            , apiKey = config.apiGraphQLKey
+            , apiGraphQLParameter = config.apiGraphQLParameter
+            , token = config.token
+            }
+    in
+    API.GraphQL.runPatchObjects graphqlConfig changes
+        |> Task.map (\_ -> ())
 
 
 saveEditingFloor : Config -> Floor -> Task Error FloorBase
@@ -232,34 +239,48 @@ getAuth config =
         Task.succeed User.guest
 
     else
-        let
-            payload =
-                API.AuthToken.decodePayload config.token
-
-            makeUser person =
-                if payload.role == "admin" then
-                    User.admin person
-
-                else
-                    User.general person
-        in
-        getPerson config payload.userId
-            |> Task.map makeUser
-            |> Task.onError
+        API.AuthToken.decodeValidPayload config.token
+            |> Task.mapError
                 (\err ->
-                    -- If there is an error, proceed with some unknown user
-                    Debug.log (toString err) <|
-                        Task.succeed <|
-                            makeUser
-                                { id = ""
-                                , name = "unknown"
-                                , post = "unknown"
-                                , mail = Nothing
-                                , tel1 = Nothing
-                                , tel2 = Nothing
-                                , image = Nothing
-                                , employeeId = Nothing
-                                }
+                    -- 401 error will be recovered and force the user to be redirected to login page
+                    -- See Page.Map.Update, ShowInformation branch in update function
+                    Http.BadStatus
+                        { url = ""
+                        , status = { code = 401, message = err }
+                        , headers = Dict.empty
+                        , body = err
+                        }
+                )
+            |> Task.andThen
+                (\payload ->
+                    let
+                        makeUser person =
+                            if payload.role == "admin" then
+                                User.admin person
+
+                            else
+                                User.general person
+                    in
+                    getPerson config payload.userId
+                        |> Task.map makeUser
+                        |> Task.onError
+                            (\err ->
+                                -- Ignore the error in profiles service
+                                -- This is required in master page
+                                Debug.log (toString err) <|
+                                    Task.succeed
+                                        (makeUser
+                                            { id = ""
+                                            , name = "unknown"
+                                            , post = "unknown"
+                                            , mail = Nothing
+                                            , tel1 = Nothing
+                                            , tel2 = Nothing
+                                            , image = Nothing
+                                            , employeeId = Nothing
+                                            }
+                                        )
+                            )
                 )
 
 
