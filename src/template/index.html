@@ -10,6 +10,7 @@
 	<link rel="stylesheet" href="./style.css"></link>
 	<link href='https://fonts.googleapis.com/css?family=Roboto:300' rel='stylesheet' type='text/css'>
 	<script src="//twemoji.maxcdn.com/2/twemoji.min.js?2.2.3"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/paho-mqtt.min.js" integrity="sha256-rYN+IEl1EAPituFi5xX/uFkd/9OFfAAedRa7WZURoeY=" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -101,6 +102,59 @@
 		});
 		main.ports.saveToken.subscribe(function(token) {
 			localStorage.setItem('authToken', token);
+		});
+		main.ports.startEditSubscription.subscribe(function({ config, floorId }) {
+			// Writing promise, not async/await because IE does not support async function
+			// Options: (a) Stop supporting IE (b) Use transpiler (e.g. babel)
+			fetch(config.apiGraphQLRoot, {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${config.token}`,
+					'x-api-key': config.apiGraphQLKey
+				},
+				body: JSON.stringify({
+					query: `subscription PatchedObjects($updatedFloorId: String) {
+						patchedObjects(updatedFloorId: $updatedFloorId) {
+							updatedFloorId
+							objects {
+								flag
+								object {
+									id
+								}
+							}
+						}
+					}`,
+					variables: {
+						updatedFloorId: floorId
+					}
+				})
+			}).then(response => {
+				response.json().then(json => {
+					const sub = {
+						wssURL: json.extensions.subscription.mqttConnections[0].url,
+						client: json.extensions.subscription.mqttConnections[0].client,
+						topics: json.extensions.subscription.mqttConnections[0].topics[0]
+					};
+
+					client = new Paho.Client(sub.wssURL, sub.client);
+					client.onMessageArrived = message => {
+						console.log(JSON.parse(message.payloadString).data.patchedObjects.objects);
+
+						main.ports.listenEditObjectChanges.send(JSON.parse(message.payloadString).data.patchedObjects.objects);
+					};
+					client.connect({
+						onSuccess: ctx => {
+							client.subscribe(sub.topics);
+						},
+						useSSL: true,
+						timeout: 3,
+						mqttVersion: 4,
+						onFailure: err => {
+							throw err;
+						}
+					});
+				})
+			});
 		});
 
 		setTimeout(function() {
