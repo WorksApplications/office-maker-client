@@ -34,6 +34,7 @@ module Model.Floor exposing
     , objects
     , objectsDictFromList
     , partiallyChangeObjects
+    , partiallyChangeRelatedPersons
     , paste
     , patchObjectsByDiffs
     , pixelToReal
@@ -374,6 +375,31 @@ partiallyChangeObjects f ids floor =
             ids
                 |> List.foldl
                     (\objectId dict -> Dict.update objectId (Maybe.map f) dict)
+                    floor.objects
+    }
+
+
+{-| Similar to `partiallyChangeObjects`, but only act on the objects personId attached.
+-}
+partiallyChangeRelatedPersons : (PersonId -> Object -> Object) -> List ObjectId -> Floor -> Floor
+partiallyChangeRelatedPersons f ids floor =
+    { floor
+        | objects =
+            ids
+                |> List.foldl
+                    (\objectId dict ->
+                        Dict.update objectId
+                            (\mayObject ->
+                                mayObject
+                                    |> Maybe.map
+                                        (\object ->
+                                            Object.relatedPerson object
+                                                |> Maybe.map (\personId -> f personId object)
+                                                |> Maybe.withDefault object
+                                        )
+                            )
+                            dict
+                    )
                     floor.objects
     }
 

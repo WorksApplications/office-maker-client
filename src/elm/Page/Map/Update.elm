@@ -1415,6 +1415,33 @@ update msg model =
                     , saveCmd
                     )
 
+        DetachProfiles ids ->
+            case model.floor of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just editingFloor ->
+                    let
+                        ( newFloor, objectsChange ) =
+                            EditingFloor.updateObjects
+                                (Floor.partiallyChangeRelatedPersons
+                                    (\_ ->
+                                        Object.setPerson Nothing
+                                            >> Object.changeName ""
+                                    )
+                                    ids
+                                )
+                                editingFloor
+
+                        saveCmd =
+                            requestSaveObjectsCmd objectsChange
+                    in
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
+
         HeaderMsg msg ->
             ( { model | header = Header.update msg model.header }, Cmd.none )
 
