@@ -1,4 +1,4 @@
-module View.Common exposing
+module View.Card exposing
     ( card
     , foldableCard
     , formControl

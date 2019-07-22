@@ -31,7 +31,7 @@ import Page.Map.PrototypePreviewView as PrototypePreviewView
 import Page.Map.SearchResultView as SearchResultView
 import Set
 import Util.HtmlUtil exposing (..)
-import View.Common exposing (..)
+import View.Card exposing (..)
 import View.DiffView as DiffView
 import View.Icons as Icons
 import View.SearchInputView as SearchInputView

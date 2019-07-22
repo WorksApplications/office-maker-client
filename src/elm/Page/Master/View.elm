@@ -1,4 +1,4 @@
-module Page.Master.View exposing (..)
+module Page.Master.View exposing (Size, colorMasterRow, colorMasterView, colorSample, headerView, messageBar, prototypeContainerSize, prototypeMasterRow, prototypeMasterView, prototypeParameter, prototypeParameters, userView, view)
 
 import Component.Header as Header
 import Html exposing (..)
@@ -11,7 +11,7 @@ import Page.Master.Model exposing (Model)
 import Page.Master.Msg exposing (Msg(..))
 import Page.Master.PrototypeForm as PrototypeForm exposing (PrototypeForm)
 import Page.Master.Styles as S
-import View.Common exposing (..)
+import View.Card exposing (..)
 import View.CommonStyles as CS
 import View.MessageBar as MessageBar
 import View.PrototypePreviewView as PrototypePreviewView
