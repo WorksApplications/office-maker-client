@@ -49,7 +49,7 @@ mainView model =
             text ""
 
           else
-            subView model
+            div [ style S.subViewWrapper ] [ subView model ]
         , FloorUpdateInfoView.view model
         ]
 
