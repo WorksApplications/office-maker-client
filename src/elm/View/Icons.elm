@@ -1,4 +1,37 @@
-module View.Icons exposing (..)
+module View.Icons exposing
+    ( accordionPanelToggle
+    , backgroundColorPropLabel
+    , closeButton
+    , colorPropLabel
+    , defaultColor
+    , editingToggle
+    , fontSizePropLabel
+    , headerIconColor
+    , helpButton
+    , labelMode
+    , link
+    , mode
+    , modeColor
+    , penMode
+    , personDetailPopupPersonEmployeeId
+    , personDetailPopupPersonMail
+    , personDetailPopupPersonTel
+    , personMatched
+    , personNotMatched
+    , popupClose
+    , printButton
+    , proplabelColor
+    , saveButton
+    , searchResultClose
+    , searchResultItemPerson
+    , searchResultItemPost
+    , selectMode
+    , shapeEllipse
+    , shapePropLabel
+    , shapeRectangle
+    , stampMode
+    , userMenuToggle
+    )
 
 import Color exposing (Color, white)
 import FontAwesome exposing (..)
@@ -26,6 +59,7 @@ mode f =
         f
             (if selected then
                 white
+
              else
                 modeColor
             )
@@ -146,6 +180,7 @@ printButton : Bool -> Svg msg
 printButton printMode =
     if printMode then
         print defaultColor 22
+
     else
         print headerIconColor 22
 
@@ -154,6 +189,7 @@ saveButton : Bool -> Svg msg
 saveButton printMode =
     if printMode then
         download defaultColor 22
+
     else
         download headerIconColor 22
 
@@ -162,6 +198,7 @@ closeButton : Bool -> Svg msg
 closeButton printMode =
     if printMode then
         close defaultColor 22
+
     else
         close headerIconColor 22
 
@@ -175,8 +212,21 @@ userMenuToggle : Bool -> Svg msg
 userMenuToggle open =
     (if open then
         caret_up
+
      else
         caret_down
     )
         white
+        16
+
+
+accordionPanelToggle : Bool -> Svg msg
+accordionPanelToggle folded =
+    (if folded then
+        caret_right
+
+     else
+        caret_down
+    )
+        defaultColor
         16

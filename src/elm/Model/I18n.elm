@@ -46,6 +46,7 @@ module Model.I18n exposing
     , selectIsland
     , selectSameColor
     , selectSamePost
+    , setAccordion
     , signIn
     , signInTo
     , signOut
@@ -669,3 +670,21 @@ noName lang =
 
         EN ->
             "(no name)"
+
+
+setAccordion : Language -> Bool -> String
+setAccordion lang folded =
+    case lang of
+        JA ->
+            if folded then
+                "展開する"
+
+            else
+                "折りたたむ"
+
+        EN ->
+            if folded then
+                "Unfold"
+
+            else
+                "Fold"

@@ -1,4 +1,4 @@
-module Page.Map.Model exposing (..)
+module Page.Map.Model exposing (DraggingContext(..), Model, SearchResultState(..), adjustOffset, cachePeople, candidatesOf, canvasPosition, encodeToUrl, expandOrShrinkToward, getEditingFloor, getEditingFloorOrDummy, getPositionedPrototype, headerHeight, init, isMouseInCanvas, nextObjectToInput, primarySelectedObject, screenToImageWithOffset, selectedObjects, shiftSelectionToward, sideMenuWidth, startEdit, syncSelectedByRect, temporaryPen, temporaryPenRect, temporaryResizeRect, toUrl, updateSelectorRect, validateRect)
 
 import API.API as API
 import API.Cache as Cache exposing (Cache)
@@ -31,6 +31,7 @@ import Page.Map.ClipboardOptionsView as ClipboardOptionsView
 import Page.Map.ContextMenuContext exposing (ContextMenuContext)
 import Page.Map.ObjectNameInput as ObjectNameInput exposing (ObjectNameInput)
 import Page.Map.URL as URL exposing (URL)
+import Set exposing (Set)
 import Time exposing (Time)
 import Util.DictUtil as DictUtil
 import Util.IdGenerator as IdGenerator exposing (Seed)
@@ -77,6 +78,7 @@ type alias Model =
     , saveFloorDebounce : Debounce SaveRequest
     , floorDeleter : FloorDeleter
     , transition : Bool
+    , foldedCards : Set String -- Component-local state, should not be here actually...
     }
 
 
@@ -161,6 +163,7 @@ init apiConfig title initialSize randomSeed visitDate isEditMode query objectId 
     , saveFloorDebounce = Debounce.init
     , floorDeleter = FloorDeleter.init
     , transition = False
+    , foldedCards = Set.empty
     }
 
 
@@ -278,6 +281,7 @@ adjustOffset toCenter model =
                                             in
                                             Position (windowCenter.x - objectCenter.x) (windowCenter.y - objectCenter.y)
                                                 |> Scale.screenToImageForPosition model.scale
+
                                         else
                                             let
                                                 containerSize =
@@ -311,6 +315,7 @@ nextObjectToInput object allObjects =
             (\o ->
                 if Object.idOf object == Object.idOf o then
                     Nothing
+
                 else
                     Just o
             )
@@ -505,6 +510,7 @@ validateRect leftTop rightBottom =
     in
     if width > 0 && height > 0 then
         Just ( leftTop, Size width height )
+
     else
         Nothing
 
@@ -535,6 +541,7 @@ toUrl model =
     , query =
         if String.length model.searchQuery == 0 then
             Nothing
+
         else
             Just model.searchQuery
     , objectId =

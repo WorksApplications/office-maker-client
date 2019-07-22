@@ -1,9 +1,38 @@
-module View.Common exposing (card, formControl)
+module View.Common exposing
+    ( card
+    , foldableCard
+    , formControl
+    )
 
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Model.I18n as I18n exposing (Language)
 import Util.StyleUtil exposing (..)
 import View.CommonStyles exposing (..)
+import View.Icons as Icons
+
+
+foldableCard : Bool -> Language -> msg -> Bool -> String -> Maybe Int -> Maybe Int -> List (Html msg) -> Html msg
+foldableCard folded lang toggleMsg absolute backgroundColor maxHeight maybeWidth children =
+    card absolute backgroundColor maxHeight maybeWidth <|
+        (if List.isEmpty children then
+            []
+
+         else
+            [ div
+                [ onClick toggleMsg ]
+                [ span [ style [ ( "vertical-align", "middle" ) ] ] [ Icons.accordionPanelToggle folded ]
+                , text (I18n.setAccordion lang folded)
+                ]
+            ]
+        )
+            ++ (if folded then
+                    []
+
+                else
+                    [ div [ style [ ( "margin-top", "0.5em" ) ] ] children ]
+               )
 
 
 card : Bool -> String -> Maybe Int -> Maybe Int -> List (Html msg) -> Html msg
@@ -30,12 +59,14 @@ cardStyles absolute backgroundColor maybeMaxHeight maybeWidth =
            , ( "position"
              , if absolute then
                 "absolute"
+
                else
                 ""
              )
            , ( "z-index"
              , if absolute then
                 "1"
+
                else
                 ""
              )
