@@ -2115,6 +2115,17 @@ update msg model =
             in
             ( newModel, Cmd.none )
 
+        ToggleCard name ->
+            let
+                toggleInSet t set =
+                    if Set.member t set then
+                        Set.remove t set
+
+                    else
+                        Set.insert t set
+            in
+            ( { model | foldedCards = toggleInSet name model.foldedCards }, Cmd.none )
+
 
 andThen : (Model -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
 andThen update ( model, cmd ) =

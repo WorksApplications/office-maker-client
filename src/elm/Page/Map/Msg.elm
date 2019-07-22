@@ -151,3 +151,4 @@ type Msg
     | GotNewToken (Maybe String)
     | LoadGraphQLInfo { url : String, key : String }
     | PatchEditObjects (List Model.Floor.ObjectDiff)
+    | ToggleCard String
