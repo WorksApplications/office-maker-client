@@ -177,8 +177,9 @@ subView : S
 subView =
     [ ( "z-index", zIndex.subView )
     , ( "width", "320px" )
-    , ( "position", "absolute" )
+    , ( "position", "relative" )
     , ( "right", "0" )
+    , ( "overflow-y", "scroll" )
     ]
 
 
@@ -301,15 +302,18 @@ formButton =
 
 
 imageLoadButton : S
-imageLoadButton = formButton
+imageLoadButton =
+    formButton
 
 
 imageDownloadButton : S
-imageDownloadButton = formButton
+imageDownloadButton =
+    formButton
 
 
 flipButton : S
-flipButton = formButton
+flipButton =
+    formButton
 
 
 publishButton : S
