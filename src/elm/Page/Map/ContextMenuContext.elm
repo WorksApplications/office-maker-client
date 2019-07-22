@@ -4,5 +4,4 @@ import CoreType exposing (..)
 
 
 type ContextMenuContext
-    = ObjectContextMenu ObjectId
-    | FloorInfoContextMenu FloorId
+    = FloorInfoContextMenu FloorId
