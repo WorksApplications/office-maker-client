@@ -1,4 +1,4 @@
-module View.Styles exposing (..)
+module View.Styles exposing (S, candidateItem, candidateItemHeight, candidateItemHover, candidateItemPersonMail, candidateItemPersonName, candidateItemPersonPost, candidateViewPointer, candidatesView, candidatesViewContainer, candidatesViewRelatedPerson, closePrint, colorProperties, colorProperty, defaultBar, defaultPopup, deleteFloorButton, deleteFloorButtonHover, deskInput, diffPopupBody, diffPopupCancelButton, diffPopupConfirmButton, diffPopupFooter, diffPopupHeader, diffPopupInnerContainer, editingToggleContainer, editingToggleIcon, editingToggleText, errorBar, flipButton, floorNameInput, floorNameInputContainer, floorNameLabel, floorNameText, floorOrdInput, floorOrdInputContainer, floorOrdLabel, floorOrdText, floorPropertyLabel, floorPropertyLastUpdate, floorPropertyLastUpdateForPrint, floorPropertyText, floorSizeInputContainer, formButton, greetingImage, greetingName, h1, header, headerHeight, headerLink, headerMenu, headerMenuItem, imageDownloadButton, imageLoadButton, langSelectView, langSelectViewItem, login, mainView, messageBar, modeSelectionView, modeSelectionViewEach, nameInputContainer, nameInputTextArea, noneBar, pasteFromSpreadsheetInput, personDetailPopup, personDetailPopupClose, personDetailPopupDefault, personDetailPopupNoPerson, personDetailPopupPersonEmployeeId, personDetailPopupPersonIconText, personDetailPopupPersonImage, personDetailPopupPersonMail, personDetailPopupPersonName, personDetailPopupPersonNo, personDetailPopupPersonPost, personDetailPopupPersonTel, personDetailPopupPointer, personDetailPopupPointerDefault, personDetailPopupPointerSmall, personDetailPopupSmall, personMatched, personMatchingInfo, personNotMatched, popupPointerBase, popupPointerButtom, popupPointerLeft, printModeHover, propertyViewPropertyIcon, prototypePreviewScroll, prototypePreviewView, prototypePreviewViewInner, publishButton, realSizeInput, searchBox, searchBoxContainer, searchBoxSubmit, searchResult, searchResultClose, searchResultGroup, searchResultGroupHeader, searchResultGroupHeaderHover, searchResultItem, searchResultItemIcon, searchResultItemInner, searchResultItemInnerLabel, shadow, shapeProperties, shapeProperty, smallPopup, subView, successBar, unsetRelatedPersonButton, unsetRelatedPersonButtonHover, userMenuItem, userMenuToggle, userMenuToggleIcon, userMenuView, widthHeightLabel, zFloorInfo, zIndex, zPrintGuide)
 
 import CoreType exposing (..)
 import Model.ProfilePopupLogic as ProfilePopupLogic
@@ -80,6 +80,7 @@ header printMode =
                 , ( "z-index", zIndex.headerForPrint )
                 , ( "width", "100%" )
                 ]
+
             else
                 [ ( "color", "#eee" )
                 , ( "background", "rgb(100,100,120)" )
@@ -127,12 +128,14 @@ colorProperty color selected =
     , ( "border-width"
       , if selected then
             "2px"
+
         else
             "1px"
       )
     , ( "border-color"
       , if selected then
             selectColor
+
         else
             "#666"
       )
@@ -156,12 +159,14 @@ shapeProperty selected =
     , ( "border-width"
       , if selected then
             "2px"
+
         else
             "1px"
       )
     , ( "border-color"
       , if selected then
             selectColor
+
         else
             "#666"
       )
@@ -199,12 +204,14 @@ modeSelectionViewEach selected =
     , ( "background-color"
       , if selected then
             selectColor
+
         else
             "inherit"
       )
     , ( "color"
       , if selected then
             invertedTextColor
+
         else
             "inherit"
       )
@@ -247,6 +254,7 @@ prototypePreviewScroll : Bool -> S
 prototypePreviewScroll isLeft =
     ( if isLeft then
         "left"
+
       else
         "right"
     , "3px"
@@ -287,19 +295,21 @@ floorPropertyText =
     ]
 
 
-imageLoadButton : S
-imageLoadButton =
+formButton : S
+formButton =
     formControl ++ defaultButton
+
+
+imageLoadButton : S
+imageLoadButton = formButton
 
 
 imageDownloadButton : S
-imageDownloadButton =
-    formControl ++ defaultButton
+imageDownloadButton = formButton
 
 
 flipButton : S
-flipButton =
-    formControl ++ defaultButton
+flipButton = formButton
 
 
 publishButton : S
@@ -779,6 +789,7 @@ personDetailPopupPersonTel second =
            , ( "left"
              , if second then
                 "180px"
+
                else
                 "100px"
              )
@@ -812,6 +823,7 @@ candidatesViewContainer screenPosOfDesk screenSizeOfDesk relatedPersonExists can
         totalHeight =
             (if relatedPersonExists then
                 160
+
              else
                 0
             )
@@ -874,6 +886,7 @@ candidateItem selected =
     , ( "background-color"
       , if selected then
             hoverBackgroundColor
+
         else
             "#fff"
       )
@@ -1046,6 +1059,7 @@ searchResultItem draggable =
                 , ( "cursor", "move" )
                 ]
                     ++ noUserSelect
+
             else
                 []
            )
@@ -1088,5 +1102,6 @@ nameInputContainer =
 (?) condition a =
     if condition then
         a
+
     else
         ""

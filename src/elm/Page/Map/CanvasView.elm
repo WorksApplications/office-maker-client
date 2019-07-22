@@ -1,6 +1,5 @@
 module Page.Map.CanvasView exposing (temporaryStampView, view)
 
-import ContextMenu
 import CoreType exposing (..)
 import Dict exposing (..)
 import Html exposing (..)

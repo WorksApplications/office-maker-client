@@ -29,6 +29,7 @@ import Page.Map.ProfilePopup as ProfilePopup
 import Page.Map.PropertyView as PropertyView
 import Page.Map.PrototypePreviewView as PrototypePreviewView
 import Page.Map.SearchResultView as SearchResultView
+import Page.Map.SelectedObjectsActions as SelectedObjectsActions
 import Set
 import Util.HtmlUtil exposing (..)
 import View.Card exposing (..)
@@ -112,6 +113,7 @@ subViewForEdit model editingMode =
     in
     [ foldableCard (Set.member "editingMode" model.foldedCards) model.lang (ToggleCard "editingMode") False "#eee" Nothing Nothing <| drawingView model editingMode
     , foldableCard (Set.member "propertyView" model.foldedCards) model.lang (ToggleCard "propertyView") False "#eee" Nothing Nothing <| PropertyView.view model
+    , foldableCard (Set.member "selectObjectsMenu" model.foldedCards) model.lang (ToggleCard "selectObjectsMenu") False "#eee" Nothing Nothing <| SelectedObjectsActions.view model
     , viewProfile model
     , foldableCard (Set.member "floorView" model.foldedCards) model.lang (ToggleCard "floorView") False "#eee" Nothing Nothing <| floorView
     ]
