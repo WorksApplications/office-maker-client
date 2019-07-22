@@ -1,4 +1,63 @@
-module Model.I18n exposing (..)
+module Model.I18n exposing
+    ( Language(..)
+    , additions
+    , cancel
+    , changes
+    , changesFromDate
+    , close
+    , confirm
+    , conflictSomeoneHasAlreadyChangedPleaseRefreshAndTryAgain
+    , copyAndCreateTemporaryFloor
+    , copyFloor
+    , copyFloorWithEmptyDesks
+    , deleteFloor
+    , deletions
+    , detachProfiles
+    , displayingLinkToObject
+    , download
+    , edit
+    , flipFloor
+    , goToManual
+    , goToMaster
+    , heightMeter
+    , help
+    , lastUpdateByAt
+    , loadImage
+    , mailAddress
+    , missing
+    , modifications
+    , name
+    , networkErrorDetectedPleaseRefreshAndTryAgain
+    , noName
+    , nothingFound
+    , order
+    , password
+    , pickupFirstWord
+    , print
+    , publish
+    , publishingInProgressPreaseWaitForSeconds
+    , registerAsStamp
+    , removeSpaces
+    , rotate
+    , save
+    , search
+    , searchPlaceHolder
+    , searchSamePost
+    , selectIsland
+    , selectSameColor
+    , selectSamePost
+    , signIn
+    , signInTo
+    , signOut
+    , successfullyPublished
+    , timeout
+    , unexpectedBadStatus
+    , unexpectedBadUrl
+    , unexpectedFileError
+    , unexpectedHtmlError
+    , unexpectedPayload
+    , widthMeter
+    )
 
 
 type Language
@@ -84,6 +143,16 @@ removeSpaces lang =
 
         EN ->
             "Remove spaces"
+
+
+detachProfiles : Language -> String
+detachProfiles lang =
+    case lang of
+        JA ->
+            "プロフィールの紐付けを解除し氏名を削除する"
+
+        EN ->
+            "Detach profiles and remove names from those objects"
 
 
 copyFloor : Language -> String
