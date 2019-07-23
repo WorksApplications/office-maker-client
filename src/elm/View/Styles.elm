@@ -301,15 +301,16 @@ subViewWrapper : S
 subViewWrapper =
     [ ( "z-index", zIndex.subView )
     , ( "width", "320px" )
-    , ( "height", "100%" )
+    , ( "max-height", "100%" )
     , ( "position", "absolute" )
     , ( "right", "0" )
-    , ( "overflow-y", "scroll" )
+    , ( "overflow", "hidden auto" )
     ]
 
 
 subView : S
-subView = []
+subView =
+    []
 
 
 shadow : S
