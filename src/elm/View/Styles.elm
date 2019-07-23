@@ -301,7 +301,7 @@ subViewWrapper : S
 subViewWrapper =
     [ ( "z-index", zIndex.subView )
     , ( "width", "320px" )
-    , ( "max-height", "100%" )
+    , ( "height", "100%" )
     , ( "position", "absolute" )
     , ( "right", "0" )
     , ( "overflow", "hidden auto" )
