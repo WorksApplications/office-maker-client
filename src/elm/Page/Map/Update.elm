@@ -1,8 +1,66 @@
-port module Page.Map.Update exposing (Flags, adjustOffset, andThen, batchSave, cachePersonIfAPersonIsNotRelatedTo, debug, debugMsg, emulateClick, focusCanvas, focusCmd, getAndCachePersonIfNotCached, handleCtrl, init, initCmd, isTotallyDifferentNames, loadFloor, moveSelecedObjectsToward, nextObjectToInput, parseURL, performAPI, print, putUserState, regesterPerson, regesterPersonIfNotCached, regesterPersonOfObject, removeSelectedObjects, removeToken, requestCandidate, requestCmd, requestPublishFloorCmd, requestSaveFloorCmd, requestSaveObjectsCmd, saveFloorDebounceConfig, savePrototypesCmd, search, searchBy, searchCandidateDebounceConfig, setInput, setSelectionStart, submitSearch, subscriptions, tokenRemoved, update, updateByMoveObjectEnd, updateFloorByFloorPropertyEvent, updateFloorObjectsWithInputName, updateOnFinishNameInput, updateOnFinishPen, updateOnFinishResize, updateOnFinishStamp, updateOnFinishStampWithoutEffects, updateOnFinishStamp_, updateOnFloorLoaded, updateOnMouseUp, updateOnPuttingLabel, updateOnSelectCandidate)
+port module Page.Map.Update exposing
+    ( Flags
+    , adjustOffset
+    , andThen
+    , batchSave
+    , cachePersonIfAPersonIsNotRelatedTo
+    , debug
+    , debugMsg
+    , emulateClick
+    , focusCanvas
+    , focusCmd
+    , getAndCachePersonIfNotCached
+    , handleCtrl
+    , init
+    , initCmd
+    , isTotallyDifferentNames
+    , moveSelecedObjectsToward
+    , nextObjectToInput
+    , parseURL
+    , performAPI
+    , performFloorLoad
+    , print
+    , putUserState
+    , regesterPerson
+    , regesterPersonIfNotCached
+    , regesterPersonOfObject
+    , removeSelectedObjects
+    , removeToken
+    , requestCandidate
+    , requestCmd
+    , requestPublishFloorCmd
+    , requestSaveFloorCmd
+    , requestSaveObjectsCmd
+    , saveFloorDebounceConfig
+    , savePrototypesCmd
+    , search
+    , searchBy
+    , searchCandidateDebounceConfig
+    , setInput
+    , setSelectionStart
+    , submitSearch
+    , subscriptions
+    , tokenRemoved
+    , update
+    , updateByMoveObjectEnd
+    , updateFloorByFloorPropertyEvent
+    , updateFloorObjectsWithInputName
+    , updateOnFinishNameInput
+    , updateOnFinishPen
+    , updateOnFinishResize
+    , updateOnFinishStamp
+    , updateOnFinishStampWithoutEffects
+    , updateOnFinishStamp_
+    , updateOnFloorLoaded
+    , updateOnMouseUp
+    , updateOnPuttingLabel
+    , updateOnSelectCandidate
+    )
 
 import API.API as API
 import API.Cache as Cache exposing (UserState)
 import API.Cache2 as Cache2
+import API.Defaults as Defaults
 import API.GraphQL as GraphQL
 import API.Page as Page
 import Component.FloorDeleter as FloorDeleter
@@ -15,6 +73,8 @@ import Debounce
 import Dict exposing (Dict)
 import Dom
 import Http
+import Json.Decode
+import Json.Encode
 import Keyboard
 import Model.ClipboardData as ClipboardData
 import Model.EditingFloor as EditingFloor exposing (EditingFloor)
@@ -69,6 +129,12 @@ port focusCanvas : {} -> Cmd msg
 port print : {} -> Cmd msg
 
 
+port startEditSubscription : { config : API.Config, floorId : String } -> Cmd msg
+
+
+port listenEditObjectChanges : (Json.Encode.Value -> msg) -> Sub msg
+
+
 type alias Flags =
     { apiRoot : String
     , apiGraphQLRoot : String
@@ -109,6 +175,17 @@ subscriptions model =
         , Sub.map ContextMenuMsg (ContextMenu.subscriptions model.contextMenu)
         , Sub.map HeaderMsg Header.subscriptions
         , ObjectNameInput.subscriptions ObjectNameInputMsg
+
+        -- AppSync subscription
+        , listenEditObjectChanges
+            (\value ->
+                case Json.Decode.decodeValue (Json.Decode.list Floor.decodeObjectDiff) value of
+                    Err err ->
+                        Debug.log ("Error in deserializing ObjectsChange: " ++ toString value) NoOp
+
+                    Ok objects ->
+                        PatchEditObjects objects
+            )
         ]
 
 
@@ -395,8 +472,7 @@ update msg model =
 
                 loadFloorCmd =
                     selectedFloor
-                        |> Maybe.map (\floorId -> loadFloor model.apiConfig requestPrivateFloors floorId)
-                        |> Maybe.map (performAPI FloorLoaded)
+                        |> Maybe.map (performFloorLoad model.apiConfig requestPrivateFloors)
                         |> Maybe.withDefault Cmd.none
 
                 loadFloorInfoCmd =
@@ -434,8 +510,7 @@ update msg model =
                 cmd =
                     case ( floorIsSelected, FloorInfo.sortByPublicOrder floorsInfo, model.floor == Nothing ) of
                         ( False, Just floor, True ) ->
-                            loadFloor model.apiConfig requestPrivateFloors (FloorInfo.idOf floor)
-                                |> performAPI FloorLoaded
+                            performFloorLoad model.apiConfig requestPrivateFloors (FloorInfo.idOf floor)
 
                         _ ->
                             Cmd.none
@@ -1042,7 +1117,7 @@ update msg model =
                 loadCmd =
                     let
                         load =
-                            performAPI FloorLoaded (loadFloor model.apiConfig requestLastEdit floorId)
+                            performFloorLoad model.apiConfig requestLastEdit floorId
                     in
                     case model.floor of
                         Just efloor ->
@@ -1340,6 +1415,33 @@ update msg model =
                     , saveCmd
                     )
 
+        DetachProfiles ids ->
+            case model.floor of
+                Nothing ->
+                    ( model, Cmd.none )
+
+                Just editingFloor ->
+                    let
+                        ( newFloor, objectsChange ) =
+                            EditingFloor.updateObjects
+                                (Floor.partiallyChangeRelatedPersons
+                                    (\_ ->
+                                        Object.setPerson Nothing
+                                            >> Object.changeName ""
+                                    )
+                                    ids
+                                )
+                                editingFloor
+
+                        saveCmd =
+                            requestSaveObjectsCmd objectsChange
+                    in
+                    ( { model
+                        | floor = Just newFloor
+                      }
+                    , saveCmd
+                    )
+
         HeaderMsg msg ->
             ( { model | header = Header.update msg model.header }, Cmd.none )
 
@@ -1367,7 +1469,7 @@ update msg model =
                                 floorId =
                                     (EditingFloor.present floor).id
                             in
-                            performAPI FloorLoaded (loadFloor model.apiConfig withPrivate floorId)
+                            performFloorLoad model.apiConfig withPrivate floorId
 
                         Nothing ->
                             Cmd.none
@@ -1829,8 +1931,7 @@ update msg model =
                             (EditingFloor.present editingFloor).id
 
                         loadFloorCmd =
-                            loadFloor model.apiConfig requestPrivateFloors floorId
-                                |> performAPI FloorLoaded
+                            performFloorLoad model.apiConfig requestPrivateFloors floorId
                     in
                     ( model, loadFloorCmd )
 
@@ -1990,6 +2091,40 @@ update msg model =
                     { oldApiConfig | apiGraphQLRoot = info.url, apiGraphQLKey = info.key }
             in
             ( { model | apiConfig = newApiConfig }, Cmd.none )
+
+        PatchEditObjects diffs ->
+            let
+                newModel =
+                    model.floor
+                        |> Maybe.map
+                            (\editingFloor ->
+                                let
+                                    ( newFloor, objectsChange ) =
+                                        EditingFloor.updateObjects
+                                            (Floor.patchObjectsByDiffs
+                                                { color = Defaults.color
+                                                , bold = Defaults.bold
+                                                }
+                                                diffs
+                                            )
+                                            editingFloor
+                                in
+                                { model | floor = Just newFloor }
+                            )
+                        |> Maybe.withDefault model
+            in
+            ( newModel, Cmd.none )
+
+        ToggleCard name ->
+            let
+                toggleInSet t set =
+                    if Set.member t set then
+                        Set.remove t set
+
+                    else
+                        Set.insert t set
+            in
+            ( { model | foldedCards = toggleInSet name model.foldedCards }, Cmd.none )
 
 
 andThen : (Model -> ( Model, Cmd Msg )) -> ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
@@ -2445,7 +2580,25 @@ updateOnFloorLoaded maybeFloor model =
         |> Maybe.withDefault ( { model | floor = Nothing }, Cmd.none )
         |> andThen
             (\model ->
-                ( model, Navigation.modifyUrl (Model.encodeToUrl model) )
+                ( model
+                , Cmd.batch
+                    [ Navigation.modifyUrl (Model.encodeToUrl model)
+                    , if Mode.isEditMode model.mode then
+                        Maybe.withDefault Cmd.none
+                            (model.floor
+                                |> Maybe.map
+                                    (\editingFloor ->
+                                        startEditSubscription
+                                            { config = model.apiConfig
+                                            , floorId = (EditingFloor.present editingFloor).id
+                                            }
+                                    )
+                            )
+
+                      else
+                        Cmd.none
+                    ]
+                )
             )
 
 
@@ -2815,11 +2968,12 @@ putUserState model =
         |> Task.perform (always NoOp)
 
 
-loadFloor : API.Config -> Bool -> String -> Task API.Error (Maybe Floor)
-loadFloor apiConfig forEdit floorId =
-    HttpUtil.recover404 <|
-        if forEdit then
-            API.getEditingFloor apiConfig floorId
+performFloorLoad : API.Config -> Bool -> String -> Cmd Msg
+performFloorLoad apiConfig forEdit floorId =
+    performAPI FloorLoaded <|
+        HttpUtil.recover404 <|
+            if forEdit then
+                API.getEditingFloor apiConfig floorId
 
-        else
-            API.getFloor apiConfig floorId
+            else
+                API.getFloor apiConfig floorId

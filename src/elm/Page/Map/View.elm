@@ -1,40 +1,42 @@
 module Page.Map.View exposing (view)
 
+import Component.FloorDeleter as FloorDeleter
+import Component.FloorProperty as FloorProperty
+import Component.Header as Header
+import Component.ImageLoader as ImageLoader
 import Dict
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Lazy as Lazy exposing (..)
-import View.Styles as S
-import View.Icons as Icons
-import View.DiffView as DiffView
-import View.Common exposing (..)
-import View.SearchInputView as SearchInputView
-import Component.FloorProperty as FloorProperty
-import Component.Header as Header
-import Component.ImageLoader as ImageLoader
-import Component.FloorDeleter as FloorDeleter
-import Util.HtmlUtil exposing (..)
-import Model.Mode as Mode exposing (Mode(..), EditingMode(..))
-import Model.Prototypes as Prototypes
 import Model.EditingFloor as EditingFloor
 import Model.I18n as I18n exposing (Language)
-import Model.User as User exposing (User)
+import Model.Mode as Mode exposing (EditingMode(..), Mode(..))
 import Model.Object as Object
-import Page.Map.Model as Model exposing (Model, DraggingContext(..))
-import Page.Map.Msg exposing (Msg(..))
+import Model.Prototypes as Prototypes
+import Model.User as User exposing (User)
 import Page.Map.CanvasView as CanvasView
-import Page.Map.PropertyView as PropertyView
+import Page.Map.ClipboardOptionsView as ClipboardOptionsView
 import Page.Map.ContextMenu
+import Page.Map.Emoji as Emoji
+import Page.Map.FloorUpdateInfoView as FloorUpdateInfoView
+import Page.Map.FloorsInfoView as FloorsInfoView
+import Page.Map.MessageBar as MessageBar
+import Page.Map.Model as Model exposing (DraggingContext(..), Model)
+import Page.Map.Msg exposing (Msg(..))
+import Page.Map.ObjectNameInput as ObjectNameInput
+import Page.Map.PrintGuide as PrintGuide
+import Page.Map.ProfilePopup as ProfilePopup
+import Page.Map.PropertyView as PropertyView
 import Page.Map.PrototypePreviewView as PrototypePreviewView
 import Page.Map.SearchResultView as SearchResultView
-import Page.Map.FloorUpdateInfoView as FloorUpdateInfoView
-import Page.Map.Emoji as Emoji
-import Page.Map.FloorsInfoView as FloorsInfoView
-import Page.Map.ObjectNameInput as ObjectNameInput
-import Page.Map.ProfilePopup as ProfilePopup
-import Page.Map.PrintGuide as PrintGuide
-import Page.Map.ClipboardOptionsView as ClipboardOptionsView
-import Page.Map.MessageBar as MessageBar
+import Page.Map.SelectedObjectsActions as SelectedObjectsActions
+import Set
+import Util.HtmlUtil exposing (..)
+import View.Card exposing (..)
+import View.DiffView as DiffView
+import View.Icons as Icons
+import View.SearchInputView as SearchInputView
+import View.Styles as S
 
 
 mainView : Model -> Html Msg
@@ -45,8 +47,9 @@ mainView model =
         , CanvasView.view model
         , if Mode.isPrintMode model.mode then
             text ""
+
           else
-            subView model
+            div [ style S.subViewWrapper ] [ subView model ]
         , FloorUpdateInfoView.view model
         ]
 
@@ -55,6 +58,7 @@ floorInfoView : Model -> Html Msg
 floorInfoView model =
     if Mode.isPrintMode model.mode then
         text ""
+
     else
         FloorsInfoView.view
             model.ctrl
@@ -70,6 +74,7 @@ subView model =
         searchResultView =
             if Mode.showingSearchResult model.mode then
                 [ searchResultCard model ]
+
             else
                 []
 
@@ -81,7 +86,7 @@ subView model =
                 _ ->
                     []
     in
-        div [ style S.subView ] (searchResultView ++ editView)
+    div [ style S.subView ] (searchResultView ++ editView)
 
 
 subViewForEdit : Model -> EditingMode -> List (Html Msg)
@@ -106,11 +111,12 @@ subViewForEdit model editingMode =
                 _ ->
                     []
     in
-        [ card False "#eee" Nothing Nothing <| drawingView model editingMode
-        , card False "#eee" Nothing Nothing <| PropertyView.view model
-        , viewProfile model
-        , card False "#eee" Nothing Nothing <| floorView
-        ]
+    [ foldableCard (Set.member "editingMode" model.foldedCards) model.lang (ToggleCard "editingMode") False "#eee" Nothing Nothing <| drawingView model editingMode
+    , foldableCard (Set.member "propertyView" model.foldedCards) model.lang (ToggleCard "propertyView") False "#eee" Nothing Nothing <| PropertyView.view model
+    , viewProfile model
+    , foldableCard (Set.member "selectObjectsMenu" model.foldedCards) model.lang (ToggleCard "selectObjectsMenu") False "#eee" Nothing Nothing <| SelectedObjectsActions.view model
+    , foldableCard (Set.member "floorView" model.foldedCards) model.lang (ToggleCard "floorView") False "#eee" Nothing Nothing <| floorView
+    ]
 
 
 viewProfile : Model -> Html Msg
@@ -150,6 +156,7 @@ fileLoadButton : Language -> User -> Html Msg
 fileLoadButton lang user =
     if User.isAdmin user then
         ImageLoader.view lang |> Html.map ImageLoaderMsg
+
     else
         text ""
 
@@ -162,6 +169,7 @@ publishButton lang user =
             , style S.publishButton
             ]
             [ text (I18n.publish lang) ]
+
     else
         text ""
 
@@ -172,8 +180,8 @@ searchResultCard model =
         maxHeight =
             model.windowSize.height - Model.headerHeight
     in
-        card True "#eee" (Just maxHeight) (Just 320) <|
-            SearchResultView.view model
+    card True "#eee" (Just maxHeight) (Just 320) <|
+        SearchResultView.view model
 
 
 drawingView : Model -> EditingMode -> List (Html Msg)
@@ -184,34 +192,37 @@ drawingView model editingMode =
 
         editingLabel =
             ObjectNameInput.isEditing model.objectNameInput
-                && case Model.primarySelectedObject model of
-                    Just object ->
-                        Object.isLabel object
+                && (case Model.primarySelectedObject model of
+                        Just object ->
+                            Object.isLabel object
 
-                    Nothing ->
-                        False
+                        Nothing ->
+                            False
+                   )
     in
-        [ Lazy.lazy modeSelectionView editingMode
-        , if editingLabel then
-            Lazy.lazy Emoji.selector ()
-          else
-            case editingMode of
-                Select ->
-                    Lazy.lazy PrototypePreviewView.view prototypes
+    [ Lazy.lazy modeSelectionView editingMode
+    , if editingLabel then
+        Lazy.lazy Emoji.selector ()
 
-                Stamp ->
-                    Lazy.lazy PrototypePreviewView.view prototypes
+      else
+        case editingMode of
+            Select ->
+                Lazy.lazy PrototypePreviewView.view prototypes
 
-                _ ->
-                    text ""
-        , if editingMode == Select then
-            ClipboardOptionsView.view
-                ClipboardOptionsMsg
-                model.clipboardOptionsForm
-                model.cellSizePerDesk
-          else
-            text ""
-        ]
+            Stamp ->
+                Lazy.lazy PrototypePreviewView.view prototypes
+
+            _ ->
+                text ""
+    , if editingMode == Select then
+        ClipboardOptionsView.view
+            ClipboardOptionsMsg
+            model.clipboardOptionsForm
+            model.cellSizePerDesk
+
+      else
+        text ""
+    ]
 
 
 modeSelectionView : EditingMode -> Html Msg
@@ -231,11 +242,11 @@ modeSelectionViewEach viewIcon currentEditMode targetEditMode =
         selected =
             currentEditMode == targetEditMode
     in
-        div
-            [ style (S.modeSelectionViewEach selected)
-            , onClick_ (ChangeMode targetEditMode)
-            ]
-            [ viewIcon selected ]
+    div
+        [ style (S.modeSelectionViewEach selected)
+        , onClick_ (ChangeMode targetEditMode)
+        ]
+        [ viewIcon selected ]
 
 
 view : Model -> Html Msg
@@ -280,14 +291,14 @@ view model =
                     )
                     model.diff
     in
-        div
-            []
-            [ header
-            , mainView model
-            , diffView
-            , Page.Map.ContextMenu.view model
-            , lazy2 PrintGuide.view model.lang printMode
-            ]
+    div
+        []
+        [ header
+        , mainView model
+        , diffView
+        , Page.Map.ContextMenu.view model
+        , lazy2 PrintGuide.view model.lang printMode
+        ]
 
 
 

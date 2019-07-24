@@ -1,6 +1,5 @@
 module Page.Map.CanvasView exposing (temporaryStampView, view)
 
-import ContextMenu
 import CoreType exposing (..)
 import Dict exposing (..)
 import Html exposing (..)
@@ -19,7 +18,6 @@ import Model.Scale as Scale exposing (Scale)
 import Model.User as User
 import Mouse
 import Native.ClipboardData
-import Page.Map.ContextMenuContext exposing (ContextMenuContext(ObjectContextMenu))
 import Page.Map.GridLayer as GridLayer
 import Page.Map.KeyOperation as KeyOperation
 import Page.Map.Model as Model exposing (DraggingContext(..), Model)
@@ -55,17 +53,14 @@ viewModeEventOptions id =
 editModeEventOptions : Bool -> ObjectId -> ObjectView.EventOptions Msg
 editModeEventOptions isAdmin id =
     if isAdmin then
-        { onContextMenu =
-            Just
-                (ContextMenu.open ContextMenuMsg (ObjectContextMenu id)
-                    |> Attributes.map (BeforeContextMenuOnObject id)
-                )
+        { onContextMenu = Nothing
         , onMouseDown = Just (onMouseDownAttribute isAdmin id)
         , onMouseUp = Just (MouseUpOnObject id)
         , onClick = Just NoOp
         , onStartEditingName = Nothing -- Just (StartEditObject id)
         , onStartResize = Just (MouseDownOnResizeGrip id)
         }
+
     else
         { onContextMenu = Nothing
         , onMouseDown = Just (onMouseDownAttribute isAdmin id)
@@ -160,6 +155,7 @@ objectViewHelp eventOptions isEditMode isGhost selected scale object =
             isGhost
             isEditMode
             scale
+
     else
         ObjectView.viewDesk
             eventOptions
@@ -242,6 +238,7 @@ profilePopupView : Model -> Floor -> Html Msg
 profilePopupView model floor =
     if Mode.isPrintMode model.mode then
         text ""
+
     else
         model.selectedResult
             |> Maybe.andThen
@@ -295,6 +292,7 @@ canvasView model floor =
         gridLayer =
             if Mode.isEditMode model.mode then
                 GridLayer.view model floor
+
             else
                 text ""
 
@@ -306,6 +304,7 @@ canvasView model floor =
             , ( "name-input"
               , if isEditMode then
                     nameInput
+
                 else
                     text ""
               )
@@ -356,6 +355,7 @@ canvasView model floor =
         children3 =
             if isEditMode then
                 ( "canvas-temporary-pen", temporaryPenView model ) :: temporaryStampsView model
+
             else
                 []
     in
@@ -398,6 +398,7 @@ canvasViewStyles model floor =
     , ( "transition"
       , if model.transition then
             "top 0.3s ease, left 0.3s ease"
+
         else
             ""
       )
@@ -405,6 +406,7 @@ canvasViewStyles model floor =
         ++ CommonStyles.noUserSelect
         ++ (if Mode.isViewMode model.mode then
                 [ ( "overflow", "hidden" ) ]
+
             else
                 []
            )
@@ -420,6 +422,7 @@ objectsView model floor =
                     , lazy2 printModeObjectView model.scale object
                     )
                 )
+
     else if Mode.isViewMode model.mode then
         Floor.objects floor
             |> List.map
@@ -435,6 +438,7 @@ objectsView model floor =
                     , lazy2 viewModeObjectView model.scale object
                     )
                 )
+
     else
         case model.draggingContext of
             MoveObject _ start ->
@@ -466,10 +470,12 @@ compareZIndex : ( Object, Bool ) -> ( Int, Int, Float )
 compareZIndex ( object, selected ) =
     ( if selected then
         1
+
       else
         0
     , if Object.isLabel object then
         1
+
       else
         0
     , Object.updateAtOf object
@@ -506,6 +512,7 @@ objectsViewWhileMoving model floor start =
                             (Object.positionOf object)
                 in
                 Object.changePosition newPosition object
+
             else
                 object
 
@@ -570,6 +577,7 @@ objectsViewWhileResizing model floor id from =
                     |> Maybe.map (\( pos, size ) -> object |> Object.changePosition pos |> Object.changeSize size)
                     |> Maybe.withDefault object
                 -- TODO don't allow 0 width/height objects
+
             else
                 object
 
@@ -627,6 +635,7 @@ canvasImageStyle flipImage size =
     , ( "transform"
       , if flipImage then
             "scale(-1,-1)"
+
         else
             ""
       )
@@ -720,6 +729,7 @@ canvasContainerStyle mode rangeSelectMode =
     , ( "background"
       , if Mode.isPrintMode mode then
             "#ddd"
+
         else
             "#000"
       )
@@ -727,6 +737,7 @@ canvasContainerStyle mode rangeSelectMode =
     , ( "cursor"
       , if crosshair then
             "crosshair"
+
         else
             "default"
       )

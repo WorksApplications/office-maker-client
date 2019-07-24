@@ -3,16 +3,16 @@ module Page.Map.PropertyView exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Lazy as Lazy
-import View.Styles as S
-import View.CommonStyles as CS
-import View.Icons as Icons
-import View.Common exposing (..)
-import Util.HtmlUtil exposing (..)
+import Model.ColorPalette exposing (ColorPalette)
 import Model.Object as Object exposing (Object)
 import Model.ObjectsOperation as ObjectsOperation
-import Model.ColorPalette exposing (ColorPalette)
+import Page.Map.Model as Model exposing (DraggingContext(..), Model)
 import Page.Map.Msg exposing (..)
-import Page.Map.Model as Model exposing (Model, DraggingContext(..))
+import Util.HtmlUtil exposing (..)
+import View.Card exposing (..)
+import View.CommonStyles as CS
+import View.Icons as Icons
+import View.Styles as S
 
 
 view : Model -> List (Html Msg)
@@ -21,30 +21,36 @@ view model =
         selectedObjects =
             Model.selectedObjects model
     in
-        if selectedObjects == [] then
-            []
-        else
-            [ if List.all Object.backgroundColorEditable selectedObjects then
-                formControl [ Lazy.lazy label Icons.backgroundColorPropLabel, Lazy.lazy2 backgroundColorView model.colorPalette selectedObjects ]
-              else
-                text ""
-            , if List.all Object.colorEditable selectedObjects then
-                formControl [ Lazy.lazy label Icons.colorPropLabel, Lazy.lazy2 colorView model.colorPalette selectedObjects ]
-              else
-                text ""
-            , if List.all Object.shapeEditable selectedObjects then
-                formControl [ Lazy.lazy label Icons.shapePropLabel, Lazy.lazy shapeView selectedObjects ]
-              else
-                text ""
-            , if List.all Object.fontSizeEditable selectedObjects then
-                formControl [ Lazy.lazy label Icons.fontSizePropLabel, Lazy.lazy fontSizeView selectedObjects ]
-              else
-                text ""
-            , if List.all Object.urlEditable selectedObjects then
-                formControl [ label (text "URL"), urlView (List.head selectedObjects) ]
-              else
-                text ""
-            ]
+    if selectedObjects == [] then
+        []
+
+    else
+        [ if List.all Object.backgroundColorEditable selectedObjects then
+            formControl [ Lazy.lazy label Icons.backgroundColorPropLabel, Lazy.lazy2 backgroundColorView model.colorPalette selectedObjects ]
+
+          else
+            text ""
+        , if List.all Object.colorEditable selectedObjects then
+            formControl [ Lazy.lazy label Icons.colorPropLabel, Lazy.lazy2 colorView model.colorPalette selectedObjects ]
+
+          else
+            text ""
+        , if List.all Object.shapeEditable selectedObjects then
+            formControl [ Lazy.lazy label Icons.shapePropLabel, Lazy.lazy shapeView selectedObjects ]
+
+          else
+            text ""
+        , if List.all Object.fontSizeEditable selectedObjects then
+            formControl [ Lazy.lazy label Icons.fontSizePropLabel, Lazy.lazy fontSizeView selectedObjects ]
+
+          else
+            text ""
+        , if List.all Object.urlEditable selectedObjects then
+            formControl [ label (text "URL"), urlView (List.head selectedObjects) ]
+
+          else
+            text ""
+        ]
 
 
 
@@ -85,9 +91,9 @@ paletteView toMsg selectedColor colors =
                 Nothing ->
                     False
     in
-        ul
-            [ style S.colorProperties ]
-            (List.map (paletteViewEach toMsg match) colors)
+    ul
+        [ style S.colorProperties ]
+        (List.map (paletteViewEach toMsg match) colors)
 
 
 paletteViewEach : (String -> Msg) -> (String -> Bool) -> String -> Html Msg
@@ -124,9 +130,9 @@ shapeView selectedObjects =
                 Object.Ellipse ->
                     Icons.shapeEllipse
     in
-        ul
-            [ style S.shapeProperties ]
-            (List.map (shapeViewEach SelectShape match toIcon) shapes)
+    ul
+        [ style S.shapeProperties ]
+        (List.map (shapeViewEach SelectShape match toIcon) shapes)
 
 
 shapeViewEach : (Object.Shape -> Msg) -> (Object.Shape -> Bool) -> (Object.Shape -> Html Msg) -> Object.Shape -> Html Msg
@@ -158,9 +164,9 @@ fontSizeViewHelp toMsg selectedFontSize sizes =
                 Nothing ->
                     False
     in
-        ul
-            [ style S.colorProperties ]
-            (List.map (fontSizeViewEach toMsg match) sizes)
+    ul
+        [ style S.colorProperties ]
+        (List.map (fontSizeViewEach toMsg match) sizes)
 
 
 fontSizeViewEach : (Float -> Msg) -> (Float -> Bool) -> Float -> Html Msg

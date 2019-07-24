@@ -93,6 +93,7 @@ type Msg
     | RotateObjects (List ObjectId)
     | FirstNameOnly (List Id)
     | RemoveSpaces (List Id)
+    | DetachProfiles (List Id)
     | HeaderMsg Header.Msg
     | SignIn
     | SignOut
@@ -149,3 +150,5 @@ type Msg
     | ShowInformation Information
     | GotNewToken (Maybe String)
     | LoadGraphQLInfo { url : String, key : String }
+    | PatchEditObjects (List Model.Floor.ObjectDiff)
+    | ToggleCard String
